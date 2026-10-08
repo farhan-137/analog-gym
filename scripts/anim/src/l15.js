@@ -577,7 +577,7 @@ scene(L15, 'Razavi 10.2: two equal poles, gain 1 and gain 4', 46, (S) => {
     fig: eqFig([['|\\beta A| = \\frac{\\beta A_0}{1 + (\\omega/\\omega_p)^2},\\quad \\angle\\beta A = -2\\tan^{-1}\\tfrac{\\omega}{\\omega_p}', 380, 28, '#ffd38a']]),
     steps: [
       { t: 6, title: '**Where is the crossover?** PM = 60° allows 120° of lag; two equal poles share it, 60° each.', tex: '2\\tan^{-1}\\frac{\\omega_{GX}}{\\omega_p} = 120^\\circ \\Rightarrow \\frac{\\omega_{GX}}{\\omega_p} = \\tan60^\\circ = \\sqrt3' },
-      { t: 11, title: '**Make |βA| = 1 at that crossover.** Each pole factor has size² $1 + 3 = 4$ there, so $\\beta A_0$ must be 4.', tex: '|\\beta A| = \\frac{\\beta A_0}{1 + (\\sqrt3)^2} = \\frac{\\beta A_0}{4} = 1 \\Rightarrow \\beta A_0 = 4,\\quad \\beta = 1:\; A_0 = 4',
+      { t: 11, title: '**Make |βA| = 1 at that crossover.** Each pole factor has size² $1 + 3 = 4$ there, so $\\beta A_0$ must be 4.', tex: '|\\beta A| = \\frac{\\beta A_0}{1 + (\\sqrt3)^2} = \\frac{\\beta A_0}{4} = 1 \\Rightarrow \\beta A_0 = 4,\\quad \\beta = 1:\\; A_0 = 4',
         try: {
           q: '**(a)** Closed-loop gain 1 (β = 1): what is the largest $A_0$?',
           hint: ['The crossover must sit at $\\omega_{GX} = \\sqrt3\\,\\omega_p$. Make the loop gain exactly 1 there.', '$|\\beta A| = \\frac{\\beta A_0}{1 + (\\omega_{GX}/\\omega_p)^2} = 1$ with $\\omega_{GX}/\\omega_p = \\sqrt3$.'],

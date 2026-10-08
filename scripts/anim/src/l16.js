@@ -293,7 +293,7 @@ scene(L16, 'Past tutorial Ex 4: 30°, 60°, 90°', 40, (S) => {
           why: '60°: flat at $\\omega_1$ — the usual design target.',
           answer: ans('pyq-t24-ex4', 'k60'), unit: '×', tol: 0.01,
         }, say: 'Exactly 1.' },
-      { t: 19, title: '**PM = 90°:** $\\sin45^\\circ = 0.707$, so K = 0.707: the ordinary −3 dB point of a one-pole response.', tex: 'K = \\frac{1}{2\\sin45^\\circ} = \\frac{1}{2\\times0.707} = 0.707\;(-3\\,\\mathrm{dB})',
+      { t: 19, title: '**PM = 90°:** $\\sin45^\\circ = 0.707$, so K = 0.707: the ordinary −3 dB point of a one-pole response.', tex: 'K = \\frac{1}{2\\sin45^\\circ} = \\frac{1}{2\\times0.707} = 0.707\\;(-3\\,\\mathrm{dB})',
         try: {
           q: 'PM = 90°: the closed-loop gain at $\\omega_1$ is how many times the low-frequency gain?',
           hint: ['Same formula again.', '$K = \\frac{1}{2\\sin(PM/2)}$ with PM/2 = 45°.'],
@@ -335,7 +335,7 @@ scene(L16, 'Razavi 10.4: what PM gives a 50 % peak?', 34, (S) => {
           ],
           answer: ans('bank-r10-4', 'pm'), unit: '°', tol: 0.01,
         }, say: '$2\\times19.47° = 38.9°$.' },
-      { t: 14, title: '**Check against the numbers you know:** 45° gives 1.3×, 60° gives 1×. A larger 1.5× peak must mean a smaller margin, below 45°. ✓', tex: '45^\\circ \\to 1.3,\; 60^\\circ \\to 1 \;\\Rightarrow\; 1.5 \\text{ must be below } 45^\\circ' },
+      { t: 14, title: '**Check against the numbers you know:** 45° gives 1.3×, 60° gives 1×. A larger 1.5× peak must mean a smaller margin, below 45°. ✓', tex: '45^\\circ \\to 1.3,\\; 60^\\circ \\to 1 \\;\\Rightarrow\\; 1.5 \\text{ must be below } 45^\\circ' },
       { t: 20, ans: true, title: '**Answer:** PM ≈ 38.9°', say: 'A sanity check you can always do: more peak, less margin.' },
     ],
   });

@@ -665,6 +665,12 @@ const L7_SET_A = 'Set A: $\\mu_nC_{ox} = 134.28\\,\\mu$A/V², $\\mu_pC_{ox} = 38
 
 scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
   const T = tfm(0.76, -130, 188);
+  // every intermediate, from the givens (Set A, W/L = 200, I_SS/2 = 0.5 mA, I_D5 = 1 mA)
+  const kn = 134.28e-6, kp = 38.36e-6, WL = 200;
+  const vov5 = Math.sqrt(2 * 1e-3 / (kp * WL)), gm1 = Math.sqrt(2 * kn * WL * 0.5e-3), gm5 = 2 * 1e-3 / vov5;
+  const rO1 = 1 / (0.1 * 0.5e-3), rO3 = 1 / (0.2 * 0.5e-3), rO5 = 1 / (0.2 * 1e-3), rO7 = 1 / (0.1 * 1e-3);
+  const par = (a, b) => (a * b) / (a + b);
+  const A1q2 = gm1 * par(rO1, rO3), A2q2 = gm5 * par(rO5, rO7), vov7 = Math.sqrt(2 * 1e-3 / (kn * WL));
   pyqFrame(S, {
     paper: 't3q2', tag: 'LEC 7 · PAST PAPER 1 OF 3', title: 'Two-stage op amp: what sits at X?', src: 'Tutorial 3 Q2 · Razavi 9.6',
     q: 'Your circuit 1 with $(W/L)_{1-8} = 200$, $I_{SS} = 1$ mA, $I_{D5} = I_{D6} = 1$ mA. (a) CM level at X, Y and the input-CM ceiling. (b) Gain and maximum output swing.',
@@ -677,6 +683,9 @@ scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
         try: {
           q: '**(a)** M5 must carry its 1 mA. What DC voltage must sit at X (the CM level of X and Y)?',
           answer: ans('bank-t3q2', 'vxy'), unit: 'V', tol: 0.01,
+          parts: [
+            { q: 'First: M5’s overdrive $|V_{ov5}|$ at 1 mA?', answer: vov5, unit: 'V', tol: 0.01, hint: '$|V_{ov5}| = \\sqrt{2I_{D5}/(\\mu_pC_{ox}\\,W/L)}$', how: ['$$|V_{ov5}| = \\sqrt{\\frac{2(1\\,\\text{m})}{38.36\\,\\mu\\times200}} = 0.511\\,\\text{V}$$'] },
+          ],
           hint: ['X is M5’s **gate**, and M5’s source is on $V_{DD}$. Get M5’s $|V_{GS}|$ from its current, then step down from $V_{DD}$.', '$|V_{GS5}| = |V_{thp}| + \\sqrt{\\dfrac{2I_{D5}}{\\mu_pC_{ox}(W/L)}}$, then $V_X = V_{DD} - |V_{GS5}|$.'],
           how: [
             'M5 is a PMOS with its source on $V_{DD}$ and its gate on X. Only one $|V_{GS5}|$ gives 1 mA, so that fixes X (the **link**).',
@@ -702,11 +711,21 @@ scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
           why: 'An input-CM ceiling always comes from the input device’s drain: drain + $V_{th}$.',
         },
         say: 'Ceiling: an NMOS gate may sit one $V_{th}$ above its drain. $1.689 + 0.7 = 2.389$ V.' },
-      { t: 23, title: '**(b) Gains multiply.** Each stage is $g_m$ × (its two $r_O$ in parallel). Stage 1 runs 0.5 mA per side ($I_{SS}/2$), stage 2 runs 1 mA per side.',
-        tex: 'A_1 = g_{m1}(r_{O1}\\parallel r_{O3}) = 5.18\\,\\text{m}\\times(20\\,\\text{k}\\parallel10\\,\\text{k}) = 34.5,\\quad A_2 = g_{m5}(r_{O5}\\parallel r_{O7}) = 3.92\\,\\text{m}\\times(5\\,\\text{k}\\parallel10\\,\\text{k}) = 13.1,\\quad A = A_1A_2 = 34.5\\times13.1 = 451', hl: [T([560, 150, 480, 500, C.red]), T([270, 150, 250, 450, C.green])],
+      { t: 23, title: '**(b) Gains multiply.** Each stage is $g_m$ × (its two $r_O$ in parallel). Stage 1 runs 0.5 mA per side ($I_{SS}/2$): $r_{O1} = 1/(0.1\\times0.5\\,\\text{m}) = 20$ kΩ, $r_{O3} = 1/(0.2\\times0.5\\,\\text{m}) = 10$ kΩ.',
+        tex: 'g_{m1} = \\sqrt{2(134.28\\,\\mu)(200)(0.5\\,\\text{m})} = 5.18\\,\\text{mS},\\quad A_1 = g_{m1}(r_{O1}\\parallel r_{O3}) = 5.18\\,\\text{m}\\times(20\\,\\text{k}\\parallel10\\,\\text{k}) = 34.5', hl: [T([560, 150, 480, 500, C.red])],
         try: {
           q: '**(b)** What is the overall small-signal gain $A$ of the op amp? (Stage 1 runs $I_{SS}/2 = 0.5$ mA per side, stage 2 runs 1 mA per side.)',
           answer: ans('bank-t3q2', 'av'), unit: 'V/V', tol: 0.03,
+          parts: [
+            { q: 'Stage 1: $g_{m1}$ of M1 at 0.5 mA?', answer: gm1, unit: 'S', tol: 0.02, hint: '$g_{m1} = \\sqrt{2\\mu_nC_{ox}(W/L)I_{D1}}$', how: ['$$g_{m1} = \\sqrt{2(134.28\\,\\mu)(200)(0.5\\,\\text{m})} = 5.18\\,\\text{mS}$$'] },
+            { q: '$r_{O1}$ of the NMOS M1 at 0.5 mA?', answer: rO1, unit: 'Ω', tol: 0.02, hint: '$r_O = 1/(\\lambda_nI_D)$', how: ['$$r_{O1} = \\frac{1}{0.1\\times0.5\\,\\text{m}} = 20\\,\\text{k}\\Omega$$'] },
+            { q: '$r_{O3}$ of the PMOS load M3 at 0.5 mA?', answer: rO3, unit: 'Ω', tol: 0.02, hint: '$r_O = 1/(\\lambda_pI_D)$ with $\\lambda_p = 0.2$ V⁻¹', how: ['$$r_{O3} = \\frac{1}{0.2\\times0.5\\,\\text{m}} = 10\\,\\text{k}\\Omega$$'] },
+            { q: 'Stage-1 gain $A_1 = g_{m1}(r_{O1}\\parallel r_{O3})$?', answer: A1q2, unit: 'V/V', tol: 0.02, hint: '$20\\,\\text{k}\\parallel10\\,\\text{k} = \\frac{20\\times10}{20+10}$ kΩ', how: ['$$A_1 = 5.18\\,\\text{m}\\times(20\\,\\text{k}\\parallel10\\,\\text{k}) = 5.18\\,\\text{m}\\times6.67\\,\\text{k} = 34.5$$'] },
+            { q: 'Stage 2: $g_{m5}$ of M5 at 1 mA (use $|V_{ov5}|$ from part (a))?', answer: gm5, unit: 'S', tol: 0.02, hint: '$g_m = 2I_D/|V_{ov}|$', how: ['$$g_{m5} = \\frac{2(1\\,\\text{m})}{0.511} = 3.92\\,\\text{mS}$$'] },
+            { q: '$r_{O5}$ of the PMOS M5 at 1 mA?', answer: rO5, unit: 'Ω', tol: 0.02, hint: '$r_O = 1/(\\lambda_pI_D)$', how: ['$$r_{O5} = \\frac{1}{0.2\\times1\\,\\text{m}} = 5\\,\\text{k}\\Omega$$'] },
+            { q: '$r_{O7}$ of the NMOS sink M7 at 1 mA?', answer: rO7, unit: 'Ω', tol: 0.02, hint: '$r_O = 1/(\\lambda_nI_D)$', how: ['$$r_{O7} = \\frac{1}{0.1\\times1\\,\\text{m}} = 10\\,\\text{k}\\Omega$$'] },
+            { q: 'Stage-2 gain $A_2 = g_{m5}(r_{O5}\\parallel r_{O7})$?', answer: A2q2, unit: 'V/V', tol: 0.02, hint: '$5\\,\\text{k}\\parallel10\\,\\text{k} = 3.33$ kΩ', how: ['$$A_2 = 3.92\\,\\text{m}\\times3.33\\,\\text{k} = 13.1$$'] },
+          ],
           hint: ['Two stages in a chain: for each, $g_m$ × (the $r_O$ looking down ∥ the $r_O$ looking up), then multiply.', '$A_1 = g_{m1}(r_{O1}\\parallel r_{O3})$, $A_2 = g_{m5}(r_{O5}\\parallel r_{O7})$, with $g_m = \\sqrt{2\\mu C_{ox}(W/L)I_D}$ or $2I_D/V_{ov}$, and $r_O = 1/(\\lambda I_D)$.', 'Stage 1 at 0.5 mA: $r_{O1} = 1/(0.1\\times0.5\\,\\text{m})$, $r_{O3} = 1/(0.2\\times0.5\\,\\text{m})$.'],
           how: [
             'Stage 1 input pair, M1 at 0.5 mA: $$g_{m1} = \\sqrt{2\\mu_nC_{ox}\\tfrac{W}{L}I_{D1}} = \\sqrt{2(134.28\\,\\mu)(200)(0.5\\,\\text{m})} = 5.18\\,\\text{mS}$$',
@@ -722,11 +741,17 @@ scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
           ],
         },
         say: '$g_{m1} = 5.18$ mS into $20\\,\\text{k}\\parallel10\\,\\text{k}$ gives $A_1 = 34.5$; M5 at 1 mA gives $A_2 = 13.1$. Multiply: 451.' },
+      { t: 27, title: '**Stage 2, the same recipe** at 1 mA: $g_{m5} = 2I_D/|V_{ov5}|$ with $|V_{ov5}|$ from (a); $r_{O5} = 1/(0.2\\times1\\,\\text{m}) = 5$ kΩ, $r_{O7} = 1/(0.1\\times1\\,\\text{m}) = 10$ kΩ. Then multiply.',
+        tex: 'g_{m5} = \\tfrac{2(1\\,\\text{m})}{0.511} = 3.92\\,\\text{mS},\\quad A_2 = g_{m5}(r_{O5}\\parallel r_{O7}) = 3.92\\,\\text{m}\\times(5\\,\\text{k}\\parallel10\\,\\text{k}) = 13.1,\\quad A = A_1A_2 = 34.5\\times13.1 = 451', hl: [T([270, 150, 250, 450, C.green])] },
       { t: 31, title: '**Swing: stage 2 is a CS stage.** Each output runs from $V_{ov7}$ (M7 at its edge) up to $V_{DD} - |V_{ov5}|$ (M5 at its edge). The two outputs move oppositely, so the differential swing is twice that.',
         tex: 'V_{ov7} = \\sqrt{\\frac{2(1\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.273\\,\\text{V},\\quad V_{pp,diff} = 2[(V_{DD} - |V_{ov5}|) - V_{ov7}] = 2[(3 - 0.511) - 0.273] = 4.43\\,\\text{V}', hl: [T([330, 170, 150, 400, C.green])],
         try: {
           q: '**(b)** What is the maximum differential output swing (peak-to-peak) with M5 and M7 kept saturated?',
           answer: ans('bank-t3q2', 'swing'), unit: 'V', tol: 0.01,
+          parts: [
+            { q: 'First: $V_{ov7}$ of the NMOS sink M7 at 1 mA?', answer: vov7, unit: 'V', tol: 0.01, hint: '$V_{ov7} = \\sqrt{2I_{D7}/(\\mu_nC_{ox}\\,W/L)}$', how: ['$$V_{ov7} = \\sqrt{\\frac{2(1\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.273\\,\\text{V}$$'] },
+            { q: 'Swing of ONE output (p-p), from $V_{ov7}$ up to $V_{DD} - |V_{ov5}|$?', answer: 3 - vov5 - vov7, unit: 'V', tol: 0.01, hint: '$(V_{DD} - |V_{ov5}|) - V_{ov7}$, with $|V_{ov5}| = 0.511$ V from (a)', how: ['$$(3 - 0.511) - 0.273 = 2.216\\,\\text{V}$$'] },
+          ],
           hint: ['Each output is a CS stage: it rises until M5 reaches its edge and falls until M7 reaches its edge. The two outputs move in opposite directions.', 'One output: from $V_{ov7}$ up to $V_{DD} - |V_{ov5}|$. Differential p-p $= 2[(V_{DD} - |V_{ov5}|) - V_{ov7}]$.'],
           how: [
             'M7 is an NMOS sink at 1 mA, $W/L = 200$: $$V_{ov7} = \\sqrt{\\frac{2I_{D7}}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\frac{2(1\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.273\\,\\text{V}$$',
@@ -745,6 +770,7 @@ scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
 scene(L7, 'Tutorial 3 Q3: telescopic + CS, sizes from a 200 mV swing', 74, (S) => {
   const T = tfm(0.72, -110, 150);
   const vx = ans('bank-t3q3', 'vxy');
+  const vov9 = Math.sqrt(2 * 0.5e-3 / (38.36e-6 * 200));
   pyqFrame(S, {
     paper: 't3q3', tag: 'LEC 7 · PAST PAPER 2 OF 3', title: 'Telescopic first stage: X level, sizes, gain', src: 'Tutorial 3 Q3 · Razavi 9.8',
     q: 'Your circuit 2: $I_{SS} = 1$ mA, $I_{D9-12} = 0.5$ mA, $(W/L)_{9-12} = 200$. (a) CM level at X, Y. (b) Tail needs 400 mV: smallest M1–M8 for a 200 mV p-p swing at X, Y. (c) Overall gain.',
@@ -757,6 +783,9 @@ scene(L7, 'Tutorial 3 Q3: telescopic + CS, sizes from a 200 mV swing', 74, (S) =
         try: {
           q: '**(a)** M9 must carry 0.5 mA with its source on $V_{DD}$. What CM level must X and Y sit at?',
           answer: vx, unit: 'V', tol: 0.01,
+          parts: [
+            { q: 'First: M9’s overdrive $|V_{ov9}|$ at 0.5 mA?', answer: vov9, unit: 'V', tol: 0.01, hint: '$|V_{ov9}| = \\sqrt{2I_{D9}/(\\mu_pC_{ox}\\,W/L)}$', how: ['$$|V_{ov9}| = \\sqrt{\\frac{2(0.5\\,\\text{m})}{38.36\\,\\mu\\times200}} = 0.361\\,\\text{V}$$'] },
+          ],
           hint: ['The same link as Q2: X is M9’s gate, and M9’s source is $V_{DD}$.', '$V_X = V_{DD} - |V_{thp}| - \\sqrt{\\dfrac{2I_{D9}}{\\mu_pC_{ox}(W/L)_9}}$'],
           how: [
             'X drives M9’s gate and M9 must carry 0.5 mA, so $|V_{GS9}|$ is fixed and X sits that far below $V_{DD}$.',
@@ -771,6 +800,9 @@ scene(L7, 'Tutorial 3 Q3: telescopic + CS, sizes from a 200 mV swing', 74, (S) =
         try: {
           q: '**(b)** X must swing 200 mV p-p around the level from (a), and the tail needs 400 mV. If M1 and M3 share the remaining room under X equally, what overdrive $V_{ov,N}$ can each have?',
           answer: (vx - 0.1 - 0.4) / 2, unit: 'V', tol: 0.01,
+          parts: [
+            { q: 'First: the lowest voltage X reaches during the 200 mV p-p swing?', answer: vx - 0.1, unit: 'V', tol: 0.01, hint: '200 mV p-p = ±0.1 V around $V_X$ from (a).', how: ['$$V_{X,min} = 1.839 - 0.1 = 1.739\\,\\text{V}$$'] },
+          ],
           hint: ['200 mV p-p means X moves ±0.1 V. Look at the **lowest** X: under it sit the tail, M1 and M3 in series.', '$V_{ov,N} = \\dfrac{(V_X - 0.1) - V_{ISS}}{2}$'],
           how: [
             'A 200 mV peak-to-peak swing takes X 0.1 V below its CM level: $$V_{X,min} = 1.839 - 0.1 = 1.739\\,\\text{V}$$',
@@ -795,9 +827,11 @@ scene(L7, 'Tutorial 3 Q3: telescopic + CS, sizes from a 200 mV swing', 74, (S) =
           calc: [{ what: 'W/L in one line (prefixes on)', keys: '2 × 0.5m ÷ ( 134.28µ × 0.6695 [x²] )', shows: '16.6', note: 'Type µ and m with [CATALOG] ▸ Engineer Symbol. Use the unrounded 0.6695: 0.67 gives 16.6 too, 0.7 would not.' }],
         },
         say: 'The smallest devices are the ones with the largest allowed overdrive: $W/L = 2I_D/(\\mu C_{ox}V_{ov}^2)$.' },
-      { t: 31, title: '**(c) Gain = telescopic $A_1$ × CS $A_2$.** At X, stage 1 sees the PMOS cascode up ($g_{m5}r_{O5}r_{O7}$) in parallel with the NMOS cascode down ($g_{m3}r_{O3}r_{O1}$). Stage 2 is $g_{m9}(r_{O9}\\parallel r_{O11})$.',
-        tex: 'A_1 = g_{m1}(R_{up}\\parallel R_{down}) = 1.49\\,\\text{m}\\times(188\\,\\text{k}\\parallel598\\,\\text{k}) = 214,\\quad A_2 = g_{m9}(r_{O9}\\parallel r_{O11}) = 2.77\\,\\text{m}\\times(10\\,\\text{k}\\parallel20\\,\\text{k}) = 18.5,\\quad A = A_1A_2 = 214\\times18.5 \\approx 3952', hl: [T([540, 140, 520, 640, C.red]), T([290, 300, 220, 420, C.green])],
+      { t: 31, title: '**(c) Stage-1 resistances at X.** Each look sees a cascode, $g_mr_Or_O$. At 0.5 mA: $r_O = 1/(\\lambda I_D)$ = 20 kΩ (NMOS), 10 kΩ (PMOS); $g_m = 2I_D/V_{ov}$ with the overdrives of step 2.',
+        tex: 'g_{m1} = g_{m3} = \\tfrac{2(0.5\\,\\text{m})}{0.669} = 1.49\\,\\text{mS},\\quad R_{down} = g_{m3}r_{O3}r_{O1} = 1.49\\,\\text{m}\\times20\\,\\text{k}\\times20\\,\\text{k} = 598\\,\\text{k}\\Omega,\\quad R_{up} = g_{m5}r_{O5}r_{O7} = \\tfrac{2(0.5\\,\\text{m})}{0.531}\\times10\\,\\text{k}\\times10\\,\\text{k} = 188\\,\\text{k}\\Omega', hl: [T([540, 140, 520, 640, C.red])],
         say: '$A_1 = g_{m1}(R_{up}\\parallel R_{down}) ≈ 214$, $A_2 = g_{m9}(r_{O9}\\parallel r_{O11}) ≈ 18.5$, so $A ≈ 3950$.' },
+      { t: 35, title: '**Gain = telescopic $A_1$ × CS $A_2$.** Stage 2: $g_{m9} = 2I_D/|V_{ov9}|$ with $|V_{ov9}|$ from (a); $r_{O9}$ = 10 kΩ, $r_{O11}$ = 20 kΩ.',
+        tex: 'A_1 = g_{m1}(R_{up}\\parallel R_{down}) = 1.49\\,\\text{m}\\times143\\,\\text{k} = 214,\\quad A_2 = \\tfrac{2(0.5\\,\\text{m})}{0.361}\\times(10\\,\\text{k}\\parallel20\\,\\text{k}) = 18.5,\\quad A = A_1A_2 = 214\\times18.5 \\approx 3952', hl: [T([290, 300, 220, 420, C.green])] },
       { t: 38, ans: true, title: `**Answers:** $V_X = V_Y = ${fx(vx, 4)}$ V · $(W/L)_{1-4} = ${fx(ans('bank-t3q3', 'wlN'), 3)}$ · $(W/L)_{5-8} = ${fx(ans('bank-t3q3', 'wlP'), 3)}$ (equal headroom split) · $A ≈ ${fx(ans('bank-t3q3', 'av'), 3)}$`, say: 'The question doesn’t say how to split the headroom; equal sharing is the natural exam assumption. State it in one line.' },
     ],
   });
@@ -882,6 +916,8 @@ scene(L7, 'Tutorial 4 Q1(b): the boosted R_out with numbers', 66, (S) => {
   const T = tfm(1, 0, 90);
   const gm = Math.sqrt(2 * 172.35e-6 * 200 * 0.5e-3);      // M1, M2 at I_2 = 0.5 mA
   const A1 = Math.sqrt(2 * 172.35e-6 * 200 * 100e-6) / (0.1 * 100e-6); // g_m3 r_O3 at I_1 = 100 µA
+  const gm3 = Math.sqrt(2 * 172.35e-6 * 200 * 100e-6), rO3 = 1 / (0.1 * 100e-6), rO = 1 / (0.1 * 0.5e-3);
+  const Rout = ans('bank-t4q1', 'av') / gm, rOP = 1 / (0.2 * 0.5e-3);
   pyqFrame(S, {
     paper: 't4q1', tag: 'LEC 7 · PAST PAPER 3 OF 3', title: 'Regulated cascode: how big does R_out get?', src: 'Tutorial 4 Q1 (b), (c)',
     q: 'M3 (gate on X, loaded by $I_1 = 100\\,\\mu$A) drives M2’s gate; $I_2 = 0.5$ mA. $(W/L)_{1-3} = 200$. (b) Gain with ideal sources. (c) With a PMOS source for $I_2$ ($r_O = 10$ kΩ), the gain.',
@@ -890,10 +926,14 @@ scene(L7, 'Tutorial 4 Q1(b): the boosted R_out with numbers', 66, (S) => {
     fig: (S2) => { const c = regCascode(S2); c.g.setAttribute('transform', 'translate(0 90)'); },
     steps: [
       { t: 7, title: '**The booster is M3**: a CS stage (gate on X, drain on M2’s gate) with an ideal load, so its gain is $g_{m3}r_{O3}$ at $I_1 = 100\\,\\mu$A.',
-        tex: 'A_1 = g_{m3}r_{O3} = \\sqrt{2(172.35\\,\\mu)(200)(100\\,\\mu)}\\times\\frac{1}{0.1\\times100\\,\\mu} = 2.63\\,\\text{m}\\times100\\,\\text{k} = 263', hl: [T([250, 320, 170, 300, C.amb])],
+        tex: 'g_{m3} = \\sqrt{2(172.35\\,\\mu)(200)(100\\,\\mu)} = 2.63\\,\\text{mS},\\quad r_{O3} = \\frac{1}{0.1\\times100\\,\\mu} = 100\\,\\text{k},\\quad A_1 = g_{m3}r_{O3} = 2.63\\,\\text{m}\\times100\\,\\text{k} = 263', hl: [T([250, 320, 170, 300, C.amb])],
         try: {
           q: '**(b)** The booster M3 is a common-source stage loaded by the ideal source $I_1 = 100\\,\\mu$A. What is its gain $A_1$?',
           answer: A1, unit: '', tol: 0.02,
+          parts: [
+            { q: 'First: $g_{m3}$ of M3 at $I_1 = 100\\,\\mu$A?', answer: gm3, unit: 'S', tol: 0.02, hint: '$g_{m3} = \\sqrt{2\\mu_nC_{ox}(W/L)I_1}$', how: ['$$g_{m3} = \\sqrt{2(172.35\\,\\mu)(200)(100\\,\\mu)} = 2.63\\,\\text{mS}$$'] },
+            { q: '$r_{O3}$ of M3 at 100 µA?', answer: rO3, unit: 'Ω', tol: 0.02, hint: '$r_O = 1/(\\lambda_nI_D)$', how: ['$$r_{O3} = \\frac{1}{0.1\\times100\\,\\mu} = 100\\,\\text{k}\\Omega$$'] },
+          ],
           hint: ['Ideal current-source load: the only resistance at M3’s drain is its own $r_{O3}$.', '$A_1 = g_{m3}r_{O3}$, with $g_{m3} = \\sqrt{2\\mu_nC_{ox}(W/L)I_1}$ and $r_{O3} = 1/(\\lambda_nI_1)$.'],
           how: [
             'M3’s gate watches X and its drain drives M2’s gate: a CS stage. An ideal load adds no resistance, so the gain is $g_{m3}r_{O3}$.',
@@ -905,10 +945,14 @@ scene(L7, 'Tutorial 4 Q1(b): the boosted R_out with numbers', 66, (S) => {
         },
         say: 'Spot the booster: M3 watches X and drives M2’s gate. It is a CS stage with an ideal load: $A_1 = g_{m3}r_{O3} ≈ 263$.' },
       { t: 15, title: '**Plug into the Lec 7 boosted formula** with $R_S = r_{O1}$ (M1 sits under M2’s source). M1 and M2 carry $I_2 = 0.5$ mA.',
-        tex: 'R_{out} = r_{O1} + r_{O2} + (1 + A_1)g_{m2}r_{O2}r_{O1} = 40\\,\\text{k} + 264\\times5.87\\,\\text{m}\\times20\\,\\text{k}\\times20\\,\\text{k} = 619\\,\\text{M}\\Omega', hl: [T([470, 320, 190, 300, C.n])],
+        tex: 'g_{m2} = \\sqrt{2(172.35\\,\\mu)(200)(0.5\\,\\text{m})} = 5.87\\,\\text{mS},\\quad r_{O1} = r_{O2} = \\tfrac{1}{0.1\\times0.5\\,\\text{m}} = 20\\,\\text{k},\\quad R_{out} = r_{O1} + r_{O2} + (1 + A_1)g_{m2}r_{O2}r_{O1} = 40\\,\\text{k} + 264\\times5.87\\,\\text{m}\\times20\\,\\text{k}\\times20\\,\\text{k} = 619\\,\\text{M}\\Omega', hl: [T([470, 320, 190, 300, C.n])],
         try: {
           q: '**(b)** Using $A_1$ from the last part, what is the output resistance $R_{out}$ looking down into M2’s drain? (M1 and M2 carry $I_2 = 0.5$ mA.)',
-          answer: ans('bank-t4q1', 'av') / gm, unit: 'Ω', tol: 0.03,
+          answer: Rout, unit: 'Ω', tol: 0.03,
+          parts: [
+            { q: 'First: $g_{m2}$ of M2 at $I_2 = 0.5$ mA?', answer: gm, unit: 'S', tol: 0.02, hint: '$g_{m2} = \\sqrt{2\\mu_nC_{ox}(W/L)I_2}$', how: ['$$g_{m2} = \\sqrt{2(172.35\\,\\mu)(200)(0.5\\,\\text{m})} = 5.87\\,\\text{mS}$$'] },
+            { q: '$r_{O1} = r_{O2}$ at 0.5 mA?', answer: rO, unit: 'Ω', tol: 0.02, hint: '$r_O = 1/(\\lambda_nI_D)$', how: ['$$r_{O1} = r_{O2} = \\frac{1}{0.1\\times0.5\\,\\text{m}} = 20\\,\\text{k}\\Omega$$'] },
+          ],
           hint: ['This is the Lec 7 boosted result, with M1 as the resistance under M2’s source: $R_S = r_{O1}$.', '$R_{out} = r_{O1} + r_{O2} + (1 + A_1)g_{m2}r_{O2}r_{O1}$; the last term is the one that matters.'],
           how: [
             'M1 and M2 at 0.5 mA: $$g_{m2} = \\sqrt{2(172.35\\,\\mu)(200)(0.5\\,\\text{m})} = 5.87\\,\\text{mS},\\quad r_{O1} = r_{O2} = \\frac{1}{0.1\\times0.5\\,\\text{m}} = 20\\,\\text{k}\\Omega$$',
@@ -920,12 +964,16 @@ scene(L7, 'Tutorial 4 Q1(b): the boosted R_out with numbers', 66, (S) => {
         },
         say: '$R_{out} = r_{O1} + r_{O2} + (1 + A_1)g_{m2}r_{O2}r_{O1}$ ≈ 619 MΩ.' },
       { t: 23, title: '**(b) Gain with an ideal $I_2$**: M1’s current $g_{m1}v_{in}$ meets only $R_{out}$ ($g_{m1} = g_{m2}$, same size and current).',
-        tex: '|A_v| = g_{m1}R_{out} = 5.87\\,\\text{m}\\times619\\,\\text{M} = 3.63\\times10^{6}', say: 'Ideal load: the gain is $g_{m1}R_{out}$ — about 3.6 million.' },
+        tex: 'g_{m1} = g_{m2} = 5.87\\,\\text{mS},\\quad |A_v| = g_{m1}R_{out} = 5.87\\,\\text{m}\\times619\\,\\text{M} = 3.63\\times10^{6}', say: 'Ideal load: the gain is $g_{m1}R_{out}$ — about 3.6 million.' },
       { t: 30, title: '**(c) The load trap:** a real PMOS source ($r_O = 10$ kΩ) sits **in parallel** with the 619 MΩ, and the small one wins.',
         tex: '|A_v| = g_{m1}(R_{out}\\parallel r_{O,P}) = 5.87\\,\\text{m}\\times(619\\,\\text{M}\\parallel10\\,\\text{k}) = 5.87\\,\\text{m}\\times10\\,\\text{k} = 58.7', hl: [T([470, 180, 190, 110, C.bad])],
         try: {
           q: '**(c)** Now $I_2$ is a real PMOS current source with $r_O = 10$ kΩ. What is the gain magnitude $|A_v|$?',
           answer: ans('bank-t4q1', 'avP'), unit: 'V/V', tol: 0.03,
+          parts: [
+            { q: 'First: $g_{m1}$ of the input device M1 (0.5 mA, $W/L = 200$)?', answer: gm, unit: 'S', tol: 0.02, hint: 'M1 has the same size and current as M2.', how: ['$$g_{m1} = g_{m2} = 5.87\\,\\text{mS}$$ (same $W/L$, same $I_2$).'] },
+            { q: 'The resistance at the output: $R_{out}\\parallel r_{O,P}$ (619 MΩ ∥ 10 kΩ)?', answer: Rout * rOP / (Rout + rOP), unit: 'Ω', tol: 0.02, hint: 'Parallel: $\\frac{ab}{a+b}$; when one is 60 000× bigger, the result is the small one.', how: ['$$619\\,\\text{M}\\parallel10\\,\\text{k} = \\frac{619\\,\\text{M}\\times10\\,\\text{k}}{619\\,\\text{M}+10\\,\\text{k}} \\approx 10.0\\,\\text{k}\\Omega$$'] },
+          ],
           hint: ['The PMOS source’s $r_O$ hangs on the output node, in parallel with the boosted $R_{out}$. In a parallel pair the small one wins.', '$|A_v| = g_{m1}(R_{out}\\parallel r_{O,P})$'],
           how: [
             'The output node sees two resistances: looking down, the boosted 619 MΩ; looking up, the PMOS source’s 10 kΩ. They are in parallel.',
