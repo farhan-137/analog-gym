@@ -609,7 +609,7 @@ scene(L17, '2024 mid-sem Q2, part 1: SR, GBW, gain, bandwidth', 66, (S) => {
           parts: [{ q: 'Tail current $I_5$ (A)?', answer: IM.m24.i5, unit: 'A', tol: 0.01, hint: 'M5 mirrors M6: currents scale with W/L.', how: ['$$I_5 = \\frac{20}{10}\\times 10\\,\\mu\\mathrm{A} = 20\\,\\mu\\mathrm{A}$$'] }],
           hint: ['Slewing: the input pair steers the whole tail current $I_5$ into $C_c$. Get $I_5$ from the mirror M6 → M5 (currents scale with W/L).', '$I_5 = \\dfrac{(W/L)_5}{(W/L)_6}I_1$, then $SR = \\dfrac{I_5}{C_c}$'],
           how: [
-            'M5 copies M6, scaled by the size ratio 20/10: $$I_5 = \\frac{(W/L)_5}{(W/L)_6}I_1 = \\frac{20}{10}\\times 10\\,\\mu\\mathrm{A} = 20\\,\\mu\\mathrm{A}$$',
+            'M6 is a PMOS diode (source = $V_{DD}$, gate tied to its drain) carrying $I_1$. M5 shares its gate and source, so the same $|V_{GS}|$ (a link) and the current scales with W/L, 20/10: $$I_5 = \\frac{(W/L)_5}{(W/L)_6}I_1 = \\frac{20}{10}\\times 10\\,\\mu\\mathrm{A} = 20\\,\\mu\\mathrm{A}$$',
             'In a large step all of $I_5$ goes through one input device into $C_c$, so the output ramps at $$SR = \\frac{I_5}{C_c} = \\frac{20\\,\\mu\\mathrm{A}}{0.22\\,\\mathrm{pF}} = 90.9\\,\\mathrm{V/\\mu s}$$',
             'In normal operation each input device carries half the tail, 10 µA (you need it next for $g_{m1}$).',
           ],
@@ -634,7 +634,7 @@ scene(L17, '2024 mid-sem Q2, part 1: SR, GBW, gain, bandwidth', 66, (S) => {
         },
         say: '72.3 MHz.',
       },
-      { t: 24, title: '**Second-stage current.** $V_{GS7} = V_{GS4}$ (same gate, same source), so $I_7$ scales with W/L: $I_7 = (80/10)\\times 10$ µA. M7 is NMOS, so $g_{m7}$ uses $\\mu_nC_{ox}$.', tex: 'I_7 = \\frac{80}{10}(10\\,\\mu\\mathrm{A}) = 80\\,\\mu\\mathrm{A},\\quad g_{m7} = \\sqrt{2(100\\,\\mu)(80)(80\\,\\mu)} = 1.13\\,\\mathrm{mS}', say: '$V_{GS7} = V_{GS4}$, so $I_7$ scales with W/L: 80/10 × 10 µA = 80 µA, and $g_{m7}$ = 1.13 mS.' },
+      { t: 24, title: '**Second-stage current.** M7 is NMOS: source = ground, gate = stage-1 output (drain of M2/M4). At balance that node sits at $V_{DS4} = V_{DS3} = V_{GS3}$, so $V_{GS7} = V_{GS3}$ and $I_7$ scales with W/L: $I_7 = (80/10)\\times 10$ µA. $g_{m7}$ uses $\\mu_nC_{ox}$.', tex: 'I_7 = \\frac{80}{10}(10\\,\\mu\\mathrm{A}) = 80\\,\\mu\\mathrm{A},\\quad g_{m7} = \\sqrt{2(100\\,\\mu)(80)(80\\,\\mu)} = 1.13\\,\\mathrm{mS}', say: 'At balance M7’s gate sits at $V_{GS3}$, so $I_7$ scales with W/L: 80/10 × 10 µA = 80 µA, and $g_{m7}$ = 1.13 mS.' },
       {
         t: 31, title: '**DC gain = stage-1 gain × stage-2 gain.** Each stage is $g_m$ times the two output resistances in parallel, with $r_O = 1/(\\lambda I_D)$.',
         tex: '\\begin{aligned} r_{O2} &= \\tfrac{1}{0.2(10\\,\\mu)} = 500\\,\\mathrm{k\\Omega},\\;\\; r_{O4} = \\tfrac{1}{0.1(10\\,\\mu)} = 1\\,\\mathrm{M\\Omega} \\\\ A_1 &= 0.1\\,\\mathrm{mS}\\times(500\\,\\mathrm{k}\\parallel 1\\,\\mathrm{M}) = 0.1\\,\\mathrm{mS}\\times 333\\,\\mathrm{k\\Omega} = 33.3 \\\\ r_{O7}\\parallel r_{O8} &= 125\\,\\mathrm{k}\\parallel 62.5\\,\\mathrm{k} = 41.7\\,\\mathrm{k\\Omega} \\\\ A_2 &= 1.13\\,\\mathrm{mS}\\times 41.7\\,\\mathrm{k\\Omega} = 47.1 \\\\ A_0 &= A_1A_2 = 33.3\\times 47.1 = 1571 \\end{aligned}',
@@ -683,7 +683,7 @@ scene(L17, '2024 mid-sem Q2, part 2: second pole, zero, PM', 50, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 6 OF 9 (PART 2)', title: 'Second pole, RHP zero and phase margin', src: 'Mid-sem 2024-25 Q2 · 15 marks',
     q: 'Same op amp: $g_{m7}$ = 1.13 mS, $C_c$ = 0.22 pF, $C_L$ = 1 pF, GBW = 72.3 MHz. Find the second pole, the RHP zero and the phase margin (β = 1).', qh: 180,
-    giv: 'From part 1: $I_7$ = 80 µA, $g_{m7} = \\sqrt{2\\mu_nC_{ox}(W/L)_7I_7}$ (M7 NMOS); dominant pole 46 kHz.',
+    giv: 'From part 1: $I_7$ = 80 µA, $g_{m7} = \\sqrt{2\\mu_nC_{ox}(W/L)_7I_7}$ (M7 NMOS: gate = stage-1 output, drain = output node with $C_L$, $C_c$ from gate to drain); dominant pole 46 kHz.',
     tests: '$f_{p2} = g_{m7}/2\\pi C_L$, $f_z = g_{m7}/2\\pi C_c$ and the three-angle PM.',
     fig: paperFig('m24q2f', [['f_{p2} = \\frac{g_{m7}}{2\\pi C_L},\\quad f_z = \\frac{g_{m7}}{2\\pi C_c}', 600, 28], ['PM = 90^\\circ - \\tan^{-1}\\tfrac{GBW}{f_{p2}} - \\tan^{-1}\\tfrac{GBW}{f_z}', 700, 26, '#ffd38a']], 400),
     steps: [
@@ -746,7 +746,7 @@ scene(L17, '2024 mid-sem Q2, part 2: second pole, zero, PM', 50, (S) => {
 scene(L17, 'Problem Set 2 P4: add a second stage and compensate', 60, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 7 OF 9', title: 'Your exam OTA + a CS stage', src: 'Problem Set 2 P4',
-    q: 'OTA: $G_{m1}$ = 0.8 mS, $R_1$ = 111 kΩ, $I_{SS}$ = 120 µA. CS stage: $G_{m2}$ = 4 mS, $R_2$ = 20 kΩ, $I_7$ = 500 µA, $C_L$ = 4 pF. With $R_z = 1/G_{m2}$: (a) $C_c$ for 60° (β = 1); (b) GBW; (c) $P_1\'$; (d) $R_z$; (e) slew rate.', qh: 240,
+    q: 'OTA: $G_{m1}$ = 0.8 mS, $R_1$ = 111 kΩ, $I_{SS}$ = 120 µA. PMOS CS stage M6: $G_{m2}$ = 4 mS, $R_2$ = 20 kΩ, biased by $I_7$ = 500 µA, $C_L$ = 4 pF. With $R_z = 1/G_{m2}$: (a) $C_c$ for 60° (β = 1); (b) GBW; (c) $P_1\'$; (d) $R_z$; (e) slew rate.', qh: 240,
     giv: 'Use $\\omega_{p2} \\approx G_{m2}/C_L$ and $P_1\' \\approx 1/(R_1A_2C_c)$.',
     tests: 'the design chain: $C_c$ from the margin, GBW, the Miller pole, $R_z$, and the two slew limits.',
     fig: eqFig([['C_c = \\frac{G_{m1}C_L\\tan 60^\\circ}{G_{m2}}', 260, 30], ["P_1' = \\frac{1}{2\\pi R_1A_2C_c},\\;\\; A_2 = G_{m2}R_2", 380, 28], ['SR = \\min\\left(\\tfrac{I_{SS}}{C_c},\\tfrac{I_7 - I_{SS}}{C_L}\\right)', 500, 28, '#ffd38a']]),
@@ -829,7 +829,7 @@ scene(L17, 'Problem Set 2 P4: add a second stage and compensate', 60, (S) => {
             { q: 'First-stage limit $I_{SS}/C_c$ (V/s)?', answer: IM.p4.sr1, unit: 'V/s', tol: 0.02, hint: 'All of $I_{SS}$ charges $C_c$.', how: ['$$\\frac{120\\,\\mu\\mathrm{A}}{1.39\\,\\mathrm{pF}} = 86.6\\,\\mathrm{V/\\mu s}$$'] },
             { q: 'Output-stage limit $(I_7 - I_{SS})/C_L$ (V/s)?', answer: IM.p4.sr2, unit: 'V/s', tol: 0.02, hint: '$I_{SS}$ of $I_7$ already goes into $C_c$.', how: ['$$\\frac{500\\,\\mu - 120\\,\\mu}{4\\,\\mathrm{pF}} = 95\\,\\mathrm{V/\\mu s}$$'] },
           ],
-          hint: ['Limit 1: the whole tail $I_{SS}$ charges $C_c$. Limit 2: on a falling edge M7’s $I_7$ must supply $C_c$’s current $I_{SS}$ and also charge $C_L$. The slower one sets the slew rate.', '$SR = \\min\\left(\\dfrac{I_{SS}}{C_c}\\,;\\; \\dfrac{I_7 - I_{SS}}{C_L}\\right)$'],
+          hint: ['Limit 1: the whole tail $I_{SS}$ charges $C_c$. Limit 2: on a falling edge the current source’s $I_7$ must supply $C_c$’s current $I_{SS}$ and also charge $C_L$. The slower one sets the slew rate.', '$SR = \\min\\left(\\dfrac{I_{SS}}{C_c}\\,;\\; \\dfrac{I_7 - I_{SS}}{C_L}\\right)$'],
           how: [
             'First stage: all of $I_{SS}$ into $C_c$: $$\\frac{I_{SS}}{C_c} = \\frac{120\\,\\mu\\mathrm{A}}{1.39\\,\\mathrm{pF}} = 86.6\\,\\mathrm{V/\\mu s}$$',
             'Output stage: $I_{SS}$ of $I_7$ already goes into $C_c$, the rest charges $C_L$: $$\\frac{I_7 - I_{SS}}{C_L} = \\frac{380\\,\\mu\\mathrm{A}}{4\\,\\mathrm{pF}} = 95\\,\\mathrm{V/\\mu s}$$',
@@ -913,9 +913,9 @@ scene(L17, '2025 mid-sem Q2, part 1: Cc, I5, (W/L)1 and (W/L)3', 62, (S) => {
           q: '④ Size the PMOS mirror load: find $(W/L)_{3,4}$ from ICMR(+) = 1.6 V. M3 carries $I_{D1}$ = 27.5 µA (from ③).',
           answer: ans(M25, 'wl3'), unit: '', tol: 0.02,
           parts: [{ q: 'Overdrive left for M3, $|V_{ov3}|$ (V)?', answer: IM.m25.vov3, unit: 'V', tol: 0.02, hint: '$|V_{ov3}| = V_{DD} - V_{in,max} - |V_{th3}|_{max} + V_{th1,min}$', how: ['$$1.8 - 1.6 - 0.51 + 0.47 = 0.16\\,\\mathrm{V}$$'] }],
-          hint: ['M1 stays saturated while its drain is above $V_{in} - V_{th1}$. Its drain sits at $V_{DD} - |V_{GS3}|$. Use the worst cases (largest $|V_{th3}|$, smallest $V_{th1}$); what is left is M3’s overdrive.', '$|V_{ov3}| = V_{DD} - V_{in,max} - |V_{th3}|_{max} + V_{th1,min}$, then $(W/L)_3 = \\dfrac{2I_{D3}}{\\mu_pC_{ox}|V_{ov3}|^2}$'],
+          hint: ['Check on M1 (NMOS, gate = $V_{in}$): it stays saturated while its drain is above $V_{in} - V_{th1}$. Link on M3 (PMOS diode, source = $V_{DD}$): that drain sits at $V_{DD} - |V_{GS3}|$. Use the worst cases (largest $|V_{th3}|$, smallest $V_{th1}$); what is left is M3’s overdrive.', '$|V_{ov3}| = V_{DD} - V_{in,max} - |V_{th3}|_{max} + V_{th1,min}$, then $(W/L)_3 = \\dfrac{2I_{D3}}{\\mu_pC_{ox}|V_{ov3}|^2}$'],
           how: [
-            'M1’s drain is M3’s diode, at $V_{DD} - |V_{GS3}|$. At the edge of saturation it equals $V_{in,max} - V_{th1}$: $$V_{DD} - |V_{th3}| - |V_{ov3}| = V_{in,max} - V_{th1}$$',
+            'M3 is a PMOS diode (source = $V_{DD}$, gate = drain = M1’s drain), so by the link $|V_{GS3}| = |V_{th3}| + |V_{ov3}|$ M1’s drain sits at $V_{DD} - |V_{GS3}|$. M1 (NMOS, gate = $V_{in}$) must stay saturated, a check: drain ≥ $V_{in} - V_{th1}$. At the edge: $$V_{DD} - |V_{th3}| - |V_{ov3}| = V_{in,max} - V_{th1}$$',
             'Solve with the worst-case thresholds: $$|V_{ov3}| = 1.8 - 1.6 - 0.51 + 0.47 = 0.16\\,\\mathrm{V}$$',
             'Square law for M3 at 27.5 µA: $$(W/L)_{3,4} = \\frac{2I_{D3}}{\\mu_pC_{ox}|V_{ov3}|^2} = \\frac{2(27.5\\,\\mu)}{60\\,\\mu\\,(0.16)^2} = 35.8$$',
           ],
@@ -946,10 +946,10 @@ scene(L17, '2025 mid-sem Q2, part 2: (W/L)5, (W/L)7, (W/L)8', 54, (S) => {
             { q: 'Overdrive of M1 at $I_{D1}$ = 27.5 µA, $V_{ov1}$ (V)?', answer: IM.m25.vov1, unit: 'V', tol: 0.02, hint: '$V_{ov1} = \\sqrt{2I_{D1}/(\\mu_nC_{ox}(W/L)_1)}$', how: ['$$V_{ov1} = \\sqrt{\\frac{2(27.5\\,\\mu)}{300\\,\\mu\\times 7.24}} = 0.159\\,\\mathrm{V}$$'] },
             { q: 'Overdrive left for the tail, $V_{ov5}$ (V)?', answer: IM.m25.vov5, unit: 'V', tol: 0.02, hint: '$V_{ov5} = V_{in,min} - V_{ov1} - V_{th1,max}$', how: ['$$0.9 - 0.159 - 0.59 = 0.151\\,\\mathrm{V}$$'] },
           ],
-          hint: ['At the lowest input, the tail’s drain (node P) is at $V_{in,min} - V_{GS1}$, and M5 needs at least its overdrive there. Use the largest $V_{th1}$ (worst case).', '$V_{ov5} = V_{in,min} - \\sqrt{\\dfrac{2I_{D1}}{\\mu_nC_{ox}(W/L)_1}} - V_{th1,max}$, then $(W/L)_5 = \\dfrac{2I_5}{\\mu_nC_{ox}V_{ov5}^2}$'],
+          hint: ['Link on M1 (NMOS, gate = $V_{in}$, source = the tail node): at the lowest input the tail node (M5’s drain) is at $V_{in,min} - V_{GS1}$. Check on M5 (NMOS, source = $V_{SS}$ = 0): it needs $V_{DS5} \\ge V_{ov5}$ there. Use the largest $V_{th1}$ (worst case).', '$V_{ov5} = V_{in,min} - \\sqrt{\\dfrac{2I_{D1}}{\\mu_nC_{ox}(W/L)_1}} - V_{th1,max}$, then $(W/L)_5 = \\dfrac{2I_5}{\\mu_nC_{ox}V_{ov5}^2}$'],
           how: [
             'Overdrive of M1 at 27.5 µA: $$V_{ov1} = \\sqrt{\\frac{2I_{D1}}{\\mu_nC_{ox}(W/L)_1}} = \\sqrt{\\frac{2(27.5\\,\\mu)}{300\\,\\mu\\times 7.24}} = 0.159\\,\\mathrm{V}$$',
-            'Voltage left for M5 at the lowest input: $$V_{ov5} = V_{in,min} - V_{ov1} - V_{th1,max} = 0.9 - 0.159 - 0.59 = 0.151\\,\\mathrm{V}$$',
+            'Link M1 from its gate ($V_{in,min}$) down to its source, the tail node, with $V_{GS1} = V_{th1} + V_{ov1}$; M5 (source = $V_{SS}$ = 0) needs $V_{DS5} \\ge V_{ov5}$ (check), so at the edge: $$V_{ov5} = V_{in,min} - V_{ov1} - V_{th1,max} = 0.9 - 0.159 - 0.59 = 0.151\\,\\mathrm{V}$$',
             'Square law for the tail: $$(W/L)_{5,6} = \\frac{2I_5}{\\mu_nC_{ox}V_{ov5}^2} = \\frac{2(55\\,\\mu)}{300\\,\\mu\\,(0.151)^2} = 16.1$$',
           ],
           calc: [{ what: 'All of ⑤ in one line (prefixes on)', keys: '2 × 55µ ÷ ( 300µ × ( 0.9 − √( 2 × 27.5µ ÷ ( 300µ × 7.238 ) ) − 0.59 ) [x²] ) [EXE]', shows: '16.11' }],
@@ -966,7 +966,7 @@ scene(L17, '2025 mid-sem Q2, part 2: (W/L)5, (W/L)7, (W/L)8', 54, (S) => {
           hint: ['RHP zero at 10·GBW: $g_{m7}/C_c = 10\\,g_{m1}/C_c$, so $g_{m7} = 10g_{m1}$. M7’s gate sits at the mirror’s drain voltage, so with a perfect mirror it has M3’s overdrive.', '$g_m = \\mu_pC_{ox}(W/L)|V_{ov}| \\;\\Rightarrow\\; (W/L)_7 = \\dfrac{g_{m7}}{\\mu_pC_{ox}|V_{ov3}|}$'],
           how: [
             'Zero at 10 × GBW: $$\\frac{g_{m7}}{C_c} = 10\\,\\frac{g_{m1}}{C_c} \\;\\Rightarrow\\; g_{m7} = 10g_{m1} = 10(0.346\\,\\mathrm{mS}) = 3.46\\,\\mathrm{mS}$$',
-            'Perfect mirror: M7 has the same $|V_{GS}|$ as M3/M4, so $|V_{ov7}| = |V_{ov3}| = 0.16$ V (from ④).',
+            'M7 is PMOS: source = $V_{DD}$, gate = stage-1 output (drain of M2/M4). A perfect mirror puts that node at $V_{DD} - |V_{GS3}|$, so $|V_{GS7}| = |V_{GS3}|$ (link) and $|V_{ov7}| = |V_{ov3}| = 0.16$ V (from ④).',
             'Use $g_m = \\mu_pC_{ox}(W/L)|V_{ov}|$: $$(W/L)_7 = \\frac{g_{m7}}{\\mu_pC_{ox}|V_{ov3}|} = \\frac{3.46\\,\\mathrm{mS}}{60\\,\\mu\\times 0.16} = 360$$',
           ],
         },
@@ -982,7 +982,7 @@ scene(L17, '2025 mid-sem Q2, part 2: (W/L)5, (W/L)7, (W/L)8', 54, (S) => {
           hint: ['First get M7’s current from its square law; M8 must sink exactly that. M8 and M5 share a gate voltage, so currents scale with W/L.', '$I_7 = \\tfrac12\\mu_pC_{ox}(W/L)_7|V_{ov3}|^2$, $(W/L)_8 = (W/L)_5\\dfrac{I_7}{I_5}$'],
           how: [
             'Current in M7: $$I_7 = \\tfrac12\\mu_pC_{ox}(W/L)_7|V_{ov3}|^2 = \\tfrac12(60\\,\\mu)(360)(0.16)^2 = 276\\,\\mu\\mathrm{A}$$',
-            'M8 mirrors M5 (same $V_{GS}$), so sizes scale with currents: $$(W/L)_8 = (W/L)_5\\frac{I_7}{I_5} = 16.1\\times\\frac{276\\,\\mu\\mathrm{A}}{55\\,\\mu\\mathrm{A}} = 81$$',
+            'M8 (NMOS, source = $V_{SS}$) shares its gate with M5 and M6, so the same $V_{GS}$ (link) and sizes scale with currents: $$(W/L)_8 = (W/L)_5\\frac{I_7}{I_5} = 16.1\\times\\frac{276\\,\\mu\\mathrm{A}}{55\\,\\mu\\mathrm{A}} = 81$$',
           ],
           why: 'The fixed order: $C_c$ → $I_5$ → (W/L)₁ → (W/L)₃ → (W/L)₅ → (W/L)₇ → (W/L)₈.',
         },
@@ -1026,11 +1026,11 @@ scene(L17, 'Compre 2023-24 Q8: a full two-stage analysis', 64, (S) => {
           ],
           hint: ['Both are diode-connected and carry the same $I_8$, and their $V_{GS}$ add up to the full 5 V. Each $|V_{GS}| = 0.7 + \\sqrt{2I_8/\\mu C_{ox}}$.', '$5 - 2(0.7) = \\sqrt{I_8}\\left(\\sqrt{\\tfrac{2}{\\mu_nC_{ox}}} + \\sqrt{\\tfrac{2}{\\mu_pC_{ox}}}\\right)$'],
           how: [
-            'The two diodes share the 5 V between the rails: $$V_{GS8} + |V_{GS9}| = 2.5 - (-2.5) = 5\\,\\mathrm{V}$$',
+            'M9 is a PMOS diode (source = $V_{DD}$, gate = drain) and M8 an NMOS diode (source = $V_{SS}$, gate = drain), in series with the same $I_8$. Link each, $|V_{GS}| = |V_{th}| + |V_{ov}|$; together they span the rails: $$V_{GS8} + |V_{GS9}| = 2.5 - (-2.5) = 5\\,\\mathrm{V}$$',
             'Take away the two thresholds; the overdrives share the rest: $$\\sqrt{\\frac{2I_8}{\\mu_nC_{ox}}} + \\sqrt{\\frac{2I_8}{\\mu_pC_{ox}}} = 5 - 1.4 = 3.6\\,\\mathrm{V}$$',
             'Pull out $\\sqrt{I_8}$ ($\\sqrt{2/110\\,\\mu} = 134.8$, $\\sqrt{2/50\\,\\mu} = 200$): $$\\sqrt{I_8} = \\frac{3.6}{134.8 + 200} = 0.01075$$',
             'Square it: $$I_8 = (0.01075)^2 = 115.6\\,\\mu\\mathrm{A}$$',
-            'The mirrors then give $I_5 = 2I_8 = 231$ µA and $I_7 = 10I_8 = 1.156$ mA.',
+            'M5 and M7 (NMOS, source = $V_{SS}$) share M8’s gate, so the same $V_{GS}$ (link): currents scale with W/L, $I_5 = 2I_8 = 231$ µA and $I_7 = 10I_8 = 1.156$ mA.',
           ],
           calc: [{ what: 'I₈ in one line (prefixes on)', keys: '( 3.6 ÷ ( √( 2 ÷ 110µ ) + √( 2 ÷ 50µ ) ) ) [x²] [EXE]', shows: '115.6µ' }],
         },
