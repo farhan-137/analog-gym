@@ -52,16 +52,16 @@ const Voice = (() => {
     for (let i = 0; i < 3; i++) {
       s = s.replace(/\\(?:text|mathrm|mathbf|operatorname)\{([^{}]*)\}/g, ' $1 ')
         .replace(/\\underbrace\{((?:[^{}]|\{[^{}]*\})*)\}_\{(?:[^{}]|\{[^{}]*\})*\}/g, ' $1 ')
-        .replace(/\\t?frac12/g, ' half ').replace(/\\t?frac\{([^{}]*)\}\{([^{}]*)\}/g, ' $1 over $2 ').replace(/\\t?frac([A-Za-z0-9])([A-Za-z0-9])/g, ' $1 over $2 ');
+        .replace(/\\t?frac12/g, ' half ').replace(/\\t?frac\{([^{}]*)\}\{([^{}]*)\}/g, ' $1 over $2 ').replace(/\\t?frac\s*([A-Za-z0-9])([A-Za-z0-9])/g, ' $1 over $2 ');
     }
-    s = s.replace(/\\left|\\right/g, '').replace(/\\max/g, ' the larger of ').replace(/\\min/g, ' the smaller of ')
+    s = s.replace(/\\left|\\right/g, '').replace(/\\tan\^\{-1\}/g, ' arc tan of ').replace(/\\Delta\s*/g, ' delta ').replace(/\\log_\{?10\}?/g, ' log ').replace(/\\log/g, ' log ').replace(/\\ln/g, ' natural log of ').replace(/\\sqrt\{([^{}]*)\}/g, ' root $1 ').replace(/\\sqrt\s*(\d)/g, ' root $1 ').replace(/\\pi/g, ' pi ').replace(/\\gg/g, ' much greater than ').replace(/\\ll/g, ' much less than ').replace(/\\angle/g, ' the angle of ').replace(/\\circ/g, ' degrees ').replace(/\\max/g, ' the larger of ').replace(/\\min/g, ' the smaller of ')
       .replace(/\\parallel/g, ' in parallel with ').replace(/\\times|\\cdot/g, ' times ').replace(/\\approx/g, ' is about ').replace(/\\ge(q)?/g, ' is at least ').replace(/\\le(q)?/g, ' is at most ')
       .replace(/\\Rightarrow|\\implies/g, ', so ').replace(/\\to/g, ' to ').replace(/\\in\b/g, ' in ').replace(/\\propto/g, ' grows like ').replace(/\\infty/g, ' infinity ').replace(/\\pm/g, ' plus or minus ')
       .replace(/\\(mu|lambda|beta|omega|tau|alpha|gamma|phi|theta)/g, ' $1 ').replace(/\\varepsilon/g, ' epsilon ').replace(/\\Delta/g, ' delta ')
       .replace(/\\qquad|\\quad/g, ', ').replace(/\\[,;!: ]/g, ' ')
       .replace(/\(g_m ?r_O\)\^2/g, ' g M r O, squared ')
       .replace(/([A-Za-z])_\{([^{}]*)\}/g, (_m, b, sub) => varSpeak(b, sub)).replace(/([A-Za-z])_([A-Za-z0-9])/g, (_m, b, sub) => varSpeak(b, sub))
-      .replace(/\^2/g, ' squared ').replace(/\^3/g, ' cubed ').replace(/\^\{([^{}]*)\}/g, ' to the $1 ')
+      .replace(/\^2/g, ' squared ').replace(/\^3/g, ' cubed ').replace(/\^\{-([^{}]*)\}/g, ' to the minus $1 ').replace(/\^\{([^{}]*)\}/g, ' to the $1 ')
       .replace(/\\[a-zA-Z]+/g, ' ').replace(/[{}_\\]/g, ' ').replace(/\|/g, ' ')
       .replace(/(\d)\s*-\s*(\d)/g, '$1 minus $2').replace(/\s-\s/g, ' minus ').replace(/(^|[\s(=])-(\d)/g, '$1minus $2')
       .replace(/\+/g, ' plus ').replace(/=/g, ' equals ').replace(/[[\]]/g, ' ');
@@ -69,14 +69,14 @@ const Voice = (() => {
   }
   const UNIT = { V: ['volt', 'volts'], mV: ['millivolt', 'millivolts'], 'µA': ['microamp', 'microamps'], uA: ['microamp', 'microamps'], mA: ['milliamp', 'milliamps'],
     'kΩ': ['kilo-ohm', 'kilo-ohms'], 'MΩ': ['mega-ohm', 'mega-ohms'], 'Ω': ['ohm', 'ohms'], mW: ['milliwatt', 'milliwatts'], W: ['watt', 'watts'], pF: ['picofarad', 'picofarads'],
-    fF: ['femtofarad', 'femtofarads'], MHz: ['megahertz', 'megahertz'], GHz: ['gigahertz', 'gigahertz'], kHz: ['kilohertz', 'kilohertz'], ns: ['nanosecond', 'nanoseconds'],
+    fF: ['femtofarad', 'femtofarads'], MHz: ['megahertz', 'megahertz'], GHz: ['gigahertz', 'gigahertz'], kHz: ['kilohertz', 'kilohertz'], ns: ['nanosecond', 'nanoseconds'], ps: ['picosecond', 'picoseconds'], Hz: ['hertz', 'hertz'],
     'µs': ['microsecond', 'microseconds'], us: ['microsecond', 'microseconds'], ms: ['millisecond', 'milliseconds'], dB: ['decibel', 'decibels'] };
   function units(s) {
     return s.replace(/(\d)\s*(?:\\[,;])?\s*\\(?:mathrm|text)\{([^{}]+)\}/g, '$1 $2')
       .replace(/(\d+(?:\.\d+)?)\s*(G|M|k)rad\/s/g, (_m, n, p) => `${n} ${{ G: 'giga', M: 'mega', k: 'kilo' }[p]}radians per second`)
       .replace(/(\d+(?:\.\d+)?)\s*(m|µ|u)S\b/g, (_m, n, p) => `${n} ${p === 'm' ? 'milli' : 'micro'}siemens`)
-      .replace(/(\d)\s*–\s*(\d)/g, '$1 to $2')
-      .replace(/(\d+(?:\.\d+)?)\s*(mV|µA|uA|mA|kΩ|MΩ|Ω|mW|W|pF|fF|MHz|GHz|kHz|ns|µs|us|ms|dB|V)(?![A-Za-z0-9_{])/g, (_m, n, u) => `${n} ${UNIT[u][+n === 1 ? 0 : 1]}`);
+      .replace(/rad\/s\b/g, 'radians per second').replace(/V\/µs\b/g, 'volts per microsecond').replace(/µA\/pF/g, 'microamps per picofarad').replace(/(\d)\s*–\s*(\d)/g, '$1 to $2')
+      .replace(/(\d+(?:\.\d+)?)\s*(mV|µA|uA|mA|kΩ|MΩ|Ω|mW|W|pF|fF|MHz|GHz|kHz|ns|ps|µs|us|ms|dB|Hz|V)(?![A-Za-z0-9_{])/g, (_m, n, u) => `${n} ${UNIT[u][+n === 1 ? 0 : 1]}`);
   }
   function plainSpeak(s) {
     return s
@@ -85,12 +85,14 @@ const Voice = (() => {
       .replace(/\bLecs?\b\.?/g, 'Lecture').replace(/\bEx\b\.?/g, 'Example').replace(/\bmid-sem\b/gi, 'mid sem').replace(/\bvs\.?\b/g, 'versus').replace(/\bi\.e\.,?/g, 'that is,').replace(/\be\.g\.,?/g, 'for example,')
       .replace(/\b(CM|KCL|KVL|CMFB|PMOS|NMOS|OTA|SR)\b/g, (w) => ({ CM: 'C M', KCL: 'K C L', KVL: 'K V L', CMFB: 'C M F B', PMOS: 'P mos', NMOS: 'N mos', OTA: 'O T A', SR: 'slew rate' }[w]))
       .replace(/\bM(\d+)\b/g, 'M $1').replace(/\bQ(\d+)\(([a-z])\)/g, 'Q $1 $2').replace(/\bP(\d+)\b/g, 'P $1').replace(/\bQ(\d+)\b/g, 'Q $1')
+      .replace(/(\d+)\^(\d+)/g, '$1 to the $2').replace(/\)\^(\d)/g, ') to the $1').replace(/√\s*2/g, 'root 2').replace(/√/g, ' root ').replace(/π/g, ' pi ').replace(/≫/g, ' much greater than ').replace(/≪/g, ' much less than ').replace(/∠/g, ' angle ').replace(/°/g, ' degrees').replace(/✕/g, ' cross ')
+      .replace(/\bmu A\b/g, 'microamps').replace(/\bHz\b/g, 'hertz').replace(/Δ\s*/g, 'delta ').replace(/·/g, ' times ').replace(/\bDM\b/g, 'D M').replace(/\bis is\b/g, 'is')
       .replace(/(\d)\s*%/g, '$1 percent').replace(/(\d+(?:\.\d+)?)×/g, '$1 times ')
       .replace(/\s*\/\s*/g, ' over ').replace(/\s=\s/g, ' equals ').replace(/↔/g, ' and ')
       .replace(/→/g, ', then ').replace(/↑/g, ' goes up ').replace(/↓/g, ' goes down ').replace(/≈/g, ' about ').replace(/≥/g, ' at least ').replace(/≤/g, ' at most ')
       .replace(/×/g, ' times ').replace(/∥/g, ' in parallel with ').replace(/÷/g, ' divided by ').replace(/Ω/g, ' ohms ').replace(/µ/g, ' micro ')
       .replace(/[“”"]/g, '').replace(/…/g, ', ').replace(/\s*[—–]\s*/g, ', ').replace(/[①②③④⑤]/g, (c) => ' ' + ('①②③④⑤'.indexOf(c) + 1) + ', ').replace(/[✓✗▶↺★💡]/g, ' ')
-      .replace(/\s+([,.;:!?])/g, '$1').replace(/,\s*,/g, ',').replace(/\s+/g, ' ').trim();
+      .replace(/\s+([,.;:!?])/g, '$1').replace(/,\s*,/g, ',').replace(/\s+/g, ' ').replace(/^[\s,;:]+/, '').trim();
   }
   function toSpeech(html) {
     const s = html.replace(/(\d)\$\s*((?:G|M|k)?rad\/s|mV|µA|uA|mA|kΩ|MΩ|Ω|mW|W|pF|fF|MHz|GHz|kHz|ns|µs|us|ms|dB|mS|µS|V)(?![A-Za-z0-9_{])/g, '$1 $2$$').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, ' and ').replace(/&[a-z]+;/g, ' ').replace(/\*\*/g, '')
@@ -233,3 +235,11 @@ const Drill = (() => {
   }
   return { open: openFor, close, isOpen: () => open };
 })();
+
+/* attach say-it-back lines to scenes by title */
+function setRecall(list) {
+  list.forEach(([title, lines]) => {
+    const s = SCENES.find((x) => x.title === title);
+    if (s) s.recall = lines; // a shared list may name scenes another lesson has
+  });
+}

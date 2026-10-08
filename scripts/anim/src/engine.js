@@ -285,8 +285,38 @@ const Player = (() => {
 })();
 
 /* ── your-turn overlay ── */
+/* exam time budget for a stop: the question's marks × the paper's minutes per mark, shared by its parts */
+const Budget = (() => {
+  const parts = {};
+  const base = (src) => (src || '').replace(/\s*·.*$/, '').trim();
+  const KNOWN = [[/Mid-sem 2024-25 Q1/, 20], [/Mid-sem 2024-25 Q2/, 15], [/Mid-sem 2024-25 Q3/, 10], [/Mid-sem 2024-25 Q4/, 7], [/Mid-sem 2024-25 Q5/, 8],
+    [/Quiz 1 2024-25 Q1/, 9], [/Quiz 1 2024-25 Q2/, 6], [/Quiz 2 2024-25 Q1/, 6], [/Quiz 2 2024-25/, 9], [/Quiz 1 2023-24/, 7.5]];
+  function info(src) {
+    const s = src || '';
+    const m = s.match(/(\d+(?:\.\d+)?) marks/) || null;
+    const quiz = /quiz/i.test(s);
+    let marks = m ? +m[1] : (KNOWN.find(([re]) => re.test(s)) || [])[1];
+    let kind = 'exam';
+    if (!marks) { if (/^Lab/.test(s)) { marks = 4; kind = 'lab'; } else if (/Exam-style|tutoring chat|^$/.test(s)) { marks = 2; kind = 'check'; } else { marks = 10; kind = 'practice'; } }
+    return { marks, rate: quiz ? 120 : 90, quiz, kind };
+  }
+  return {
+    count(src) { const b = base(src); parts[b] = (parts[b] || 0) + 1; },
+    reset() { Object.keys(parts).forEach((k) => delete parts[k]); },
+    for(st) {
+      if (st.secs) return { secs: st.secs, note: '' };
+      const I = info(st.src), n = parts[base(st.src)] || 1;
+      const secs = Math.max(45, Math.round((I.marks * I.rate) / n / 15) * 15);
+      const paper = I.quiz ? 'quiz: 30 min for 15 marks' : 'mid-sem: 90 min for 60 marks';
+      const what = I.kind === 'exam' ? `${I.marks}-mark question` : I.kind === 'practice' ? 'treated as a 10-mark exam question' : I.kind === 'lab' ? 'treated as a 4-mark part' : 'quick check';
+      return { secs, note: `${what}${n > 1 ? `, ${n} parts` : ''} · ${paper}` };
+    },
+  };
+})();
+
 const Try = (() => {
-  let box, open = false;
+  let box, open = false, tick = null;
+  const mmss = (s) => `${s < 0 ? '+' : ''}${Math.floor(Math.abs(s) / 60)}:${String(Math.floor(Math.abs(s) % 60)).padStart(2, '0')}`;
   function fmt(v) { const a = Math.abs(v); if (a !== 0 && (a >= 1e5 || a < 1e-3)) return v.toExponential(3); return (+v.toPrecision(4)).toString(); }
   function parseNum(s) {
     s = s.trim().replace(/,/g, '').replace(/µ/g, 'u').replace(/−/g, '-');
@@ -300,9 +330,25 @@ const Try = (() => {
     box = document.querySelector('.try');
     const tries = { n: 0 };
     const b = box.querySelector('.box');
-    b.innerHTML = `<div class="tag">Your turn${st.src ? ' · ' + st.src : ''}</div><div class="p">${st.q}</div>`;
+    const B = Budget.for(st), t0 = performance.now();
+    b.innerHTML = `<div class="tag">Your turn${st.src ? ' · ' + st.src : ''}</div>
+      <div class="timer"><div class="ring"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="bg"/><circle cx="22" cy="22" r="19" class="fg"/></svg><span></span></div>
+      <div class="tl"><b>Exam budget ${mmss(B.secs)}</b><br><small>${B.note}</small></div></div><div class="p">${st.q}</div>`;
+    const ring = b.querySelector('.timer'), fg = b.querySelector('.timer .fg'), rs = b.querySelector('.timer .ring span');
+    const C0 = 2 * Math.PI * 19; fg.style.strokeDasharray = C0;
+    const used = () => (performance.now() - t0) / 1000;
+    clearInterval(tick);
+    const upd = () => {
+      const left = B.secs - used();
+      rs.textContent = mmss(Math.ceil(left));
+      fg.style.strokeDashoffset = C0 * (1 - Math.max(0, left) / B.secs);
+      ring.classList.toggle('warn', left <= B.secs * 0.25 && left > 0); ring.classList.toggle('over', left <= 0);
+      if (left <= 0) ring.querySelector('.tl small').textContent = 'Over budget: in the exam, write what you have and move on.';
+    };
+    upd(); tick = setInterval(upd, 250);
     const fb = document.createElement('div'); fb.className = 'fb';
-    const finish = (msg) => { fb.className = 'fb ok'; fb.innerHTML = msg; cont.style.display = ''; };
+    const took = () => { clearInterval(tick); const u = used(); return ` <span class="took">⏱ ${mmss(Math.round(u))} of ${mmss(B.secs)}${u > B.secs ? ' (too slow for the exam: redo it tomorrow)' : ''}</span>`; };
+    const finish = (msg) => { fb.className = 'fb ok'; fb.innerHTML = msg + took(); cont.style.display = ''; };
     const cont = document.createElement('button'); cont.className = 'go'; cont.textContent = 'Continue ▶'; cont.style.display = 'none';
     cont.onclick = () => { close(); Player.play(); };
     if (st.choices) {
@@ -347,6 +393,6 @@ const Try = (() => {
     b.appendChild(r2);
     box.classList.add('on');
   }
-  function close() { open = false; document.querySelector('.try').classList.remove('on'); }
+  function close() { open = false; clearInterval(tick); document.querySelector('.try').classList.remove('on'); }
   return { open: openStop, close, isOpen: () => open };
 })();

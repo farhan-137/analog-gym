@@ -1,4 +1,4 @@
-"""Render the lesson narration with Kokoro (neural TTS, runs offline): one mp3 per line in audio/<lesson>/<k>.mp3.
+"""Render the lesson narration with Kokoro (neural TTS, runs offline): one mp3 per line in audio/mp3/<k>.mp3 (shared by all lessons).
 Usage: python3 scripts/anim/tts.py c   (needs: pip install kokoro-onnx soundfile; ffmpeg; model + voices, see KOKORO_DIR)
 Only lines without an mp3 are rendered, so edits re-render just what changed."""
 import json, os, re, subprocess, sys, tempfile
@@ -10,7 +10,7 @@ lesson = sys.argv[1] if len(sys.argv) > 1 else 'c'
 kdir = os.environ.get('KOKORO_DIR', os.path.join(here, '.kokoro'))
 VOICE, SPEED = os.environ.get('KOKORO_VOICE', 'af_heart'), float(os.environ.get('KOKORO_SPEED', '0.92'))
 lines = json.load(open(os.path.join(here, 'audio', lesson + '.json')))
-out = os.path.join(here, 'audio', lesson); os.makedirs(out, exist_ok=True)
+out = os.path.join(here, 'audio', 'mp3'); os.makedirs(out, exist_ok=True)  # shared by all lessons
 todo = [l for l in lines if not os.path.exists(os.path.join(out, l['k'] + '.mp3'))]
 print(len(lines), 'lines,', len(todo), 'to render')
 if not todo: sys.exit(0)

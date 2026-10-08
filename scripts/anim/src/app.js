@@ -11,7 +11,7 @@
   /* harvest every scene's captions once (for the transcript and the time map) */
   const scratch = el('svg', { width: 1600, height: 900, style: 'position:absolute;left:-99999px;top:0;visibility:hidden' }, document.body);
   const TRANSCRIPT = SCENES.map((s) => {
-    try { const S = makeCtx(scratch, s); s.build(S); const caps = S.caps.sort((a, b) => a.t - b.t); while (scratch.firstChild) scratch.removeChild(scratch.firstChild); return caps; } catch (e) { console.error('scene', s.title, e); return []; }
+    try { const S = makeCtx(scratch, s); s.build(S); S.stops.forEach((st) => Budget.count(st.src)); const caps = S.caps.sort((a, b) => a.t - b.t); while (scratch.firstChild) scratch.removeChild(scratch.firstChild); return caps; } catch (e) { console.error('scene', s.title, e); return []; }
   });
   scratch.remove();
 
