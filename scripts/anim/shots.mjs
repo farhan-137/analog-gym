@@ -1,7 +1,7 @@
 // Screenshots of chosen moments: node scripts/anim/shots.mjs <outdir> <sceneIndex:t,...>  (t in seconds within the scene; 'e' = end)
 import { chromium } from 'playwright';
 const [,, out, spec, file = 'index.html'] = process.argv;
-const b = await chromium.launch({ executablePath: '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser' });
+const b = await chromium.launch({ executablePath: process.env.PW_CHROME || '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser' });
 const p = await b.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
 const errs = [];
 p.on('pageerror', (e) => errs.push(String(e)));

@@ -148,11 +148,57 @@ function html(S, x, y, w, h, inner, cls = '', parent) {
   fo.appendChild(div);
   return fo;
 }
-/* inline rich text for HTML blocks: $tex$ and **bold** */
+/* inline rich text for HTML blocks: $tex$, $$display tex$$ (chains of = broken into aligned lines) and **bold** */
 function rt(s) {
   const maths = [];
-  const t = s.replace(/\$([^$]+)\$/g, (_m, x) => `\u0000${maths.push(x) - 1}\u0000`);
-  return t.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/\u0000(\d+)\u0000/g, (_m, i) => katex.renderToString(maths[+i], { throwOnError: false }));
+  const t = s.replace(/\$\$([^$]+)\$\$/g, (_m, x) => `\u0001${maths.push(x) - 1}\u0001`).replace(/\$([^$]+)\$/g, (_m, x) => `\u0000${maths.push(x) - 1}\u0000`);
+  return t.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/\u0001(\d+)\u0001/g, (_m, i) => texBlock(maths[+i]))
+    .replace(/\u0000(\d+)\u0000/g, (_m, i) => katex.renderToString(maths[+i], { throwOnError: false }));
+}
+/* A worked line like "A = f(x) = 3·4 = 12" becomes one step per line:
+     A = f(x)
+       = 3·4
+       = 12
+   Several equations joined by \quad or ,\; go on separate lines. Already-aligned TeX is left alone. */
+function autoAlign(tex) {
+  if (/\\begin|\\\\/.test(tex)) return tex;
+  const top = (s, re) => { // split s at matches of re that sit outside braces / \left..\right
+    const out = []; let d = 0, last = 0;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (c === '\\' && s.startsWith('\\left', i)) { d++; i += 4; continue; }
+      if (c === '\\' && s.startsWith('\\right', i)) { d--; i += 5; continue; }
+      if (c === '{') d++; else if (c === '}') d--;
+      else if (d === 0) { re.lastIndex = i; const m = re.exec(s); if (m && m.index === i) { out.push([s.slice(last, i), m[0]]); last = i + m[0].length; i = last - 1; } }
+      if (c === '\\' && d >= 0 && s[i + 1] && /[{}]/.test(s[i + 1])) i++;
+    }
+    out.push([s.slice(last), '']);
+    return out;
+  };
+  const eqs = top(tex, /,?\s*\\(?:quad|qquad)(?![a-zA-Z])\s*|,\s*\\;\s*/y).map(([p]) => p.trim()).filter(Boolean);
+  const rows = [];
+  for (const e of eqs) {
+    const parts = top(e, /=|\\approx(?![a-zA-Z])/y);
+    if (parts.length < 3 && eqs.length === 1) return tex; // a single short relation: keep it on one line
+    if (parts.length === 1) { rows.push(e + ' &'); continue; }
+    // lhs &= a \\ &= b \\ ...
+    let row = parts[0][0].trim() + ` &${parts[0][1]} `;
+    for (let k = 1; k < parts.length; k++) row += parts[k][0].trim() + (parts[k][1] ? ` \\\\ &${parts[k][1]} ` : '');
+    rows.push(row);
+  }
+  return `\\begin{aligned}${rows.join(' \\\\[4pt] ')}\\end{aligned}`;
+}
+function texBlock(tex) {
+  return `<div class="tb">${katex.renderToString(autoAlign(tex), { throwOnError: false, displayMode: true })}</div>`;
+}
+/* height an HTML block will take at a given width (measured offscreen, same stylesheet) */
+function measureHTML(inner, w, cls = '') {
+  let m = document.getElementById('measure');
+  if (!m) { m = document.createElement('div'); m.id = 'measure'; m.className = 'fo'; m.style.cssText = 'position:absolute;left:-5000px;top:0;visibility:hidden'; document.body.appendChild(m); }
+  m.style.width = w + 'px';
+  m.innerHTML = `<div class="${cls}">${inner}</div>`;
+  return m.firstChild.getBoundingClientRect().height;
 }
 
 /* rounded label chip on the stage */
@@ -164,6 +210,38 @@ function chip(S, x, y, str, o = {}, parent) {
   const pad = 12;
   const r = S.el('rect', { x: b.x - pad, y: b.y - 6, width: b.width + 2 * pad, height: b.height + 12, rx: 10, fill: o.bg || 'rgba(20,26,36,0.92)', stroke: col, 'stroke-width': 1.6 }, g);
   g.insertBefore(r, t);
+  return g;
+}
+
+/* A branch current you can follow: moving dashes along pts (in the direction of conventional current),
+   an arrowhead on every long segment, and a label chip such as "I_SS/2 = 0.5 mA".
+   o.at = [x, y] for the chip (default: beside the middle of the longest segment), o.color, o.w, o.speed.
+   Shown from t0, gone at t1 (null = stays). Returns the group. */
+function current(S, pts, t0, t1, label, o = {}) {
+  const col = o.color || C.cur;
+  const g = S.g(); const restore = S.into(g);
+  S.flow(pts, t0, t1, { color: col, w: o.w || 4, speed: o.speed || 70 });
+  const deco = S.g();
+  let best = 0, mid = pts[0], dir = [0, 1];
+  for (let i = 1; i < pts.length; i++) {
+    const [x1, y1] = pts[i - 1], [x2, y2] = pts[i];
+    const L = Math.hypot(x2 - x1, y2 - y1);
+    if (L < 1) continue;
+    const ux = (x2 - x1) / L, uy = (y2 - y1) / L;
+    if (L >= 50 || pts.length === 2) {
+      const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, a = 9;
+      S.el('polygon', { points: `${cx + ux * a},${cy + uy * a} ${cx - ux * a - uy * a},${cy - uy * a + ux * a} ${cx - ux * a + uy * a},${cy - uy * a - ux * a}`, fill: col, stroke: '#0a0e15', 'stroke-width': 1.2 }, deco);
+    }
+    if (L > best) { best = L; mid = [(x1 + x2) / 2, (y1 + y2) / 2]; dir = [ux, uy]; }
+  }
+  if (label) {
+    const at = o.at || [mid[0] + (Math.abs(dir[1]) > 0.5 ? 70 : 0), mid[1] + (Math.abs(dir[1]) > 0.5 ? 0 : -26)];
+    chip(S, at[0], at[1], label, { color: col, size: o.size || 17 }, deco);
+  }
+  deco.style.opacity = 0;
+  S.fade(deco, t0, 0.5);
+  if (t1) S.out(deco, t1, 0.5);
+  restore();
   return g;
 }
 

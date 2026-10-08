@@ -38,6 +38,7 @@ const out = src('shell.html')
   .replace(/\/\*TITLE\*\//g, L.title).replace('/*H1*/', L.h1).replace('/*SUB*/', L.sub)
   .replace('/*KATEXJS*/', () => readFileSync(join(kdir, 'katex.min.js'), 'utf8'))
   .replace('/*APPJS*/', () => app.replace(/<\/script/g, '<\\/script'));
-mkdirSync(join(root, 'anim-dist'), { recursive: true });
-writeFileSync(join(root, 'anim-dist', L.out), out);
+const outDir = process.env.ANIM_OUT || join(root, 'anim-dist'); // a separate dir lets several builds run at once
+mkdirSync(outDir, { recursive: true });
+writeFileSync(join(outDir, L.out), out);
 console.log('built', (out.length / 1e6).toFixed(2), 'MB,', Object.keys(audio).length, 'recorded lines');

@@ -34,30 +34,35 @@ function pyqFrame(S, o) {
   restore();
   fig.style.opacity = 0;
   S.fade(fig, off + 0.3, 0.8);
-  const qh = o.qh || 250;
-  const card = html(S, 944, 118, 620, qh, `<div class="qcard"><div class="src">${o.src}</div>${rt(o.q)}${o.giv ? `<div class="giv">${rt(o.giv)}</div>` : ''}</div>`);
+  const qInner = `<div class="qcard"><div class="src">${o.src}</div>${rt(o.q)}${o.giv ? `<div class="giv">${rt(o.giv)}</div>` : ''}</div>`;
+  const qh = Math.min(430, Math.max(o.qh || 0, Math.ceil(measureHTML(qInner.replace('class="qcard"', 'class="qcard" style="height:auto"'), 620)) + 4));
+  const card = html(S, 944, 118, 620, qh, qInner);
   card.style.opacity = 0;
   S.slideIn(card, off + 0.4, 0.8, 30, 0);
-  const per = o.per || 3, top = 118 + qh + 18, slot = o.slot || ((858 - top) / per);
+  const top = 118 + qh + 16, room = 862 - top, GAP = 12;
   if (o.tests) {
     const t1 = o.steps[0].t + off;
-    const tb = html(S, 944, top, 620, 858 - top, `<div class="whybox"><b>What this question tests</b><br>${rt(o.tests)}</div>`);
+    const tb = html(S, 944, top, 620, room, `<div class="whybox"><b>What this question tests</b><br>${rt(o.tests)}</div>`);
     tb.style.opacity = 0; S.slideIn(tb, off + 1.2, 0.7); S.out(tb, t1 - 0.6, 0.5);
     S.say(off + 1.2, '<span class="why">What it tests:</span> ' + o.tests);
   }
+  // each step: a numbered card, the reasoning in words, then the working one line per step; pages fill by height
+  const inners = o.steps.map((st, i) => (st.ans ? `<div class="ans"><div class="t">${rt(st.title)}</div>${st.tex ? texBlock(st.tex) : ''}</div>`
+    : `<div class="step"><div class="n">${i + 1}</div><div class="t">${rt(st.title)}</div>${st.tex ? `<div class="e">${texBlock(st.tex)}</div>` : ''}</div>`));
+  const hs = inners.map((h) => Math.ceil(measureHTML(h, 620)) + 2);
+  const page = [], ys = [];
+  let pg = 0, y0 = top;
+  hs.forEach((h, i) => { if (i > 0 && y0 + h > top + room) { pg++; y0 = top; } page.push(pg); ys.push(y0); y0 += h + GAP; });
   o.steps.forEach((st, i) => {
-    const k = i % per;
-    const y = top + k * slot;
+    const y = ys[i];
     const T0 = off + st.t;
-    const inner = st.ans ? `<div class="ans">${rt(st.title)}${st.tex ? '<br>' + katex.renderToString(st.tex, { throwOnError: false }) : ''}</div>`
-      : `<div class="step"><div class="t">${rt(st.title)}</div>${st.tex ? `<div class="e">${katex.renderToString(st.tex, { throwOnError: false })}</div>` : ''}</div>`;
-    const fo = html(S, 944, y, 620, slot - 10, inner);
+    const fo = html(S, 944, y, 620, Math.min(hs[i], room), inners[i]);
     fo.style.opacity = 0;
     S.slideIn(fo, T0, 0.7, 0, 18);
-    const nextPage = o.steps.findIndex((x, j) => j > i && j % per === 0 && Math.floor(j / per) > Math.floor(i / per));
+    const nextPage = page.findIndex((p, j) => j > i && p > page[i]);
     if (nextPage > 0) S.out(fo, off + o.steps[nextPage].t - 0.6, 0.5);
     if (st.say) S.say(T0, st.say);
-    if (st.try) S.stop(T0 - 0.4, { src: o.src, ...st.try });
+    if (st.try) S.stop(T0 - 0.4, { src: o.src, top, ...st.try });
     (st.hl || []).forEach(([x, y2, w, h, col]) => {
       const tEnd = off + (o.steps[i + 1] ? o.steps[i + 1].t : st.t + 6);
       const r = S.el('rect', { x, y: y2, width: w, height: h, rx: 14, fill: 'none', stroke: col || C.amb, 'stroke-width': 3, filter: 'url(#glow)' });

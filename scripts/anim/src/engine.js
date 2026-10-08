@@ -318,12 +318,29 @@ const Try = (() => {
   let box, open = false, tick = null;
   const mmss = (s) => `${s < 0 ? '+' : ''}${Math.floor(Math.abs(s) / 60)}:${String(Math.floor(Math.abs(s) % 60)).padStart(2, '0')}`;
   function fmt(v) { const a = Math.abs(v); if (a !== 0 && (a >= 1e5 || a < 1e-3)) return v.toExponential(3); return (+v.toPrecision(4)).toString(); }
+  /* the answer as you would write it: 6.91e-4 S → 0.691 mS, 9.09e7 V/s → 90.9 MV/s */
+  function pretty(v, unit = '') {
+    const base = /^(V|A|S|F|Hz|Ω|s|W|V\/s|rad\/s)$/.test(unit);
+    const a = Math.abs(v);
+    if (base && a !== 0 && (a < 0.1 || a >= 1e4)) {
+      const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm'], [1e-6, 'µ'], [1e-9, 'n'], [1e-12, 'p'], [1e-15, 'f']];
+      const [m, p] = P.find(([m]) => a >= m * 0.9995) || P[P.length - 1];
+      return `${+(v / m).toPrecision(3)} ${p}${unit}`;
+    }
+    return `${fmt(v)}${unit ? ' ' + unit : ''}`;
+  }
   function parseNum(s) {
     s = s.trim().replace(/,/g, '').replace(/µ/g, 'u').replace(/−/g, '-');
     const m = s.match(/^(-?[\d.]+(?:e-?\d+)?)\s*([pnumkMG])?/i);
     if (!m) return NaN;
     const mult = { p: 1e-12, n: 1e-9, u: 1e-6, m: 1e-3, k: 1e3, M: 1e6, G: 1e9 }[m[2]] || 1;
     return parseFloat(m[1]) * mult;
+  }
+  /* fx-991CW recipes: [{ what, keys, shows? }]; [KEY] in keys renders as a key cap; `shows` only after you answer */
+  function calcHTML(list, done) {
+    const key = (k) => k.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\[([^\]]+)\]/g, '<kbd>$1</kbd>');
+    return `<div class="h">🖩 On your fx-991CW</div>` + list.map((c) => typeof c === 'string' ? `<div class="ck"><div class="k">${key(c)}</div></div>`
+      : `<div class="ck"><div class="w">${rt(c.what || '')}</div><div class="k">${key(c.keys || '')}</div>${done && c.shows ? `<div class="s">screen shows ${key(c.shows)}</div>` : ''}${c.note ? `<div class="w2">${rt(c.note)}</div>` : ''}</div>`).join('');
   }
   function openStop(st) {
     open = true;
@@ -333,7 +350,7 @@ const Try = (() => {
     const B = Budget.for(st), t0 = performance.now();
     b.innerHTML = `<div class="tag">Your turn${st.src ? ' · ' + st.src : ''}</div>
       <div class="timer"><div class="ring"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="bg"/><circle cx="22" cy="22" r="19" class="fg"/></svg><span></span></div>
-      <div class="tl"><b>Exam budget ${mmss(B.secs)}</b><br><small>${B.note}</small></div></div><div class="p">${st.q}</div>`;
+      <div class="tl"><b>Exam budget ${mmss(B.secs)}</b><br><small>${B.note}</small></div></div><div class="p">${rt(st.q)}</div>`;
     const ring = b.querySelector('.timer'), fg = b.querySelector('.timer .fg'), rs = b.querySelector('.timer .ring span');
     const C0 = 2 * Math.PI * 19; fg.style.strokeDasharray = C0;
     const used = () => (performance.now() - t0) / 1000;
@@ -347,51 +364,97 @@ const Try = (() => {
     };
     upd(); tick = setInterval(upd, 250);
     const fb = document.createElement('div'); fb.className = 'fb';
-    const took = () => { clearInterval(tick); const u = used(); return ` <span class="took">⏱ ${mmss(Math.round(u))} of ${mmss(B.secs)}${u > B.secs ? ' (too slow for the exam: redo it tomorrow)' : ''}</span>`; };
-    const finish = (msg) => { fb.className = 'fb ok'; fb.innerHTML = msg + took(); cont.style.display = ''; };
+    const hintBox = document.createElement('div'); hintBox.className = 'hints';
+    const sol = document.createElement('div'); sol.className = 'sol';
+    const hints = Array.isArray(st.hint) ? st.hint : st.hint ? [st.hint] : [];
+    const calcBox = document.createElement('div'); calcBox.className = 'calc'; calcBox.style.display = 'none';
+    const calcBtn = document.createElement('button'); calcBtn.className = 'cb'; calcBtn.textContent = '🖩 fx-991CW';
+    calcBtn.onclick = () => { const on = calcBox.style.display === 'none'; calcBox.innerHTML = calcHTML(st.calc || [], false); calcBox.style.display = on ? '' : 'none'; };
+    let shown = 0;
+    const took = () => { clearInterval(tick); const u = used(); return `<span class="took">⏱ ${mmss(Math.round(u))} of ${mmss(B.secs)}${u > B.secs ? ' (too slow for the exam: redo it tomorrow)' : ''}</span>`; };
     const cont = document.createElement('button'); cont.className = 'go'; cont.textContent = 'Continue ▶'; cont.style.display = 'none';
     cont.onclick = () => { close(); Player.play(); };
+    // after an answer: the full method, one line per step, then the answer
+    const finish = (head, ok) => {
+      fb.className = 'fb ' + (ok ? 'ok' : 'shown'); fb.innerHTML = head + ' ' + took();
+      const how = st.how || [];
+      const ansLine = st.choices ? '' : `<div class="final">Answer: <b>${pretty(st.answer, st.unit)}</b></div>`;
+      sol.innerHTML = (how.length ? `<div class="h">How to solve it</div><ol>${how.map((l) => `<li>${rt(l)}</li>`).join('')}</ol>` : '')
+        + (st.why ? `<div class="why2">${rt(st.why)}</div>` : '') + ansLine
+        + (st.calc ? `<div class="calc in-sol">${calcHTML(st.calc, true)}</div>` : '');
+      calcBox.style.display = 'none';
+      sol.style.display = sol.innerHTML ? '' : 'none';
+      hintBox.style.display = 'none';
+      b.querySelectorAll('.row.in button, .choices button').forEach((x) => { if (!x.classList.contains('right')) x.disabled = true; });
+      cont.style.display = ''; setTimeout(() => cont.focus(), 30);
+      if (st.top) place(1.5); // the question is done: the worked solution may use the full height
+      b.scrollTop = 0;
+    };
+    const nextHint = () => {
+      if (shown >= hints.length) { if (!hints.length) { fb.className = 'fb hint'; fb.textContent = 'No hint for this one: try, or press “Show me”.'; } return; }
+      const d = document.createElement('div'); d.className = 'hint'; d.innerHTML = `<b>Hint ${shown + 1}${hints.length > 1 ? ' of ' + hints.length : ''}</b> ${rt(hints[shown])}`;
+      hintBox.appendChild(d); shown++;
+      if (hb) hb.textContent = shown < hints.length ? `Hint ${shown + 1}` : 'Hint';
+      if (shown >= hints.length && hb) hb.disabled = true;
+    };
+    let hb = null;
     if (st.choices) {
       const ch = document.createElement('div'); ch.className = 'choices';
       st.choices.forEach((c, i) => {
-        const bt = document.createElement('button'); bt.innerHTML = c;
+        const bt = document.createElement('button'); bt.innerHTML = rt(c);
         bt.onclick = () => {
-          if (i === st.answer) finish('✓ Right. ' + (st.why || ''));
-          else { tries.n++; fb.className = 'fb bad'; fb.innerHTML = '✗ Not this one. ' + (st.hint || ''); }
+          if (i === st.answer) { bt.classList.add('right'); finish('✓ Right.', true); }
+          else { tries.n++; bt.classList.add('wrong'); fb.className = 'fb bad'; fb.innerHTML = '✗ Not this one.' + (tries.n === 1 && hints.length ? ' Open a hint, then try again.' : ''); }
         };
         ch.appendChild(bt);
       });
       b.appendChild(ch);
-    } else {
-      const row = document.createElement('div'); row.className = 'row';
-      row.innerHTML = `<input type="text" inputmode="decimal" placeholder="your answer" aria-label="your answer"> <span class="u">${st.unit || ''}</span>`;
-      const chk = document.createElement('button'); chk.className = 'go'; chk.textContent = 'Check';
-      const hint = document.createElement('button'); hint.textContent = 'Hint';
+      const row = document.createElement('div'); row.className = 'row in';
+      hb = document.createElement('button'); hb.textContent = 'Hint';
       const show = document.createElement('button'); show.textContent = 'Show me';
-      row.append(chk, hint, show);
+      hb.onclick = nextHint; show.onclick = () => { ch.children[st.answer].classList.add('right'); finish('The answer is marked in green.', false); };
+      if (hints.length) row.append(hb); row.append(show); if (st.calc) row.append(calcBtn);
+      b.appendChild(row);
+    } else {
+      const row = document.createElement('div'); row.className = 'row in';
+      row.innerHTML = `<input type="text" inputmode="decimal" placeholder="e.g. 0.25, 250m, 4.7µ" aria-label="your answer"> <span class="u">${st.unit || ''}</span>`;
+      const chk = document.createElement('button'); chk.className = 'go'; chk.textContent = 'Check';
+      hb = document.createElement('button'); hb.textContent = 'Hint';
+      const show = document.createElement('button'); show.textContent = 'Show me';
+      row.append(chk, hb, show); if (st.calc) row.append(calcBtn);
       b.appendChild(row);
       const inp = row.querySelector('input');
       const check = () => {
         const v = parseNum(inp.value);
-        if (Number.isNaN(v)) { fb.className = 'fb bad'; fb.textContent = 'Type a number (you can use m, µ/u, k, M).'; return; }
+        if (Number.isNaN(v)) { fb.className = 'fb bad'; fb.textContent = 'Type a number (you can use p, n, µ/u, m, k, M, G).'; return; }
         const tol = st.tol ?? 0.03;
         const ok = Math.abs(v - st.answer) <= tol * Math.abs(st.answer) + (st.abs || 0);
-        if (ok) finish(`✓ Correct: ${fmt(st.answer)} ${st.unit || ''}. ${st.why || ''}`);
-        else { tries.n++; fb.className = 'fb bad'; fb.innerHTML = `✗ Not quite (you wrote ${fmt(v)}). ${tries.n === 1 ? (st.hint || '') : 'Try once more, or press “Show me”.'}`; }
+        if (ok) finish('✓ Correct.', true);
+        else { tries.n++; fb.className = 'fb bad'; fb.innerHTML = `✗ Not quite: you wrote ${pretty(v, st.unit)}. ${shown < hints.length ? 'Open a hint and try again.' : 'Check your working, or press “Show me”.'}`; }
       };
       chk.onclick = check;
       inp.onkeydown = (e) => { e.stopPropagation(); if (e.key === 'Enter') check(); };
-      hint.onclick = () => { fb.className = 'fb hint'; fb.innerHTML = '💡 ' + (st.hint || ''); };
-      show.onclick = () => finish(`Answer: ${fmt(st.answer)} ${st.unit || ''}. ${st.why || ''}`);
+      hb.onclick = nextHint;
+      show.onclick = () => finish('Here is the full method.', false);
       setTimeout(() => inp.focus(), 50);
     }
-    b.appendChild(fb);
-    const r2 = document.createElement('div'); r2.className = 'row'; r2.style.marginTop = '8px';
+    b.append(hintBox, calcBox, fb, sol);
+    sol.style.display = 'none';
+    const r2 = document.createElement('div'); r2.className = 'row'; r2.style.marginTop = '10px';
     const skip = document.createElement('button'); skip.textContent = 'Skip';
     skip.onclick = () => { close(); Player.play(); };
     r2.append(cont, skip);
     b.appendChild(r2);
+    // in a past-paper frame the box sits under the question card, so the givens stay readable
+    place(st.top ? st.top / 9 : 0);
     box.classList.add('on');
+  }
+  function place(pc) {
+    const b = box.querySelector('.box');
+    // padding % is measured on the width; the stage is 16:9, so pc% of its height is pc·0.5625% of its width
+    box.style.alignItems = pc ? 'flex-start' : ''; box.style.paddingTop = pc ? pc * 0.5625 + '%' : '';
+    b.style.maxHeight = pc ? (100 * (98.5 - pc)) / (100 - pc) + '%' : '';
+    box.classList.toggle('col', !!pc);
   }
   function close() { open = false; clearInterval(tick); document.querySelector('.try').classList.remove('on'); }
   return { open: openStop, close, isOpen: () => open };
