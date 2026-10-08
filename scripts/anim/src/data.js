@@ -181,3 +181,25 @@ var CARDS = [
   ['Why do triode sensors see only the CM?', 'Parallel conductances add: only $V_{out1}+V_{out2}$ appears.'],
   ['Replica CMFB rule?', 'M14 = M11, M15 = M12 + M13 with $V_{REF}$ on its gate: balanced only when $V_{out,CM} = V_{REF}$.'],
 ];
+
+/* a stack of equations as the redraw panel of a question frame */
+const eqFig = (lines) => (S2) => { const g = S2.g(); const r = S2.into(g); lines.forEach(([tex, y, sz, col]) => eq(S2, tex, 470, y, { size: sz || 28, w: 860, color: col })); r(); };
+/* move scenes (by title) to just before another scene, keeping chapters and indices in step */
+function moveScenesBefore(titles, before) {
+  const mv = titles.map((t) => SCENES.find((s) => s.title === t)).filter(Boolean);
+  const anchor = SCENES.find((s) => s.title === before);
+  if (!anchor || !mv.length) return;
+  mv.forEach((s) => SCENES.splice(SCENES.indexOf(s), 1));
+  SCENES.splice(SCENES.indexOf(anchor), 0, ...mv);
+  SCENES.forEach((s, i) => { s.index = i; });
+  CHAPTERS.forEach((c) => { c.scenes = SCENES.filter((s) => s.ch === c.name); });
+}
+
+/* the printed circuit in the redraw panel (left of the question frame), with a few key equations under it */
+const paperFig = (key, eqs = [], h = 380) => (S2) => {
+  const g = S2.g(); const r = S2.into(g);
+  S2.el('rect', { x: 60, y: 140, width: 820, height: h, rx: 12, fill: '#f8f6f1' });
+  if (PAPERS[key]) S2.el('image', { href: PAPERS[key], x: 72, y: 150, width: 796, height: h - 20, preserveAspectRatio: 'xMidYMid meet' });
+  eqs.forEach(([tex, y, sz, col]) => eq(S2, tex, 470, y, { size: sz || 26, w: 860, color: col }));
+  r();
+};

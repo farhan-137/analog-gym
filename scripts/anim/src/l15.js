@@ -293,7 +293,6 @@ scene(L15, 'Lecture 15 in one card', 28, (S) => {
 });
 
 /* ── questions ── */
-const eqFig = (lines) => (S2) => { const g = S2.g(); const r = S2.into(g); lines.forEach(([tex, y, sz, col]) => eq(S2, tex, 470, y, { size: sz || 28, w: 860, color: col })); r(); };
 
 scene(L15, 'Past tutorial Ex 3: a one-pole op amp at gain 100', 44, (S) => {
   pyqFrame(S, {

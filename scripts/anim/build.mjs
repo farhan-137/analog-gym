@@ -16,12 +16,12 @@ const LESSONS = {
   a: { out: 'index.html', title: 'Analog Lab: Lec 7–12', h1: 'Analog Lab · Lectures 7–12', sub: 'Two-stage op amps, gain boosting, boosters, CMFB · your notes, animated, with past papers solved on screen',
     files: ['engine.js', 'voice.js', 'lib.js', 'data.js', 'l07.js', 'l08.js', 'l09.js', 'l10.js', 'l1112.js', 'outro.js', 'r_0709.js', 'r_1012.js', 'app.js'] },
   b: { out: 'lec11-14.html', title: 'Analog Lab: Lec 11–14', h1: 'Analog Lab · Lectures 11–14', sub: 'CMFB, then frequency and poles from zero, settling, slewing and stability · every related question, solved by you first',
-    files: ['engine.js', 'voice.js', 'lib.js', 'data.js', 'b_intro.js', 'l10.js', 'l1112.js', 'freq.js', 'l13.js', 'l14.js', 'b_outro.js', 'r_1012.js', 'r_1314.js', 'app.js'] },
+    files: ['engine.js', 'voice.js', 'lib.js', 'data.js', 'b_intro.js', 'l10.js', 'l1112.js', 'freq.js', 'f_extra.js', 'slew.js', 'l13.js', 'l14.js', 'slew2.js', 'b_extra.js', 'b_outro.js', 'r_1012.js', 'r_1314.js', 'app.js'] },
   c: { out: 'lec06.html', title: 'Analog Lab: Lec 6', h1: 'Analog Lab · Lecture 6', sub: 'Folded cascodes from the ground up: CM ranges, rail-to-rail, the folded buffer, the low-voltage cascode load · every related question, solved by you first',
-    files: ['engine.js', 'voice.js', 'lib.js', 'data.js', 'c_intro.js', 'c_found.js', 'c_lec6.js', 'c_q.js', 'c_recall.js', 'app.js'] },
+    files: ['engine.js', 'voice.js', 'lib.js', 'data.js', 'c_intro.js', 'c_found.js', 'c_lec6.js', 'c_q.js', 'c_q2.js', 'c_recall.js', 'app.js'] },
 };
 LESSONS.d = { out: 'lec15-17.html', title: 'Analog Lab: Lec 15–17', h1: 'Analog Lab · Lectures 15–17', sub: 'Frequency and poles from zero, then phase margin, peaking and ringing, and compensation (dominant pole, Miller, the RHP zero) · every related question, solved by you first',
-  files: ['engine.js', 'voice.js', 'lib.js', 'data.js', 'd_intro.js', 'freq.js', 'd_lib.js', 'd_found.js', 'l15.js', 'l16.js', 'l17.js', 'd_outro.js', 'r_1314.js', 'r_1517.js', 'app.js'] };
+  files: ['engine.js', 'voice.js', 'lib.js', 'data.js', 'd_intro.js', 'freq.js', 'f_extra.js', 'd_lib.js', 'd_found.js', 'l15.js', 'l16.js', 'l17.js', 'd_outro.js', 'r_1314.js', 'r_1517.js', 'app.js'] };
 const L = LESSONS[process.argv[2] || 'a'];
 const FILES = L.files;
 const key = process.argv[2] || 'a';

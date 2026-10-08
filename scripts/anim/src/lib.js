@@ -260,3 +260,20 @@ function liveLine(S, col, wd = 3.4, dash) {
 }
 const ptsOf = (n, a, b, fn) => { const out = []; for (let i = 0; i <= n; i++) { const u = a + ((b - a) * i) / n; const [x, y] = fn(u); out.push(`${x.toFixed(1)},${y.toFixed(1)}`); } return out.join(' '); };
 
+
+/* an arrow whose ends are set every frame */
+function dynArrow(S, col, w = 4, parent) {
+  const g = S.g({}, parent);
+  const ln = S.el('line', { stroke: col, 'stroke-width': w, 'stroke-linecap': 'round' }, g);
+  const hd = S.el('polygon', { fill: col }, g);
+  return Object.assign(g, {
+    set(x1, y1, x2, y2, hl = 16) {
+      const L = Math.hypot(x2 - x1, y2 - y1), a = Math.atan2(y2 - y1, x2 - x1), h = Math.min(hl, L * 0.6);
+      const bx = x2 - Math.cos(a) * h, by = y2 - Math.sin(a) * h, px = Math.sin(a) * h * 0.5, py = -Math.cos(a) * h * 0.5;
+      ln.setAttribute('x1', x1); ln.setAttribute('y1', y1); ln.setAttribute('x2', bx); ln.setAttribute('y2', by);
+      hd.setAttribute('points', `${x2},${y2} ${bx + px},${by + py} ${bx - px},${by - py}`);
+      g.style.visibility = L < 1 ? 'hidden' : 'visible';
+    },
+  });
+}
+
