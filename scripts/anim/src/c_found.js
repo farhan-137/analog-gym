@@ -26,6 +26,76 @@ function foldP(S, n = {}) {
   r(); return g;
 }
 
+scene(CF, 'The picture first: a tap and a waterfall', 66, (S) => {
+  header(S, 'FOUNDATIONS · 0', 'A transistor is a tap; saturation is a waterfall');
+  const WATER = '#38bdf8', VTH = 0.5;
+  // ── left: the tap. Pipe from source to drain, a sluice gate lifted by V_GS
+  const pipe = S.g(); const rp = S.into(pipe);
+  S.el('rect', { x: 120, y: 300, width: 600, height: 64, fill: '#0d1a28' });
+  wire(S, [[120, 300], [380, 300]]); wire(S, [[440, 300], [720, 300]]); wire(S, [[120, 364], [380, 364]]); wire(S, [[440, 364], [720, 364]]);
+  S.el('rect', { x: 380, y: 364, width: 60, height: 110, fill: '#060a10', stroke: C.dim, 'stroke-width': 2 }); // slot the gate sinks into
+  S.el('rect', { x: 380, y: 186, width: 60, height: 114, fill: '#060a10', stroke: C.dim, 'stroke-width': 2 }); // housing above
+  txt(S, 120, 286, 'source', { size: 20, color: C.muted }); txt(S, 720, 286, 'drain', { size: 20, color: C.muted, anchor: 'end' });
+  txt(S, 410, 172, 'gate = the handle', { size: 19, color: C.amb, anchor: 'middle', weight: 700 });
+  rp();
+  S.draw(pipe, 0.3, 1.2);
+  const gate = S.el('rect', { x: 386, y: 186, width: 48, height: 288, rx: 4, fill: C.amb, 'fill-opacity': 0.85 });
+  const flowIn = S.el('path', { d: 'M130 332 L720 332', fill: 'none', stroke: WATER, 'stroke-linecap': 'round', 'stroke-dasharray': '14 12' });
+  const vgsT = txt(S, 120, 540, '', { size: 22, color: C.text, mono: true, weight: 700 });
+  const idT = txt(S, 120, 576, '', { size: 20, color: WATER, mono: true, weight: 700 });
+  const fee = chip(S, 610, 410, 'first V_th: entry fee, nothing flows', { color: C.bad, size: 18 });
+  const ov = chip(S, 610, 460, 'the opening = V_ov', { color: C.ok, size: 18 });
+  [gate, flowIn, vgsT, idT, fee, ov].forEach((e) => { e.style.opacity = 0; });
+  [gate, vgsT, idT].forEach((e) => S.fade(e, 5, 0.5)); S.fade(fee, 7, 0.5); S.fade(ov, 14, 0.5);
+  const vgsAt = (t) => (t < 6 ? 0 : t < 13 ? lerp(0, VTH, E.inout((t - 6) / 7)) : t < 18 ? lerp(VTH, 0.6, E.inout((t - 13) / 5)) : t < 22 ? lerp(0.6, 0.7, E.inout((t - 18) / 4)) : 0.7);
+  S.anim(0, 1e4, 'tap', (_p, t) => {
+    const vgs = vgsAt(t), vov = Math.max(0, vgs - VTH), open = Math.min(64, vov * 300); // 0.2 V of overdrive opens 60 px
+    const yB = vgs < VTH ? 474 - (vgs / VTH) * 110 : 364 - open; // gate bottom: climbs out of the slot (entry fee), then opens the pipe
+    gate.setAttribute('y', 186); gate.setAttribute('height', yB - 186);
+    const rel = vov / 0.2, i = rel * rel; // square law, relative to V_ov = 0.2 V
+    flowIn.style.opacity = vov > 0.002 ? 1 : 0;
+    flowIn.setAttribute('stroke-width', 3 + 10 * i);
+    flowIn.style.strokeDashoffset = -t * (40 + 50 * i);
+    vgsT.textContent = ''; richText(vgsT, `V_GS = ${vgs.toFixed(2)} V → V_ov = ${vov.toFixed(2)} V`, 22);
+    idT.textContent = ''; richText(idT, `I_D ∝ V_ov^2 = ${(100 * i).toFixed(0)} %`, 20);
+  }, E.lin);
+  S.say(0.3, 'Before any symbols, one picture. A transistor is a <b>tap</b>: current is water flowing from the source to the drain, and the gate is the handle.');
+  S.say(6, 'Turn the gate voltage up from zero. At first nothing flows: the first $V_{th}$, half a volt, only lifts the gate to the edge of the pipe. That is the <b>entry fee</b>.');
+  S.say(14, 'Past $V_{th}$, the opening is the <b>overdrive</b> $V_{ov}$. Half the opening gives a quarter of the flow: $I_D \\propto V_{ov}^2$. And $W/L$ is simply how big the pipe is.');
+  // ── right: the waterfall. River → ledge → cliff of height V_DS → pool
+  const yl = 520, xe = 1120, sc = 260, depth = 52; // depth = 0.2 V × sc = V_ov: the pool reaches the ledge exactly at V_DS = V_ov
+  const fall = S.g(); fall.style.opacity = 0; S.fade(fall, 24, 0.7);
+  const rf = S.into(fall);
+  S.el('rect', { x: 840, y: yl, width: xe - 840, height: 860 - yl, fill: '#1a2433', stroke: '#2c3a4f', 'stroke-width': 2 });
+  const river = S.el('rect', { x: 840, y: yl - 20, width: xe - 840, height: 20, fill: WATER, 'fill-opacity': 0.75 });
+    const ground = S.el('rect', { x: xe, width: 420, fill: '#1a2433', stroke: '#2c3a4f', 'stroke-width': 2 });
+  const pool = S.el('rect', { x: xe + 2, width: 418, fill: WATER, 'fill-opacity': 0.45 });
+  const stream = S.el('path', { fill: 'none', stroke: WATER, 'stroke-linecap': 'round', 'stroke-dasharray': '10 9' });
+  const hT = txt(S, 1180, 380, '', { size: 21, color: C.text, mono: true, weight: 700 });
+  const fT = txt(S, 1180, 414, '', { size: 20, color: WATER, mono: true, weight: 700 });
+  const stT = txt(S, 1180, 452, '', { size: 22, weight: 800 });
+  txt(S, 850, yl - 34, 'from the tap →', { size: 18, color: C.muted });
+  rf();
+  const vdsAt = (t) => (t < 32 ? 0.6 : t < 38 ? lerp(0.6, 1.0, E.inout((t - 32) / 6)) : t < 42 ? 1.0 : t < 48 ? lerp(1.0, 0.25, E.inout((t - 42) / 6)) : t < 53 ? lerp(0.25, 0.07, E.inout((t - 48) / 5)) : t < 58 ? 0.07 : lerp(0.07, 0.6, E.inout(clamp((t - 58) / 4, 0, 1))));
+  S.anim(0, 1e4, 'fall', (_p, t) => {
+    const vds = vdsAt(t), yb = yl + vds * sc, ys = yb - depth;            // pool bottom and surface
+    const sat = vds >= 0.2, x = Math.min(vds / 0.2, 1), i = sat ? 1 : 2 * x - x * x; // triode: 2x − x²
+    ground.setAttribute('y', yb); ground.setAttribute('height', 860 - yb);
+    pool.setAttribute('y', ys); pool.setAttribute('height', depth); // in triode the surface (ys) climbs above the ledge
+    river.setAttribute('height', 20); river.setAttribute('fill', sat ? WATER : '#7dd3fc');
+    stream.setAttribute('d', `M${xe} ${yl - 10} C ${xe + 40} ${yl - 6}, ${xe + 52} ${Math.min(ys, yl) - 10}, ${xe + 58} ${Math.max(ys, yl - 8)}`);
+    stream.setAttribute('stroke-width', 3 + 12 * i); stream.style.strokeDashoffset = -t * (30 + 60 * i);
+    hT.textContent = ''; richText(hT, `cliff V_DS = ${vds.toFixed(2)} V`, 21);
+    fT.textContent = ''; richText(fT, `flow I_D = ${(100 * i).toFixed(0)} %`, 20);
+    stT.textContent = sat ? 'saturation ✓' : 'triode ✗'; stT.setAttribute('fill', sat ? C.ok : C.bad);
+  }, E.lin);
+  S.say(24, 'Now the drain side. The water leaves the tap over a <b>cliff</b>, and the height of the cliff is $V_{DS}$.');
+  S.say(32, 'Make the cliff taller: exactly the same water falls. The flow is decided <b>upstream</b>, by the opening, not by the cliff. That is <b>saturation</b>, and it is why a saturated transistor is a current source.');
+  S.say(42, 'Now shrink the cliff. Once it is lower than $V_{ov}$, the pool below rises over the edge, pushes back, and the flow drops. That is <b>triode</b>: no longer a current source.');
+  whyBox(S, 120, 620, 640, 190, '**The one rule of this whole lesson:** every transistor needs its cliff at least $V_{ov}$ tall, $|V_{DS}| \\ge |V_{ov}|$. Every CM range and swing is just “which cliff runs out first?”', 54);
+  S.say(54, 'So the whole lesson rests on one rule: keep every cliff at least $V_{ov}$ tall. Next, the same picture in symbols.');
+});
+
 scene(CF, 'One transistor: entry fee, overdrive, saturation', 66, (S) => {
   header(S, 'FOUNDATIONS · 1', 'A MOSFET needs V_th to turn on, and V_ov to carry current');
   const g = S.g(); const r = S.into(g);
@@ -175,9 +245,9 @@ scene(CF, 'The cascode: pump, shield, and the headroom it costs', 70, (S) => {
   wire(S, [[350, 430], [350, 450]]); nmos(S, 350, 500, { name: 'M1', gate: 'V_in', gl: 30 }); gnd(S, 350, 550);
   r();
   S.draw(g, 0.3, 1.4);
-  S.halo(260, 455, 180, 100, C.n, 4, null, 'PUMP'); S.halo(260, 335, 180, 95, C.p, 8, null, 'SHIELD');
+  S.halo(260, 455, 180, 100, C.n, 4, null, 'PUMP'); S.halo(260, 335, 180, 95, C.p, 8, null, 'SHIELD (bodyguard)');
   S.say(4, 'A cascode is two devices in one column. <b>M1 is the pump</b>: its gate takes $V_{in}$ and it turns it into a current $g_{m1}v_{in}$.');
-  S.say(8, '<b>M2 is the shield</b>: its gate is held at a fixed $V_b$, so its source X barely moves. M1 is protected from the output swinging, and looking down from $V_{out}$ you see $r_{O1}$ multiplied by $g_{m2}r_{O2}$.');
+  S.say(8, '<b>M2 is the shield</b>, M1’s bodyguard: its gate is held at a fixed $V_b$, so its source X barely moves. M1 is protected from the output swinging, and looking down from $V_{out}$ you see $r_{O1}$ multiplied by $g_{m2}r_{O2}$.');
   eqAt(S, 'G_m \\approx g_{m1},\\quad R_{down} = g_{m2}r_{O2}r_{O1},\\quad A_v \\approx (g_mr_O)^2', 1150, 230, 14, { size: 30, w: 780 });
   S.say(14, 'Down divides at X, so all of M1’s current goes up through M2: $G_m ≈ g_{m1}$. Up multiplies: $R_{down} = g_{m2}r_{O2}r_{O1}$. The gain becomes about $(g_mr_O)^2$ — 2500 instead of 50.');
   const tw = tower(S, 1000, 760, [{ v: 0.2, name: 'M1' }, { v: 0.2, name: 'M2', st: 'sq' }, { v: 1.2, name: 'room', st: 'room' }, { v: 0.2, name: 'load' }], 200, { w: 90, nodes: ['0', '0.2', '0.4', '1.6', '1.8'] });

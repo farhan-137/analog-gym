@@ -171,10 +171,10 @@ function bbox(e) {
 /* ── player ── */
 const Player = (() => {
   let svg, subs, cur = -1, S = null, anims = [], groups = [], t = 0, playing = false, last = 0, speed = 1;
-  let offsets = [], total = 0, stopsDone = new Set(), voice = false, lastCap = '';
+  let offsets = [], total = 0, stopsDone = new Set(), voice = false, lastCap = '', drills = true, hb = { style: {} };
   const listeners = [];
   function init(svgEl, subsEl) {
-    svg = svgEl; subs = subsEl;
+    svg = svgEl; subs = subsEl; hb = document.querySelector('.holdbar i') || hb;
     let acc = 0;
     offsets = SCENES.map((s) => { const o = acc; acc += s.dur; return o; });
     total = acc;
@@ -205,8 +205,8 @@ const Player = (() => {
     let html = '';
     for (const c of S.caps) if (c.t <= lt + 1e-6) html = c.html;
     if (html !== lastCap) {
-      lastCap = html; subs.innerHTML = html ? `<span>${rt(html)}</span>` : '';
-      if (voice && playing && html) speak(html);
+      lastCap = html; subs.innerHTML = html ? `<span>${rt(html)}</span>` : ''; capShownAt = lt;
+      if (voice && playing && html) speak(html); else { spokenFor = ''; }
     }
   }
   function seek(gt, fromUser) {
@@ -214,23 +214,14 @@ const Player = (() => {
     const i = sceneAt(gt);
     if (i !== cur) enter(i);
     t = gt;
-    if (fromUser) { [...stopsDone].forEach((k) => { const [si, st] = k.split('@').map(Number); if (offsets[si] + st > gt + 0.01) stopsDone.delete(k); }); lastCap = '\u0000'; window.speechSynthesis?.cancel(); }
+    if (fromUser) { [...stopsDone].forEach((k) => { const [si, st] = k.split('@').map(Number); if (offsets[si] + st > gt + 0.01) stopsDone.delete(k); }); lastCap = '\u0000'; Voice.cancel(); holdUntil = 0; heldKey = ''; }
     render(gt - offsets[i]);
     listeners.forEach((f) => f(gt));
   }
+  let freeze = false, spokenFor = '', interrupted = false, holdUntil = 0, holdFrom = 0, heldKey = '', capShownAt = 0;
   function speak(html) {
-    const s = window.speechSynthesis; if (!s) return;
-    s.cancel();
-    const spoken = html.replace(/<[^>]+>/g, '').replace(/\$([^$]+)\$/g, (_m, x) => x
-      .replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, '$1 over $2').replace(/\\parallel/g, ' parallel ').replace(/\\times/g, ' times ').replace(/\\(beta|lambda|mu|omega|varepsilon|tau)/g, ' $1 ')
-      .replace(/\\approx/g, ' about ').replace(/\\le/g, ' at most ').replace(/\\ge/g, ' at least ').replace(/\^2/g, ' squared').replace(/\^3/g, ' cubed')
-      .replace(/\\[a-zA-Z]+/g, ' ').replace(/[{}_\\]/g, ' ').replace(/\s+/g, ' '))
-      .replace(/→/g, ' gives ').replace(/≈/g, ' about ').replace(/∥/g, ' parallel ');
-    const u = new SpeechSynthesisUtterance(spoken);
-    u.rate = 1.02 * speed; u.pitch = 1;
-    const v = s.getVoices().find((x) => /en-(US|GB|IN)/.test(x.lang) && /Natural|Samantha|Daniel|Google|Neural/.test(x.name)) || s.getVoices().find((x) => /^en/.test(x.lang));
-    if (v) u.voice = v;
-    s.speak(u);
+    spokenFor = html; interrupted = false;
+    Voice.speak(html, { speed: Math.sqrt(speed), gap: 240 + 180 * Pace.level() }).then((ok) => { if (!ok && spokenFor === html) interrupted = true; });
   }
   function nextCapTime() {
     const lt = t - offsets[cur];
@@ -239,14 +230,32 @@ const Player = (() => {
   }
   function tick(now) {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
-    if (playing) {
+    hb.style.width = '0%';
+    if (freeze && !Voice.talking()) freeze = false;
+    if (playing && freeze) { /* repeating the line: wait for the voice */ } else if (playing && now < holdUntil) {
+      // study pause after a line: the picture rests so you can read it again
+      hb.style.width = (100 * (holdUntil - now)) / Math.max(1, holdUntil - holdFrom) + '%';
+    } else if (playing) {
       let nt = t + dt * speed;
-      // hold the picture while the voice is still reading the current line
-      if (voice && window.speechSynthesis?.speaking && nt >= nextCapTime() - 0.02) nt = t;
+      const nb = nextCapTime(), key = cur + '@' + nb.toFixed(3);
+      if (nt >= nb - 0.02) {
+        if (Voice.talking()) nt = Math.min(nt, Math.max(t, nb - 0.02)); // hold the picture while the voice reads the line
+        else if (heldKey !== key && lastCap) {
+          heldKey = key;
+          const ms = Pace.hold(lastCap, nb - offsets[cur] - capShownAt, voice && spokenFor === lastCap);
+          if (ms > 30) { holdFrom = now; holdUntil = now + ms; nt = Math.max(t, nb - 0.02); }
+        }
+      }
       // interactive stops
       const lt0 = t - offsets[cur], lt1 = nt - offsets[cur];
       const stop = S.stops.find((s) => s.t > lt0 - 1e-6 && s.t <= lt1 && !stopsDone.has(cur + '@' + s.t));
-      if (stop) { nt = offsets[cur] + stop.t; stopsDone.add(cur + '@' + stop.t); playing = false; Try.open(stop); listeners.forEach((f) => f(nt)); }
+      if (stop) { nt = offsets[cur] + stop.t; stopsDone.add(cur + '@' + stop.t); playing = false; Voice.cancel(); Try.open(stop); listeners.forEach((f) => f(nt)); }
+      // say-it-back drill at the end of a scene
+      const sc = SCENES[cur], dEnd = sc.dur - 0.01;
+      if (!stop && sc.recall && drills && lt1 >= dEnd && lt0 < dEnd + 1e-6 && !stopsDone.has(cur + '@' + dEnd)) {
+        nt = offsets[cur] + dEnd; stopsDone.add(cur + '@' + dEnd); playing = false; listeners.forEach((f) => f(nt));
+        Drill.open(sc, voice, () => { Player.play(); });
+      }
       if (nt >= total - 1e-3) { nt = total - 1e-3; playing = false; }
       if (nt !== t) seek(nt);
     }
@@ -254,12 +263,20 @@ const Player = (() => {
   }
   return {
     init, seek, total: () => total, time: () => t, offsets: () => offsets, cur: () => cur,
-    play() { if (Try.isOpen()) return; playing = true; last = performance.now(); listeners.forEach((f) => f(t)); },
-    pause() { playing = false; window.speechSynthesis?.cancel(); listeners.forEach((f) => f(t)); },
+    play() {
+      if (Try.isOpen() || Drill.isOpen()) return;
+      playing = true; last = performance.now();
+      if (voice && lastCap && lastCap !== '\u0000' && (interrupted || spokenFor !== lastCap)) speak(lastCap);
+      listeners.forEach((f) => f(t));
+    },
+    pause() { if (Voice.talking()) interrupted = true; playing = false; Voice.cancel(); holdUntil = 0; listeners.forEach((f) => f(t)); },
+    /* read the current line again (even with the voice off) and wait for it */
+    repeat() { if (!lastCap || lastCap === '\u0000') return; heldKey = ''; holdUntil = 0; freeze = true; speak(lastCap); if (!playing) { playing = true; last = performance.now(); listeners.forEach((f) => f(t)); } },
+    setDrills(v) { drills = v; }, drills: () => drills,
     toggle() { playing ? this.pause() : this.play(); },
     playing: () => playing,
     setSpeed(v) { speed = v; },
-    setVoice(v) { voice = v; if (!v) window.speechSynthesis?.cancel(); else if (lastCap) speak(lastCap); },
+    setVoice(v) { voice = v; if (!v) Voice.cancel(); else if (lastCap && playing) speak(lastCap); },
     voice: () => voice,
     on(f) { listeners.push(f); },
     start() { last = performance.now(); requestAnimationFrame(tick); },

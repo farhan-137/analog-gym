@@ -123,3 +123,18 @@ svg.stage .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
 .tbl th { text-align: left; color: #9fb0c3; font-weight: 600; padding: 6px 10px; border-bottom: 1px solid #33425a; }
 .tbl td { padding: 7px 10px; border-bottom: 1px solid #222c3a; }
 .tbl .chg { color: #ffb36b; font-weight: 600; } .tbl .same { color: #6fd6a2; }
+
+/* study pause bar, say-it-back drill */
+.holdbar { height: 3px; background: #070a10; }
+.holdbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #34d399, #60a5fa); opacity: .85; }
+.ctrl select { background: #18202c; border: 1px solid #263142; border-radius: 9px; padding: 6px 8px; color: #e6ebf2; max-width: 200px; }
+.try.drill .box { border-color: #34d399; width: min(680px, 52%); }
+.try.drill .tag { color: #5ee0a0; }
+.try.drill .step { font-size: 15px; color: #cfe9dd; margin: 10px 0 6px; min-height: 22px; }
+.try.drill .step .peek { color: #7f8ea3; font-size: 13px; }
+.try.drill .line { font-size: 21px; line-height: 1.5; padding: 14px 16px; border-radius: 10px; background: #0b1420; border: 1px solid #23415a; transition: filter .35s, opacity .35s; cursor: pointer; }
+.try.drill .line.hid { filter: blur(9px); opacity: .55; }
+.try.drill .cd { height: 4px; background: #13202c; border-radius: 3px; margin: 10px 0 12px; overflow: hidden; }
+.try.drill .cd i { display: block; height: 100%; width: 0; background: #34d399; }
+.try.drill .tip { margin-top: 10px; font-size: 13.5px; color: #93a1b3; }
+@media (max-width: 900px) { .try.drill .box { width: 96% !important; } .try.drill .line { font-size: 17px; } }

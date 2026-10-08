@@ -5,3 +5,4 @@ test-results
 playwright-report
 dist-single
 *.tsbuildinfo
+scripts/anim/.kokoro

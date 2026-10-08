@@ -28,19 +28,40 @@
   $('#back').onclick = () => Player.seek(Player.time() - 10, true);
   $('#speed').onchange = (e) => Player.setSpeed(+e.target.value);
   const vb = $('#voice');
-  vb.onclick = () => { Player.setVoice(!Player.voice()); vb.classList.toggle('on', Player.voice()); vb.textContent = Player.voice() ? '🔊 Voice on' : '🔈 Voice'; };
+  const vp = $('#vpick');
+  const fillVoices = () => {
+    const vs = Voice.list(); if (!vs.length) return;
+    const cur = Voice.current() || Voice.pick();
+    vp.innerHTML = vs.slice(0, 40).map((v) => `<option${v === cur ? ' selected' : ''}>${v.name}</option>`).join('');
+  };
+  vp.onchange = () => { Voice.choose(vp.value); if (Player.voice()) Player.repeat(); };
+  try { window.speechSynthesis.onvoiceschanged = fillVoices; } catch (_) { /* no speech */ }
+  fillVoices();
+  const setV = (on) => { Player.setVoice(on); vb.classList.toggle('on', on); vb.textContent = on ? '🔊 Voice on' : '🔈 Voice'; vp.style.display = on && vp.options.length ? '' : 'none'; Voice.store('alab.voiceOn', on ? '1' : '0'); };
+  vb.onclick = () => { fillVoices(); setV(!Player.voice()); };
+  if (Voice.store('alab.voiceOn') === '1' && (window.speechSynthesis || Voice.hasStudio)) { Player.setVoice(true); vb.classList.add('on'); vb.textContent = '🔊 Voice on'; setTimeout(() => { vp.style.display = vp.options.length ? '' : 'none'; }, 400); }
+  $('#again').onclick = () => Player.repeat();
+  const pc = $('#pace');
+  pc.innerHTML = Pace.LEVELS.map((l, i) => `<option value="${i}"${i === Pace.level() ? ' selected' : ''}>${l.name}</option>`).join('');
+  pc.onchange = () => Pace.set(+pc.value);
+  const db = $('#drills');
+  if (!SCENES.some((s) => s.recall)) db.style.display = 'none';
+  const setD = (on) => { Player.setDrills(on); db.classList.toggle('on', on); Voice.store('alab.drills', on ? '1' : '0'); };
+  setD(Voice.store('alab.drills') !== '0');
+  db.onclick = () => setD(!Player.drills());
   let drag = false;
   const seekX = (e) => { const r = bar.getBoundingClientRect(); Player.seek(clamp((e.clientX - r.left) / r.width, 0, 1) * total, true); };
   bar.addEventListener('pointerdown', (e) => { drag = true; bar.setPointerCapture(e.pointerId); seekX(e); });
   bar.addEventListener('pointermove', (e) => { if (drag) seekX(e); });
   bar.addEventListener('pointerup', () => { drag = false; });
   document.addEventListener('keydown', (e) => {
-    if (Try.isOpen() || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
+    if (Try.isOpen() || Drill.isOpen() || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
     if (e.key === ' ') { e.preventDefault(); Player.toggle(); }
     else if (e.key === 'ArrowRight') { e.preventDefault(); $('#next').click(); }
     else if (e.key === 'ArrowLeft') { e.preventDefault(); $('#prev').click(); }
     else if (e.key === 'j') Player.seek(Player.time() - 10, true);
     else if (e.key === 'l') Player.seek(Player.time() + 10, true);
+    else if (e.key === 'r') Player.repeat();
   });
 
   /* chapter list */
