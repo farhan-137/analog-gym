@@ -270,6 +270,31 @@ scene(L17, 'Lecture 17 in one card', 30, (S) => {
 });
 
 /* ── questions ── */
+/* intermediates for the step-by-step parts, computed from the same givens as the bank answers */
+const IM = (() => {
+  const at = (x) => Math.atan(x) * DEG;
+  // PS2 P3 (a): crossover of βA = 10⁴ with poles 1 kHz, 1 MHz, 10 MHz
+  const g = (f) => 1e4 / Math.hypot(1, f / 1e3) / Math.hypot(1, f / 1e6) / Math.hypot(1, f / 1e7);
+  let lo = 1e5, hi = 1e8; for (let i = 0; i < 80; i++) { const m = Math.sqrt(lo * hi); if (g(m) > 1) lo = m; else hi = m; }
+  const p3 = { fgx: lo, a1: at(lo / 1e3), a2: at(lo / 1e6), a3: at(lo / 1e7) };
+  // Quiz 2 2024 Q1
+  const q1 = { a0: 1e4, ap: at(159 / 740), az: at(159 / 3180), gm2: 2 * Math.PI * 740e6 * 5e-12 };
+  // Mid-sem 2023 Q5 (b)
+  const q5 = { ratio: 10, tan: Math.tan((45 - at(0.1)) / DEG) };
+  // Mid-sem 2024 Q2
+  const id1 = 10e-6, i7 = 80e-6, gm1 = Math.sqrt(2 * 50e-6 * 10 * id1), gm7 = Math.sqrt(2 * 100e-6 * 80 * i7);
+  const ro2 = 1 / (0.2 * id1), ro4 = 1 / (0.1 * id1), r1 = 1 / (1 / ro2 + 1 / ro4), r2 = 1 / (0.1 * i7 + 0.2 * i7);
+  const gbw = ans('pyq-m24-q2', 'gbw');
+  const m24 = { i5: 20e-6, gm1, ro2, ro4, a1: gm1 * r1, r2, a2: gm7 * r2, ap: at(gbw / ans('pyq-m24-q2', 'fp2')), az: at(gbw / ans('pyq-m24-q2', 'fz')) };
+  // PS2 P4
+  const cc4 = ans('bank-ps2-p4', 'cc');
+  const p4 = { wu: 0.8e-3 / cc4, a2: 4e-3 * 20e3, ceff: 4e-3 * 20e3 * cc4, sr1: 120e-6 / cc4, sr2: (500e-6 - 120e-6) / 4e-12 };
+  // Mid-sem 2025 Q2
+  const M = (k) => ans('pyq-m25-q2', k);
+  const ang = 90 - 60 - at(0.1), g1 = 2 * Math.PI * 50e6 * M('cc'), vov1 = Math.sqrt(2 * (M('i') / 2) / (300e-6 * M('wl1')));
+  const m25 = { ang, ratio: 1 / (10 * Math.tan(ang / DEG)), gm1: g1, id1: M('i') / 2, vov3: 1.8 - 1.6 - 0.51 + 0.47, vov1, vov5: 0.9 - vov1 - 0.59, gm7: 10 * g1, i7: 0.5 * 60e-6 * M('wl7') * 0.16 ** 2 };
+  return { p3, q1, q5, m24, p4, m25 };
+})();
 scene(L17, 'Past tutorial Ex 5–6: dominant pole for gains down to 20 dB', 52, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 1 OF 9', title: 'Two ways to compensate one amplifier', src: 'Past tutorial 2024-25 T2 Ex 5–6',
@@ -345,6 +370,12 @@ scene(L17, 'Problem Set 2 P3: compensate your page’s amplifier', 56, (S) => {
         try: {
           q: '(a) The amplifier as built, used with β = 0.1. What is its phase margin?',
           answer: ans('bank-ps2-p3', 'pm0'), unit: '°', tol: 0.1, abs: 0.3,
+          parts: [
+            { q: 'Loop gain at DC, $\\beta A_0$ (V/V)?', answer: 1e4, unit: '', tol: 0.01, hint: '100 dB = $10^5$; multiply by β.', how: ['$$\\beta A_0 = 0.1\\times 10^5 = 10^4$$'] },
+            { q: 'Crossover $f_{GX}$, where $|\\beta A| = 1$ (Hz)?', answer: IM.p3.fgx, unit: 'Hz', tol: 0.03, hint: ['Only the 1 kHz pole would put it at 10 MHz; the 1 MHz pole makes it come earlier. Try 3 MHz.', '$\\dfrac{10^4}{\\sqrt{1 + (f/1\\mathrm{k})^2}\\sqrt{1 + (f/1\\mathrm{M})^2}\\sqrt{1 + (f/10\\mathrm{M})^2}} = 1$'], how: ['$$|\\beta A(3.01\\,\\mathrm{MHz})| = \\frac{10^4}{3010\\times 3.17\\times 1.04} \\approx 1$$'] },
+            { q: 'Phase lag of the 1 MHz pole at $f_{GX}$ (degrees)?', answer: IM.p3.a2, unit: '°', tol: 0.01, hint: '$\\tan^{-1}(f_{GX}/1\\,\\mathrm{MHz})$; the 1 kHz pole gives ≈ 90°.', how: ['$$\\tan^{-1}(3.01) = 71.65^\\circ$$ (and the 1 kHz pole: $\\tan^{-1}(3010) = 89.98^\\circ$)'] },
+            { q: 'Phase lag of the 10 MHz pole at $f_{GX}$ (degrees)?', answer: IM.p3.a3, unit: '°', tol: 0.02, hint: '$\\tan^{-1}(f_{GX}/10\\,\\mathrm{MHz})$', how: ['$$\\tan^{-1}(0.301) = 16.78^\\circ$$'] },
+          ],
           hint: ['First find the crossover $f_{GX}$ where $|\\beta A| = 1$ (start from βA₀ = 10⁴; the gain falls ×10 per decade after 1 kHz, faster after 1 MHz). Then add the three pole angles there.', '$PM = 180^\\circ - \\tan^{-1}\\frac{f_{GX}}{1\\,\\mathrm{k}} - \\tan^{-1}\\frac{f_{GX}}{1\\,\\mathrm{M}} - \\tan^{-1}\\frac{f_{GX}}{10\\,\\mathrm{M}}$'],
           how: [
             'Loop gain at DC: $$\\beta A_0 = 0.1\\times 10^5 = 10^4$$',
@@ -406,10 +437,11 @@ scene(L17, '2024 Quiz 2 Q1: GBW, PM and Cc from Bode data', 52, (S) => {
     steps: [
       {
         t: 6, title: '**GBW = DC gain × dominant pole.** 80 dB is 10⁴, and above the first pole gain × frequency stays constant.',
-        tex: 'GBW = A_0f_{p1} = 10^4\\times 15.9\\,\\mathrm{kHz} = 159\\,\\mathrm{MHz}',
+        tex: 'A_0 = 10^{80/20} = 10^4,\\quad GBW = A_0f_{p1} = 10^4\\times 15.9\\,\\mathrm{kHz} = 159\\,\\mathrm{MHz}',
         try: {
           q: 'Find the gain-bandwidth product GBW of this op amp.',
           answer: ans('pyq-q24b-q1', 'gbw'), unit: 'Hz', tol: 0.01,
+          parts: [{ q: 'DC gain $A_0$ as a plain number (V/V)?', answer: IM.q1.a0, unit: '', tol: 0.01, hint: '$A_0 = 10^{\\text{dB}/20}$', how: ['$$A_0 = 10^{80/20} = 10^4$$'] }],
           hint: ['Above the dominant pole the gain falls 20 dB/dec, so gain × frequency stays the same all the way down to unity gain. Turn 80 dB into a plain number first.', '$GBW = A_0\\,f_{p1}$ with $A_0 = 10^{80/20}$'],
           how: [
             'Convert the DC gain from dB: $$A_0 = 10^{80/20} = 10^4$$',
@@ -421,10 +453,14 @@ scene(L17, '2024 Quiz 2 Q1: GBW, PM and Cc from Bode data', 52, (S) => {
       },
       {
         t: 13, title: '**PM at the GBW:** the dominant pole takes 90°, then the second pole AND the RHP zero each take a little more.',
-        tex: stepTex('pyq-q24b-q1', 1),
+        tex: '\\tan^{-1}\\frac{159}{740} = 12.1^\\circ,\\quad \\tan^{-1}\\frac{159}{3180} = 2.9^\\circ,\\quad PM = 90^\\circ - 12.1^\\circ - 2.9^\\circ = 75^\\circ',
         try: {
           q: 'Find the phase margin (unity feedback, so the crossover is at the GBW you just found).',
           answer: ans('pyq-q24b-q1', 'pm'), unit: '°', tol: 0.01,
+          parts: [
+            { q: 'Phase lag of the second pole (740 MHz) at the GBW (degrees)?', answer: IM.q1.ap, unit: '°', tol: 0.02, hint: '$\\tan^{-1}(GBW/f_{p2})$', how: ['$$\\tan^{-1}\\frac{159}{740} = 12.1^\\circ$$'] },
+            { q: 'Phase lag of the RHP zero (3.18 GHz) at the GBW (degrees)?', answer: IM.q1.az, unit: '°', tol: 0.02, hint: 'An RHP zero lags like a pole: $\\tan^{-1}(GBW/f_z)$.', how: ['$$\\tan^{-1}\\frac{159}{3180} = 2.9^\\circ$$'] },
+          ],
           hint: ['At the GBW the dominant pole has used its full 90°. The second pole and the right-half-plane zero both add lag (an RHP zero lags like a pole).', '$PM = 90^\\circ - \\tan^{-1}\\frac{GBW}{f_{p2}} - \\tan^{-1}\\frac{GBW}{f_z}$'],
           how: [
             'The dominant pole is $10^4$ times below the GBW, so it gives its full 90°. Left over: $$180^\\circ - 90^\\circ = 90^\\circ$$',
@@ -443,6 +479,7 @@ scene(L17, '2024 Quiz 2 Q1: GBW, PM and Cc from Bode data', 52, (S) => {
         try: {
           q: 'Find the compensation capacitor $C_c$.',
           answer: ans('pyq-q24b-q1', 'cc'), unit: 'F', tol: 0.02,
+          parts: [{ q: 'Second-stage transconductance $g_{m2}$, from the second pole and $C_L$ (S)?', answer: IM.q1.gm2, unit: 'S', tol: 0.02, hint: '$f_{p2} = g_{m2}/(2\\pi C_L)$', how: ['$$g_{m2} = 2\\pi(740\\,\\mathrm{M})(5\\,\\mathrm{p}) = 23.2\\,\\mathrm{mS}$$'] }],
           hint: ['In a Miller op amp the second pole is $g_{m2}/C_L$ and the RHP zero is $g_{m2}/C_c$. You know $C_L$ and both frequencies.', '$g_{m2} = 2\\pi f_{p2}C_L$, then $C_c = \\dfrac{g_{m2}}{2\\pi f_z}$'],
           how: [
             'The second pole gives $g_{m2}$: $$g_{m2} = 2\\pi f_{p2}C_L = 2\\pi(740\\,\\mathrm{MHz})(5\\,\\mathrm{pF}) = 23.2\\,\\mathrm{mS}$$',
@@ -485,10 +522,14 @@ scene(L17, '2023 mid-sem Q5: K at PM = 50°, and Cc versus CL', 52, (S) => {
       { t: 14, title: '**(b) Share out the 45°.** The dominant pole takes 90°; the zero at 10 × GBW takes tan⁻¹(0.1) = 5.71°; what is left, 39.29°, is all the second pole may take.', tex: '\\tan^{-1}\\frac{\\omega_u}{\\omega_{p2}} = 180^\\circ - 45^\\circ - 90^\\circ - \\tan^{-1}(0.1) = 45^\\circ - 5.71^\\circ = 39.29^\\circ', say: 'The zero takes 5.7°, so the second pole may take only 39.3° at the GBW.' },
       {
         t: 21, title: '**Turn the angle into a capacitor ratio** with $\\omega_u = g_{m1}/C_c$, $\\omega_{p2} = g_{m2}/C_L$, and $g_{m2} = 10g_{m1}$ (because $\\omega_z/\\omega_u = g_{m2}/g_{m1} = 10$).',
-        tex: '\\frac{C_c}{C_L} = \\frac{g_{m1}}{g_{m2}\\tan 39.29^\\circ} = \\frac{1}{10(0.818)} = 0.122',
+        tex: '\\frac{g_{m2}}{g_{m1}} = \\frac{\\omega_z}{\\omega_u} = 10,\\quad \\tan 39.29^\\circ = 0.818,\\quad \\frac{C_c}{C_L} = \\frac{g_{m1}}{g_{m2}\\tan 39.29^\\circ} = \\frac{1}{10(0.818)} = 0.122',
         try: {
           q: '(b) The second pole may take 39.29° at the GBW (step 2). What is the smallest $C_c/C_L$ that gives PM = 45°?',
           answer: ans('pyq-m23-q5', 'ratio'), unit: '', tol: 0.02,
+          parts: [
+            { q: 'The zero is at 10 × GBW. What is $g_{m2}/g_{m1}$?', answer: IM.q5.ratio, unit: '', tol: 0.01, hint: '$\\omega_z/\\omega_u = (g_{m2}/C_c)/(g_{m1}/C_c)$', how: ['$$\\frac{\\omega_z}{\\omega_u} = \\frac{g_{m2}}{g_{m1}} = 10$$'] },
+            { q: 'The second pole takes 39.29°. What is $\\omega_u/\\omega_{p2}$?', answer: IM.q5.tan, unit: '', tol: 0.01, hint: '$\\tan^{-1}(\\omega_u/\\omega_{p2}) = 39.29^\\circ$', how: ['$$\\frac{\\omega_u}{\\omega_{p2}} = \\tan 39.29^\\circ = 0.818$$'] },
+          ],
           hint: ['Write each frequency with the Miller dictionary on the card. The zero at $10\\omega_u$ tells you $g_{m2}/g_{m1}$.', '$\\dfrac{\\omega_u}{\\omega_{p2}} = \\tan 39.29^\\circ \\;\\Rightarrow\\; \\dfrac{C_c}{C_L} = \\dfrac{g_{m1}}{g_{m2}\\tan 39.29^\\circ}$'],
           how: [
             'The zero at 10 × GBW fixes the transconductance ratio: $$\\frac{\\omega_z}{\\omega_u} = \\frac{g_{m2}/C_c}{g_{m1}/C_c} = \\frac{g_{m2}}{g_{m1}} = 10$$',
@@ -565,6 +606,7 @@ scene(L17, '2024 mid-sem Q2, part 1: SR, GBW, gain, bandwidth', 66, (S) => {
         try: {
           q: 'Find the slew rate SR. (Start from the bias: $I_1$ = 10 µA flows in the diode M6.)',
           answer: ans(M24, 'sr'), unit: 'V/s', tol: 0.01,
+          parts: [{ q: 'Tail current $I_5$ (A)?', answer: IM.m24.i5, unit: 'A', tol: 0.01, hint: 'M5 mirrors M6: currents scale with W/L.', how: ['$$I_5 = \\frac{20}{10}\\times 10\\,\\mu\\mathrm{A} = 20\\,\\mu\\mathrm{A}$$'] }],
           hint: ['Slewing: the input pair steers the whole tail current $I_5$ into $C_c$. Get $I_5$ from the mirror M6 → M5 (currents scale with W/L).', '$I_5 = \\dfrac{(W/L)_5}{(W/L)_6}I_1$, then $SR = \\dfrac{I_5}{C_c}$'],
           how: [
             'M5 copies M6, scaled by the size ratio 20/10: $$I_5 = \\frac{(W/L)_5}{(W/L)_6}I_1 = \\frac{20}{10}\\times 10\\,\\mu\\mathrm{A} = 20\\,\\mu\\mathrm{A}$$',
@@ -581,6 +623,7 @@ scene(L17, '2024 mid-sem Q2, part 1: SR, GBW, gain, bandwidth', 66, (S) => {
         try: {
           q: 'Find the gain-bandwidth product GBW (in Hz). The input pair M1, M2 is PMOS; $I_5$ = 20 µA from the last step.',
           answer: ans(M24, 'gbw'), unit: 'Hz', tol: 0.01,
+          parts: [{ q: '$g_{m1}$ of a PMOS input device at $I_5/2$ (S)?', answer: IM.m24.gm1, unit: 'S', tol: 0.01, hint: '$g_{m1} = \\sqrt{2\\mu_pC_{ox}(W/L)_1I_{D1}}$, $I_{D1}$ = 10 µA', how: ['$$g_{m1} = \\sqrt{2(50\\,\\mu)(10)(10\\,\\mu)} = 0.1\\,\\mathrm{mS}$$'] }],
           hint: ['Above the dominant pole, stage 1’s current $g_{m1}v_{in}$ just charges $C_c$, so unity gain is at $g_{m1}/C_c$. Each input device carries $I_5/2$.', '$g_{m1} = \\sqrt{2\\mu_pC_{ox}(W/L)_1I_{D1}}$, $GBW = \\dfrac{g_{m1}}{2\\pi C_c}$'],
           how: [
             'Each input device carries half the tail: $$I_{D1} = \\frac{I_5}{2} = 10\\,\\mu\\mathrm{A}$$',
@@ -594,10 +637,17 @@ scene(L17, '2024 mid-sem Q2, part 1: SR, GBW, gain, bandwidth', 66, (S) => {
       { t: 24, title: '**Second-stage current.** $V_{GS7} = V_{GS4}$ (same gate, same source), so $I_7$ scales with W/L: $I_7 = (80/10)\\times 10$ µA. M7 is NMOS, so $g_{m7}$ uses $\\mu_nC_{ox}$.', tex: 'I_7 = \\frac{80}{10}(10\\,\\mu\\mathrm{A}) = 80\\,\\mu\\mathrm{A},\\quad g_{m7} = \\sqrt{2(100\\,\\mu)(80)(80\\,\\mu)} = 1.13\\,\\mathrm{mS}', say: '$V_{GS7} = V_{GS4}$, so $I_7$ scales with W/L: 80/10 × 10 µA = 80 µA, and $g_{m7}$ = 1.13 mS.' },
       {
         t: 31, title: '**DC gain = stage-1 gain × stage-2 gain.** Each stage is $g_m$ times the two output resistances in parallel, with $r_O = 1/(\\lambda I_D)$.',
-        tex: 'A_0 = \\underbrace{0.1\\,\\mathrm{mS}(500\\,\\mathrm{k}\\parallel 1\\,\\mathrm{M})}_{33.3}\\times\\underbrace{1.13\\,\\mathrm{mS}(125\\,\\mathrm{k}\\parallel 62.5\\,\\mathrm{k})}_{47.1} = 1571',
+        tex: '\\begin{aligned} r_{O2} &= \\tfrac{1}{0.2(10\\,\\mu)} = 500\\,\\mathrm{k\\Omega},\\;\\; r_{O4} = \\tfrac{1}{0.1(10\\,\\mu)} = 1\\,\\mathrm{M\\Omega} \\\\ A_1 &= 0.1\\,\\mathrm{mS}\\times(500\\,\\mathrm{k}\\parallel 1\\,\\mathrm{M}) = 0.1\\,\\mathrm{mS}\\times 333\\,\\mathrm{k\\Omega} = 33.3 \\\\ r_{O7}\\parallel r_{O8} &= 125\\,\\mathrm{k}\\parallel 62.5\\,\\mathrm{k} = 41.7\\,\\mathrm{k\\Omega} \\\\ A_2 &= 1.13\\,\\mathrm{mS}\\times 41.7\\,\\mathrm{k\\Omega} = 47.1 \\\\ A_0 &= A_1A_2 = 33.3\\times 47.1 = 1571 \\end{aligned}',
         try: {
           q: 'Find the DC gain $A_0$ (V/V). From the steps above: $g_{m1}$ = 0.1 mS at 10 µA per input device, $g_{m7}$ = 1.13 mS at $I_7$ = 80 µA.',
           answer: ans(M24, 'a0'), unit: '', tol: 0.02,
+          parts: [
+            { q: '$r_{O2}$ (PMOS input device, 10 µA) in Ω?', answer: IM.m24.ro2, unit: 'Ω', tol: 0.01, hint: '$r_O = 1/(\\lambda_pI_D)$, $\\lambda_p$ = 0.2 V⁻¹', how: ['$$r_{O2} = \\frac{1}{0.2\\times 10\\,\\mu} = 500\\,\\mathrm{k\\Omega}$$'] },
+            { q: '$r_{O4}$ (NMOS load, 10 µA) in Ω?', answer: IM.m24.ro4, unit: 'Ω', tol: 0.01, hint: '$r_O = 1/(\\lambda_nI_D)$, $\\lambda_n$ = 0.1 V⁻¹', how: ['$$r_{O4} = \\frac{1}{0.1\\times 10\\,\\mu} = 1\\,\\mathrm{M\\Omega}$$'] },
+            { q: 'Stage-1 gain $A_1 = g_{m1}(r_{O2}\\parallel r_{O4})$?', answer: IM.m24.a1, unit: '', tol: 0.02, hint: '500 kΩ ∥ 1 MΩ = 333 kΩ', how: ['$$A_1 = 0.1\\,\\mathrm{mS}\\times 333\\,\\mathrm{k\\Omega} = 33.3$$'] },
+            { q: 'Output resistance $r_{O7}\\parallel r_{O8}$ at $I_7$ = 80 µA (Ω)?', answer: IM.m24.r2, unit: 'Ω', tol: 0.02, hint: '$r_{O7} = 1/(\\lambda_nI_7)$ (NMOS), $r_{O8} = 1/(\\lambda_pI_7)$ (PMOS)', how: ['$$r_{O7} = \\frac{1}{0.1\\times 80\\,\\mu} = 125\\,\\mathrm{k\\Omega},\\; r_{O8} = \\frac{1}{0.2\\times 80\\,\\mu} = 62.5\\,\\mathrm{k\\Omega},\\; r_{O7}\\parallel r_{O8} = 41.7\\,\\mathrm{k\\Omega}$$'] },
+            { q: 'Stage-2 gain $A_2 = g_{m7}(r_{O7}\\parallel r_{O8})$?', answer: IM.m24.a2, unit: '', tol: 0.02, hint: '$g_{m7}$ = 1.13 mS (step 3 card)', how: ['$$A_2 = 1.13\\,\\mathrm{mS}\\times 41.7\\,\\mathrm{k\\Omega} = 47.1$$'] },
+          ],
           hint: ['Each stage: $g_m$ × (resistance at its output node). Node 1 sees $r_{O2}\\parallel r_{O4}$ (PMOS input, NMOS load); the output sees $r_{O7}\\parallel r_{O8}$ (NMOS M7, PMOS source M8). Use $r_O = 1/(\\lambda I_D)$ with the right λ.', '$A_0 = g_{m1}(r_{O2}\\parallel r_{O4})\\cdot g_{m7}(r_{O7}\\parallel r_{O8})$'],
           how: [
             'Stage-1 resistances at 10 µA: $$r_{O2} = \\frac{1}{\\lambda_pI_D} = \\frac{1}{0.2(10\\,\\mu)} = 500\\,\\mathrm{k\\Omega},\\; r_{O4} = \\frac{1}{\\lambda_nI_D} = \\frac{1}{0.1(10\\,\\mu)} = 1\\,\\mathrm{M\\Omega}$$',
@@ -669,10 +719,14 @@ scene(L17, '2024 mid-sem Q2, part 2: second pole, zero, PM', 50, (S) => {
       },
       {
         t: 20, title: '**Phase margin at the GBW** (β = 1): 90° is left after the dominant pole; subtract the second pole’s angle and the zero’s angle.',
-        tex: stepTex(M24, 7),
+        tex: '\\tan^{-1}\\frac{72.3}{180} = 21.9^\\circ,\\quad \\tan^{-1}\\frac{72.3}{818} = 5.05^\\circ,\\quad PM = 90^\\circ - 21.9^\\circ - 5.05^\\circ = 63.1^\\circ',
         try: {
           q: 'Find the phase margin in unity feedback, using $f_{p2}$ and $f_z$ from the last two parts.',
           answer: ans(M24, 'pm'), unit: '°', tol: 0.01,
+          parts: [
+            { q: 'Phase lag of the second pole at the GBW (degrees)?', answer: IM.m24.ap, unit: '°', tol: 0.02, hint: '$\\tan^{-1}(GBW/f_{p2})$', how: ['$$\\tan^{-1}\\frac{72.3}{180} = 21.9^\\circ$$'] },
+            { q: 'Phase lag of the RHP zero at the GBW (degrees)?', answer: IM.m24.az, unit: '°', tol: 0.02, hint: '$\\tan^{-1}(GBW/f_z)$', how: ['$$\\tan^{-1}\\frac{72.3}{818} = 5.05^\\circ$$'] },
+          ],
           hint: ['With β = 1 the crossover is at the GBW. The dominant pole takes 90° there; the second pole and the RHP zero both add lag.', '$PM = 90^\\circ - \\tan^{-1}\\frac{GBW}{f_{p2}} - \\tan^{-1}\\frac{GBW}{f_z}$'],
           how: [
             'Crossover at the GBW; the dominant pole (46 kHz) gives its full 90°: $$180^\\circ - 90^\\circ = 90^\\circ$$',
@@ -716,10 +770,11 @@ scene(L17, 'Problem Set 2 P4: add a second stage and compensate', 60, (S) => {
       },
       {
         t: 14, title: '**(b) GBW = $G_{m1}/(2\\pi C_c)$:** stage 1’s current charging $C_c$.',
-        tex: 'f_u = \\frac{G_{m1}}{2\\pi C_c} = \\frac{0.8\\,\\mathrm{mS}}{2\\pi(1.39\\,\\mathrm{pF})} = 91.9\\,\\mathrm{MHz}',
+        tex: '\\omega_u = \\frac{G_{m1}}{C_c} = \\frac{0.8\\,\\mathrm{mS}}{1.39\\,\\mathrm{pF}} = 577\\,\\mathrm{Mrad/s},\\quad f_u = \\frac{\\omega_u}{2\\pi} = 91.9\\,\\mathrm{MHz}',
         try: {
           q: '(b) Find the GBW (in Hz) with the $C_c$ from (a).',
           answer: ans('bank-ps2-p4', 'fu'), unit: 'Hz', tol: 0.02,
+          parts: [{ q: 'Unity-gain frequency in rad/s, $\\omega_u = G_{m1}/C_c$?', answer: IM.p4.wu, unit: 'rad/s', tol: 0.02, hint: 'Use $C_c$ from (a).', how: ['$$\\omega_u = \\frac{0.8\\,\\mathrm{mS}}{1.39\\,\\mathrm{pF}} = 577\\,\\mathrm{Mrad/s}$$'] }],
           hint: ['Above the dominant pole, stage 1’s current charges $C_c$; the gain reaches 1 at $G_{m1}/C_c$ (rad/s).', '$GBW = \\dfrac{G_{m1}}{2\\pi C_c}$'],
           how: [
             'Unity-gain frequency in rad/s: $$\\omega_u = \\frac{G_{m1}}{C_c} = \\frac{0.8\\,\\mathrm{mS}}{1.39\\,\\mathrm{pF}} = 577\\,\\mathrm{Mrad/s}$$',
@@ -731,10 +786,14 @@ scene(L17, 'Problem Set 2 P4: add a second stage and compensate', 60, (S) => {
       },
       {
         t: 22, title: '**(c) The Miller pole.** Node 1 sees $C_c$ multiplied by $(1 + A_2) \\approx A_2$, with $A_2 = G_{m2}R_2$ = 80, through $R_1$.',
-        tex: "P_1' = \\frac{1}{2\\pi R_1A_2C_c} = \\frac{1}{2\\pi(111\\,\\mathrm{k})(80)(1.39\\,\\mathrm{p})} = 12.9\\,\\mathrm{kHz}",
+        tex: "A_2 = G_{m2}R_2 = 4\\,\\mathrm{mS}\\times 20\\,\\mathrm{k\\Omega} = 80,\\quad A_2C_c = 80\\times 1.39\\,\\mathrm{pF} = 111\\,\\mathrm{pF},\\quad P_1' = \\frac{1}{2\\pi R_1A_2C_c} = \\frac{1}{2\\pi(111\\,\\mathrm{k})(111\\,\\mathrm{p})} = 12.9\\,\\mathrm{kHz}",
         try: {
           q: "(c) Find the dominant (Miller) pole $P_1'$ in Hz, with the $C_c$ from (a).",
           answer: ans('bank-ps2-p4', 'p1'), unit: 'Hz', tol: 0.02,
+          parts: [
+            { q: 'Second-stage gain $A_2$ (V/V)?', answer: IM.p4.a2, unit: '', tol: 0.01, hint: '$A_2 = G_{m2}R_2$', how: ['$$A_2 = 4\\,\\mathrm{mS}\\times 20\\,\\mathrm{k\\Omega} = 80$$'] },
+            { q: 'Miller capacitance seen at node 1, $\\approx A_2C_c$ (F)?', answer: IM.p4.ceff, unit: 'F', tol: 0.02, hint: '$C_c(1 + A_2) \\approx A_2C_c$', how: ['$$80\\times 1.39\\,\\mathrm{pF} = 111\\,\\mathrm{pF}$$'] },
+          ],
           hint: ['Node 1 (stage-1 output) sees $R_1$ and the Miller-multiplied $C_c(1 + A_2)$. First find the second-stage gain $A_2 = G_{m2}R_2$.', "$P_1' \\approx \\dfrac{1}{2\\pi R_1A_2C_c}$"],
           how: [
             'Second-stage gain: $$A_2 = G_{m2}R_2 = 4\\,\\mathrm{mS}\\times 20\\,\\mathrm{k\\Omega} = 80$$',
@@ -762,10 +821,14 @@ scene(L17, 'Problem Set 2 P4: add a second stage and compensate', 60, (S) => {
       },
       {
         t: 37, title: '**(e) Two slew limits; the smaller wins.** $C_c$ is charged by the tail $I_{SS}$; $C_L$ by what is left of $I_7$ after $I_{SS}$ goes into $C_c$.',
-        tex: stepTex('bank-ps2-p4', 4),
+        tex: '\\frac{I_{SS}}{C_c} = \\frac{120\\,\\mu\\mathrm{A}}{1.39\\,\\mathrm{pF}} = 86.6\\,\\mathrm{V/\\mu s},\\quad \\frac{I_7 - I_{SS}}{C_L} = \\frac{380\\,\\mu\\mathrm{A}}{4\\,\\mathrm{pF}} = 95\\,\\mathrm{V/\\mu s},\\quad SR = 86.6\\,\\mathrm{V/\\mu s}\\;(\\text{the smaller})',
         try: {
           q: '(e) Find the slew rate, with the $C_c$ from (a). Check both the first stage and the output stage.',
           answer: ans('bank-ps2-p4', 'sr'), unit: 'V/s', tol: 0.02,
+          parts: [
+            { q: 'First-stage limit $I_{SS}/C_c$ (V/s)?', answer: IM.p4.sr1, unit: 'V/s', tol: 0.02, hint: 'All of $I_{SS}$ charges $C_c$.', how: ['$$\\frac{120\\,\\mu\\mathrm{A}}{1.39\\,\\mathrm{pF}} = 86.6\\,\\mathrm{V/\\mu s}$$'] },
+            { q: 'Output-stage limit $(I_7 - I_{SS})/C_L$ (V/s)?', answer: IM.p4.sr2, unit: 'V/s', tol: 0.02, hint: '$I_{SS}$ of $I_7$ already goes into $C_c$.', how: ['$$\\frac{500\\,\\mu - 120\\,\\mu}{4\\,\\mathrm{pF}} = 95\\,\\mathrm{V/\\mu s}$$'] },
+          ],
           hint: ['Limit 1: the whole tail $I_{SS}$ charges $C_c$. Limit 2: on a falling edge M7’s $I_7$ must supply $C_c$’s current $I_{SS}$ and also charge $C_L$. The slower one sets the slew rate.', '$SR = \\min\\left(\\dfrac{I_{SS}}{C_c}\\,;\\; \\dfrac{I_7 - I_{SS}}{C_L}\\right)$'],
           how: [
             'First stage: all of $I_{SS}$ into $C_c$: $$\\frac{I_{SS}}{C_c} = \\frac{120\\,\\mu\\mathrm{A}}{1.39\\,\\mathrm{pF}} = 86.6\\,\\mathrm{V/\\mu s}$$',
@@ -791,10 +854,14 @@ scene(L17, '2025 mid-sem Q2, part 1: Cc, I5, (W/L)1 and (W/L)3', 62, (S) => {
     steps: [
       {
         t: 6, title: '**① $C_c$ from the margin.** With the zero at 10 × GBW ($g_{m7} = 10g_{m1}$), 60° needs $C_c \\ge 0.22\\,C_L$ (Allen’s rule); take the minimum.',
-        tex: 'C_c = 0.22\\,C_L = 0.22\\times 5\\,\\mathrm{pF} = 1.1\\,\\mathrm{pF}',
+        tex: '\\tan^{-1}\\frac{\\omega_u}{\\omega_{p2}} = 90^\\circ - 60^\\circ - 5.71^\\circ = 24.29^\\circ,\\quad \\frac{C_c}{C_L} = \\frac{1}{10\\tan 24.29^\\circ} = 0.22,\\quad C_c = 0.22\\times 5\\,\\mathrm{pF} = 1.1\\,\\mathrm{pF}',
         try: {
           q: '① Find the minimum $C_c$ for PM = 60°, with the RHP zero placed at 10 × GBW.',
           answer: ans(M25, 'cc'), unit: 'F', tol: 0.01,
+          parts: [
+            { q: 'Phase the second pole may take at $\\omega_u$ (degrees)?', answer: IM.m25.ang, unit: '°', tol: 0.01, hint: '90° left after the dominant pole, minus 60° of margin, minus the zero’s $\\tan^{-1}(0.1)$.', how: ['$$90^\\circ - 60^\\circ - 5.71^\\circ = 24.29^\\circ$$'] },
+            { q: 'Smallest $C_c/C_L$ (with $g_{m7} = 10g_{m1}$)?', answer: IM.m25.ratio, unit: '', tol: 0.02, hint: '$\\dfrac{\\omega_u}{\\omega_{p2}} = \\dfrac{g_{m1}C_L}{g_{m7}C_c} = \\tan 24.29^\\circ$', how: ['$$\\frac{C_c}{C_L} = \\frac{1}{10\\tan 24.29^\\circ} = 0.22$$'] },
+          ],
           hint: ['The zero at 10·GBW costs tan⁻¹(0.1) = 5.7° and the dominant pole 90°, so the second pole may take 24.3°. With $g_{m7} = 10g_{m1}$ that gives Allen’s rule.', '$C_c \\ge 0.22\\,C_L$'],
           how: [
             'Phase budget for the second pole: $$\\tan^{-1}\\frac{\\omega_u}{\\omega_{p2}} = 90^\\circ - 60^\\circ - \\tan^{-1}(0.1) = 24.29^\\circ$$',
@@ -825,6 +892,10 @@ scene(L17, '2025 mid-sem Q2, part 1: Cc, I5, (W/L)1 and (W/L)3', 62, (S) => {
         try: {
           q: '③ Size the NMOS input pair: find $(W/L)_{1,2}$ from the GBW spec (use $C_c$ and $I_5$ from ① and ②).',
           answer: ans(M25, 'wl1'), unit: '', tol: 0.02,
+          parts: [
+            { q: 'Required $g_{m1}$ from the GBW spec (S)?', answer: IM.m25.gm1, unit: 'S', tol: 0.02, hint: '$g_{m1} = 2\\pi\\,GBW\\,C_c$', how: ['$$g_{m1} = 2\\pi(50\\,\\mathrm{M})(1.1\\,\\mathrm{p}) = 0.346\\,\\mathrm{mS}$$'] },
+            { q: 'Drain current of each input device $I_{D1}$ (A)?', answer: IM.m25.id1, unit: 'A', tol: 0.01, hint: 'The tail splits in two.', how: ['$$I_{D1} = 55\\,\\mu/2 = 27.5\\,\\mu\\mathrm{A}$$'] },
+          ],
           hint: ['GBW = $g_{m1}/(2\\pi C_c)$ gives the $g_{m1}$ you need; each input device carries $I_5/2$. Then use $g_m = \\sqrt{2\\mu_nC_{ox}(W/L)I_D}$.', '$g_{m1} = 2\\pi\\,GBW\\,C_c$, $(W/L)_1 = \\dfrac{g_{m1}^2}{2\\mu_nC_{ox}I_{D1}}$'],
           how: [
             'Required $g_{m1}$ from the GBW: $$g_{m1} = 2\\pi\\,GBW\\,C_c = 2\\pi(50\\,\\mathrm{MHz})(1.1\\,\\mathrm{pF}) = 0.346\\,\\mathrm{mS}$$',
@@ -841,6 +912,7 @@ scene(L17, '2025 mid-sem Q2, part 1: Cc, I5, (W/L)1 and (W/L)3', 62, (S) => {
         try: {
           q: '④ Size the PMOS mirror load: find $(W/L)_{3,4}$ from ICMR(+) = 1.6 V. M3 carries $I_{D1}$ = 27.5 µA (from ③).',
           answer: ans(M25, 'wl3'), unit: '', tol: 0.02,
+          parts: [{ q: 'Overdrive left for M3, $|V_{ov3}|$ (V)?', answer: IM.m25.vov3, unit: 'V', tol: 0.02, hint: '$|V_{ov3}| = V_{DD} - V_{in,max} - |V_{th3}|_{max} + V_{th1,min}$', how: ['$$1.8 - 1.6 - 0.51 + 0.47 = 0.16\\,\\mathrm{V}$$'] }],
           hint: ['M1 stays saturated while its drain is above $V_{in} - V_{th1}$. Its drain sits at $V_{DD} - |V_{GS3}|$. Use the worst cases (largest $|V_{th3}|$, smallest $V_{th1}$); what is left is M3’s overdrive.', '$|V_{ov3}| = V_{DD} - V_{in,max} - |V_{th3}|_{max} + V_{th1,min}$, then $(W/L)_3 = \\dfrac{2I_{D3}}{\\mu_pC_{ox}|V_{ov3}|^2}$'],
           how: [
             'M1’s drain is M3’s diode, at $V_{DD} - |V_{GS3}|$. At the edge of saturation it equals $V_{in,max} - V_{th1}$: $$V_{DD} - |V_{th3}| - |V_{ov3}| = V_{in,max} - V_{th1}$$',
@@ -866,10 +938,14 @@ scene(L17, '2025 mid-sem Q2, part 2: (W/L)5, (W/L)7, (W/L)8', 54, (S) => {
     steps: [
       {
         t: 6, title: '**⑤ ICMR(−) sizes the tail.** At the lowest input, $V_{GS1}$ (with the largest $V_{th1}$) uses most of the 0.9 V; what is left is M5’s overdrive.',
-        tex: 'V_{ov5} = V_{in,min} - V_{ov1} - V_{th1,max} = 0.9 - 0.159 - 0.59 = 0.151\\,\\mathrm{V},\\quad (W/L)_{5,6} = \\frac{2I_5}{\\mu_nC_{ox}V_{ov5}^2} = \\frac{2(55\\,\\mu)}{300\\,\\mu(0.151)^2} = 16.1',
+        tex: '\\begin{aligned} V_{ov1} &= \\sqrt{\\tfrac{2(27.5\\,\\mu)}{300\\,\\mu(7.24)}} = 0.159\\,\\mathrm{V} \\\\ V_{ov5} &= V_{in,min} - V_{ov1} - V_{th1,max} = 0.9 - 0.159 - 0.59 = 0.151\\,\\mathrm{V} \\\\ (W/L)_{5,6} &= \\frac{2I_5}{\\mu_nC_{ox}V_{ov5}^2} = \\frac{2(55\\,\\mu)}{300\\,\\mu(0.151)^2} = 16.1 \\end{aligned}',
         try: {
           q: '⑤ Size the tail M5 (= M6) from ICMR(−) = 0.9 V. (Values from part 1 are on the card.)',
           answer: ans(M25, 'wl5'), unit: '', tol: 0.02,
+          parts: [
+            { q: 'Overdrive of M1 at $I_{D1}$ = 27.5 µA, $V_{ov1}$ (V)?', answer: IM.m25.vov1, unit: 'V', tol: 0.02, hint: '$V_{ov1} = \\sqrt{2I_{D1}/(\\mu_nC_{ox}(W/L)_1)}$', how: ['$$V_{ov1} = \\sqrt{\\frac{2(27.5\\,\\mu)}{300\\,\\mu\\times 7.24}} = 0.159\\,\\mathrm{V}$$'] },
+            { q: 'Overdrive left for the tail, $V_{ov5}$ (V)?', answer: IM.m25.vov5, unit: 'V', tol: 0.02, hint: '$V_{ov5} = V_{in,min} - V_{ov1} - V_{th1,max}$', how: ['$$0.9 - 0.159 - 0.59 = 0.151\\,\\mathrm{V}$$'] },
+          ],
           hint: ['At the lowest input, the tail’s drain (node P) is at $V_{in,min} - V_{GS1}$, and M5 needs at least its overdrive there. Use the largest $V_{th1}$ (worst case).', '$V_{ov5} = V_{in,min} - \\sqrt{\\dfrac{2I_{D1}}{\\mu_nC_{ox}(W/L)_1}} - V_{th1,max}$, then $(W/L)_5 = \\dfrac{2I_5}{\\mu_nC_{ox}V_{ov5}^2}$'],
           how: [
             'Overdrive of M1 at 27.5 µA: $$V_{ov1} = \\sqrt{\\frac{2I_{D1}}{\\mu_nC_{ox}(W/L)_1}} = \\sqrt{\\frac{2(27.5\\,\\mu)}{300\\,\\mu\\times 7.24}} = 0.159\\,\\mathrm{V}$$',
@@ -886,6 +962,7 @@ scene(L17, '2025 mid-sem Q2, part 2: (W/L)5, (W/L)7, (W/L)8', 54, (S) => {
         try: {
           q: '⑥ Size the PMOS output device: find $(W/L)_7$.',
           answer: ans(M25, 'wl7'), unit: '', tol: 0.02,
+          parts: [{ q: 'Required $g_{m7}$ (S)?', answer: IM.m25.gm7, unit: 'S', tol: 0.02, hint: 'Zero at 10 × GBW: $g_{m7} = 10g_{m1}$.', how: ['$$g_{m7} = 10(0.346\\,\\mathrm{mS}) = 3.46\\,\\mathrm{mS}$$'] }],
           hint: ['RHP zero at 10·GBW: $g_{m7}/C_c = 10\\,g_{m1}/C_c$, so $g_{m7} = 10g_{m1}$. M7’s gate sits at the mirror’s drain voltage, so with a perfect mirror it has M3’s overdrive.', '$g_m = \\mu_pC_{ox}(W/L)|V_{ov}| \\;\\Rightarrow\\; (W/L)_7 = \\dfrac{g_{m7}}{\\mu_pC_{ox}|V_{ov3}|}$'],
           how: [
             'Zero at 10 × GBW: $$\\frac{g_{m7}}{C_c} = 10\\,\\frac{g_{m1}}{C_c} \\;\\Rightarrow\\; g_{m7} = 10g_{m1} = 10(0.346\\,\\mathrm{mS}) = 3.46\\,\\mathrm{mS}$$',
@@ -901,6 +978,7 @@ scene(L17, '2025 mid-sem Q2, part 2: (W/L)5, (W/L)7, (W/L)8', 54, (S) => {
         try: {
           q: '⑦ Size the output current source M8 (it mirrors M5). Use $(W/L)_7$ = 360 from ⑥ and $(W/L)_5$ = 16.1 from ⑤.',
           answer: ans(M25, 'wl8'), unit: '', tol: 0.02,
+          parts: [{ q: 'Current in M7, $I_7$ (A)?', answer: IM.m25.i7, unit: 'A', tol: 0.02, hint: '$I_7 = \\tfrac12\\mu_pC_{ox}(W/L)_7|V_{ov3}|^2$', how: ['$$I_7 = \\tfrac12(60\\,\\mu)(360)(0.16)^2 = 276\\,\\mu\\mathrm{A}$$'] }],
           hint: ['First get M7’s current from its square law; M8 must sink exactly that. M8 and M5 share a gate voltage, so currents scale with W/L.', '$I_7 = \\tfrac12\\mu_pC_{ox}(W/L)_7|V_{ov3}|^2$, $(W/L)_8 = (W/L)_5\\dfrac{I_7}{I_5}$'],
           how: [
             'Current in M7: $$I_7 = \\tfrac12\\mu_pC_{ox}(W/L)_7|V_{ov3}|^2 = \\tfrac12(60\\,\\mu)(360)(0.16)^2 = 276\\,\\mu\\mathrm{A}$$',
@@ -926,7 +1004,7 @@ const CQ8 = (() => {
   const gbw = gm1 / (2 * Math.PI * cc), sr = i5 / cc, pw = vsup * (i8 + i5 + i7);
   const fp2 = gm6 / (2 * Math.PI * cl), fz = gm6 / (2 * Math.PI * cc);
   const pm = 90 - Math.atan(gbw / fp2) * DEG - Math.atan(gbw / fz) * DEG;
-  return { i8, i5, i7, gm1, a0, gbw, sr, pw, fp2, fz, pm, gm6 };
+  return { x, i8, i5, i7, gm1, r1, r2, a1: gm1 * r1, a2: gm6 * r2, a0, gbw, sr, pw, fp2, fz, pm, gm6, ap: Math.atan(gbw / fp2) * DEG, az: Math.atan(gbw / fz) * DEG };
 })();
 scene(L17, 'Compre 2023-24 Q8: a full two-stage analysis', 64, (S) => {
   pyqFrame(S, {
@@ -942,6 +1020,10 @@ scene(L17, 'Compre 2023-24 Q8: a full two-stage analysis', 64, (S) => {
         try: {
           q: 'Find the bias current $I_8$ in the diode branch (M9 and M8 in series across the 5 V supply, both W/L = 1).',
           answer: CQ8.i8, unit: 'A', tol: 0.01,
+          parts: [
+            { q: 'Voltage left for the two overdrives together (V)?', answer: 3.6, unit: 'V', tol: 0.01, hint: 'The two $|V_{GS}|$ add to 5 V; take away the two 0.7 V thresholds.', how: ['$$5 - 2(0.7) = 3.6\\,\\mathrm{V}$$'] },
+            { q: 'Solve $\\sqrt{I_8}\\,(\\sqrt{2/110\\mu} + \\sqrt{2/50\\mu}) = 3.6$ for $\\sqrt{I_8}$ (in √A)?', answer: CQ8.x, unit: '', tol: 0.01, hint: 'The two square roots are 134.8 and 200.', how: ['$$\\sqrt{I_8} = \\frac{3.6}{134.8 + 200} = 0.01075$$'] },
+          ],
           hint: ['Both are diode-connected and carry the same $I_8$, and their $V_{GS}$ add up to the full 5 V. Each $|V_{GS}| = 0.7 + \\sqrt{2I_8/\\mu C_{ox}}$.', '$5 - 2(0.7) = \\sqrt{I_8}\\left(\\sqrt{\\tfrac{2}{\\mu_nC_{ox}}} + \\sqrt{\\tfrac{2}{\\mu_pC_{ox}}}\\right)$'],
           how: [
             'The two diodes share the 5 V between the rails: $$V_{GS8} + |V_{GS9}| = 2.5 - (-2.5) = 5\\,\\mathrm{V}$$',
@@ -956,10 +1038,18 @@ scene(L17, 'Compre 2023-24 Q8: a full two-stage analysis', 64, (S) => {
       },
       {
         t: 16, title: '**DC gain = $A_1 \\times A_2$.** Stage 1: $g_{m1}$ at $I_5/2$ into $r_{O2}\\parallel r_{O4}$. Stage 2: $g_{m6}$ at $I_7$ into $r_{O6}\\parallel r_{O7}$.',
-        tex: `A_0 = ${fx(CQ8.gm1 * 1e3, 3)}\\,\\mathrm{mS}\\times 96.1\\,\\mathrm{k}\\times ${fx(CQ8.gm6 * 1e3, 3)}\\,\\mathrm{mS}\\times 9.61\\,\\mathrm{k} = ${fx(CQ8.a0, 4)}`,
+        tex: `\\begin{aligned} g_{m1} &= ${fx(CQ8.gm1 * 1e3, 3)}\\,\\mathrm{mS},\\;\\; r_{O2}\\parallel r_{O4} = \\tfrac{1}{0.09\\times 115.6\\,\\mu} = 96.1\\,\\mathrm{k\\Omega} \\\\ A_1 &= ${fx(CQ8.gm1 * 1e3, 3)}\\,\\mathrm{mS}\\times 96.1\\,\\mathrm{k\\Omega} = ${fx(CQ8.a1, 3)} \\\\ g_{m6} &= ${fx(CQ8.gm6 * 1e3, 3)}\\,\\mathrm{mS},\\;\\; r_{O6}\\parallel r_{O7} = \\tfrac{1}{0.09\\times 1.156\\,\\mathrm{m}} = 9.61\\,\\mathrm{k\\Omega} \\\\ A_2 &= ${fx(CQ8.gm6 * 1e3, 3)}\\,\\mathrm{mS}\\times 9.61\\,\\mathrm{k\\Omega} = ${fx(CQ8.a2, 3)} \\\\ A_0 &= A_1A_2 = ${fx(CQ8.a0, 4)} \\end{aligned}`,
         try: {
           q: 'Find the DC gain $A_0$ (V/V), using the currents from the last step.',
           answer: CQ8.a0, unit: '', tol: 0.02,
+          parts: [
+            { q: '$g_{m1}$ (NMOS, W/L = 10, at $I_5/2$) in S?', answer: CQ8.gm1, unit: 'S', tol: 0.02, hint: '$g_{m1} = \\sqrt{2\\mu_nC_{ox}(W/L)I_D}$, $I_D = I_5/2 = I_8$', how: ['$$g_{m1} = \\sqrt{2(110\\,\\mu)(10)(115.6\\,\\mu)} = 0.504\\,\\mathrm{mS}$$'] },
+            { q: 'Stage-1 output resistance $r_{O2}\\parallel r_{O4}$ (Ω)?', answer: CQ8.r1, unit: 'Ω', tol: 0.02, hint: 'Same current in both: $1/((\\lambda_n + \\lambda_p)I_D)$', how: ['$$\\frac{1}{0.09\\times 115.6\\,\\mu} = 96.1\\,\\mathrm{k\\Omega}$$ ($r_{O2}$ = 216 kΩ, $r_{O4}$ = 173 kΩ)'] },
+            { q: 'Stage-1 gain $A_1$?', answer: CQ8.a1, unit: '', tol: 0.02, hint: '$A_1 = g_{m1}(r_{O2}\\parallel r_{O4})$', how: ['$$A_1 = 0.504\\,\\mathrm{mS}\\times 96.1\\,\\mathrm{k\\Omega} = 48.5$$'] },
+            { q: '$g_{m6}$ (PMOS, W/L = 100, at $I_7$) in S?', answer: CQ8.gm6, unit: 'S', tol: 0.02, hint: '$g_{m6} = \\sqrt{2\\mu_pC_{ox}(W/L)_6I_7}$', how: ['$$g_{m6} = \\sqrt{2(50\\,\\mu)(100)(1.156\\,\\mathrm{m})} = 3.40\\,\\mathrm{mS}$$'] },
+            { q: 'Stage-2 output resistance $r_{O6}\\parallel r_{O7}$ (Ω)?', answer: CQ8.r2, unit: 'Ω', tol: 0.02, hint: '$1/((\\lambda_n + \\lambda_p)I_7)$', how: ['$$\\frac{1}{0.09\\times 1.156\\,\\mathrm{m}} = 9.61\\,\\mathrm{k\\Omega}$$'] },
+            { q: 'Stage-2 gain $A_2$?', answer: CQ8.a2, unit: '', tol: 0.02, hint: '$A_2 = g_{m6}(r_{O6}\\parallel r_{O7})$', how: ['$$A_2 = 3.40\\,\\mathrm{mS}\\times 9.61\\,\\mathrm{k\\Omega} = 32.7$$'] },
+          ],
           hint: ['Each stage is $g_m$ × (the two $r_O$ at its output in parallel). The two devices of a stage carry the same current, so $r_{On}\\parallel r_{Op} = 1/((\\lambda_n + \\lambda_p)I_D)$.', '$A_0 = \\sqrt{2\\mu_nC_{ox}(10)\\tfrac{I_5}{2}}\\cdot\\dfrac{1}{0.09\\cdot I_5/2}\\;\\times\\;\\sqrt{2\\mu_pC_{ox}(100)I_7}\\cdot\\dfrac{1}{0.09\\cdot I_7}$'],
           how: [
             'Stage 1: each input device carries $I_5/2$ = 115.6 µA: $$g_{m1} = \\sqrt{2(110\\,\\mu)(10)(115.6\\,\\mu)} = 0.504\\,\\mathrm{mS}$$',
@@ -987,10 +1077,16 @@ scene(L17, 'Compre 2023-24 Q8: a full two-stage analysis', 64, (S) => {
       },
       {
         t: 35, title: '**Power and margin.** Power = supply (5 V) × every branch current. PM = 90° minus the second pole’s and the RHP zero’s angles at the GBP.',
-        tex: `P = 5\\,\\mathrm{V}\\times(I_8 + I_5 + I_7) = ${fx(CQ8.pw * 1e3, 4)}\\,\\mathrm{mW},\\;\\; PM = 90^\\circ - 30.7^\\circ - 8.4^\\circ = ${fx(CQ8.pm, 4)}^\\circ`,
+        tex: `\\begin{aligned} P &= 5\\,\\mathrm{V}\\times(I_8 + I_5 + I_7) = ${fx(CQ8.pw * 1e3, 4)}\\,\\mathrm{mW} \\\\ f_{p2} &= \\tfrac{g_{m6}}{2\\pi C_L} = ${fx(CQ8.fp2 / 1e6, 3)}\\,\\mathrm{MHz},\\;\\; f_z = \\tfrac{g_{m6}}{2\\pi C_c} = ${fx(CQ8.fz / 1e6, 4)}\\,\\mathrm{MHz} \\\\ PM &= 90^\\circ - 30.7^\\circ - 8.4^\\circ = ${fx(CQ8.pm, 4)}^\\circ \\end{aligned}`,
         try: {
           q: 'Find the phase margin in unity feedback, using GBP = 16.05 MHz and $g_{m6}$ from the gain step.',
           answer: CQ8.pm, unit: '°', tol: 0.01,
+          parts: [
+            { q: 'Second pole $f_{p2}$ (Hz)?', answer: CQ8.fp2, unit: 'Hz', tol: 0.02, hint: '$f_{p2} = g_{m6}/(2\\pi C_L)$', how: ['$$\\frac{3.40\\,\\mathrm{mS}}{2\\pi(20\\,\\mathrm{pF})} = 27.1\\,\\mathrm{MHz}$$'] },
+            { q: 'RHP zero $f_z$ (Hz)?', answer: CQ8.fz, unit: 'Hz', tol: 0.02, hint: '$f_z = g_{m6}/(2\\pi C_c)$', how: ['$$\\frac{3.40\\,\\mathrm{mS}}{2\\pi(5\\,\\mathrm{pF})} = 108\\,\\mathrm{MHz}$$'] },
+            { q: 'Phase lag of the second pole at the GBP (degrees)?', answer: CQ8.ap, unit: '°', tol: 0.02, hint: '$\\tan^{-1}(GBP/f_{p2})$', how: ['$$\\tan^{-1}\\frac{16.05}{27.1} = 30.7^\\circ$$'] },
+            { q: 'Phase lag of the RHP zero at the GBP (degrees)?', answer: CQ8.az, unit: '°', tol: 0.02, hint: '$\\tan^{-1}(GBP/f_z)$', how: ['$$\\tan^{-1}\\frac{16.05}{108} = 8.4^\\circ$$'] },
+          ],
           hint: ['Find the second pole $g_{m6}/(2\\pi C_L)$ and the RHP zero $g_{m6}/(2\\pi C_c)$ first, then take their angles at the GBP.', '$PM = 90^\\circ - \\tan^{-1}\\frac{GBP}{f_{p2}} - \\tan^{-1}\\frac{GBP}{f_z}$'],
           how: [
             'Second pole (output node, $C_L$): $$f_{p2} = \\frac{g_{m6}}{2\\pi C_L} = \\frac{3.40\\,\\mathrm{mS}}{2\\pi(20\\,\\mathrm{pF})} = 27.1\\,\\mathrm{MHz}$$',
