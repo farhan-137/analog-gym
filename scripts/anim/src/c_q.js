@@ -212,7 +212,8 @@ scene(CQ, 'Problem Set 1 P7: how much of M1’s current reaches the output?', 46
   });
 }, { q: 'Problem Set 1 P7' });
 
-const QZ = { tail: 'M11', in: ['M1', 'M2'], top: ['M5', 'M6'], pc: ['M3', 'M4'], nc: ['M7', 'M8'], bot: ['M9', 'M10'], fold: ['X', 'Y'] };
+// names exactly as printed: M3, M4 gates = V_b2, M7, M8 gates = V_b1; M5, M6, M9, M10 and M11 are biased by the mirrors M_b2, M_b3, M_b1
+const QZ = { tail: 'M11', in: ['M1', 'M2'], top: ['M5', 'M6'], pc: ['M3', 'M4'], nc: ['M7', 'M8'], bot: ['M9', 'M10'], fold: ['X', 'Y'], bias: { top: 'from M_b2', pc: 'V_b2', nc: 'V_b1', bot: 'from M_b3', tail: 'M_b1' } };
 scene(CQ, 'Quiz 1 2023 Q2: NMOS-input folded cascode, all parts', 92, (S) => {
   const T = tfm(0.82, -60, 140);
   pyqFrame(S, {

@@ -50,6 +50,13 @@ function pyqFrame(S, o) {
   const inners = o.steps.map((st, i) => (st.ans ? `<div class="ans"><div class="t">${rt(st.title)}</div>${st.tex ? texBlock(st.tex) : ''}</div>`
     : `<div class="step"><div class="n">${i + 1}</div><div class="t">${rt(st.title)}</div>${st.tex ? `<div class="e">${texBlock(st.tex)}</div>` : ''}</div>`));
   const hs = inners.map((h) => Math.ceil(measureHTML(h, 620)) + 2);
+  // a card taller than the whole column is scaled down to fit instead of being cut off
+  hs.forEach((h, i) => {
+    if (h <= room) return;
+    const z = Math.max(0.5, (room - 4) / h);
+    inners[i] = `<div style="zoom:${z.toFixed(3)}">${inners[i]}</div>`;
+    hs[i] = Math.ceil(measureHTML(inners[i], 620)) + 2;
+  });
   const page = [], ys = [];
   let pg = 0, y0 = top;
   hs.forEach((h, i) => { if (i > 0 && y0 + h > top + room) { pg++; y0 = top; } page.push(pg); ys.push(y0); y0 += h + GAP; });

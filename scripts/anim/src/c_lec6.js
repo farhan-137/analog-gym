@@ -5,22 +5,24 @@ const C6 = 'Lec 6 · Your page';
 /* NMOS-input folded cascode, fully differential. Lecture naming by default. */
 function foldN(S, n = {}) {
   const N = { tail: 'M11', in: ['M1', 'M2'], top: ['M9', 'M10'], pc: ['M7', 'M8'], nc: ['M5', 'M6'], bot: ['M3', 'M4'], fold: ['X', 'Y'], ...n };
+  // gate-bias names: generic by default; a past paper passes its own (n.bias) so the figure matches the printed question
+  const Bn = { top: 'V_b4', pc: 'V_b3', nc: 'V_b2', bot: 'V_b1', tail: 'V_b5', ...(n.bias || {}) };
   const g = S.g(); const r = S.into(g);
   rail(S, 150, 960, 150);
   const L = 600, R = 820;
   const row = (y, a, b, p, gate) => { const A = fet(S, L, y, { p, name: a, right: true, gl: 26, nameSide: 'l' }); const B = fet(S, R, y, { p, name: b, gl: 26, nameSide: 'r' }); wire(S, [[A.gate[0], y], [B.gate[0], y]]); if (gate) txt(S, 710, y - 9, gate, { size: 16, color: C.muted, anchor: 'middle' }); };
-  row(205, N.top[0], N.top[1], true, 'V_b4'); wire(S, [[L, 150], [L, 155]]); wire(S, [[R, 150], [R, 155]]);
+  row(205, N.top[0], N.top[1], true, Bn.top); wire(S, [[L, 150], [L, 155]]); wire(S, [[R, 150], [R, 155]]);
   wire(S, [[L, 255], [L, 280]]); wire(S, [[R, 255], [R, 280]]); dot(S, L, 268); dot(S, R, 268);
   txt(S, L - 12, 290, N.fold[0], { size: 19, color: C.bad, weight: 750, anchor: 'end' }); txt(S, R + 12, 290, N.fold[1], { size: 19, color: C.bad, weight: 750 });
-  row(330, N.pc[0], N.pc[1], true, 'V_b3');
+  row(330, N.pc[0], N.pc[1], true, Bn.pc);
   wire(S, [[L, 380], [L, 420]]); wire(S, [[R, 380], [R, 420]]); dot(S, L, 400); dot(S, R, 400);
   txt(S, L + 12, 418, 'V_out1', { size: 16, color: C.volt, weight: 700 }); txt(S, R - 12, 418, 'V_out2', { size: 16, color: C.volt, weight: 700, anchor: 'end' });
-  row(470, N.nc[0], N.nc[1], false, 'V_b2'); wire(S, [[L, 520], [L, 530]]); wire(S, [[R, 520], [R, 530]]);
-  row(580, N.bot[0], N.bot[1], false, 'V_b1'); gnd(S, L, 630); gnd(S, R, 630);
+  row(470, N.nc[0], N.nc[1], false, Bn.nc); wire(S, [[L, 520], [L, 530]]); wire(S, [[R, 520], [R, 530]]);
+  row(580, N.bot[0], N.bot[1], false, Bn.bot); gnd(S, L, 630); gnd(S, R, 630);
   nmos(S, 230, 420, { name: N.in[0], gate: 'V_in1' }); nmos(S, 370, 420, { name: N.in[1], gate: 'V_in2', right: true, nameSide: 'l' });
   wire(S, [[230, 370], [230, 268], [L, 268]]); wire(S, [[370, 370], [370, 240], [700, 240], [700, 268], [R, 268]]);
   wire(S, [[230, 470], [230, 490], [370, 490], [370, 470]]); dot(S, 300, 490);
-  nmos(S, 300, 540, { name: N.tail, gate: 'V_b5', gl: 24 }); gnd(S, 300, 590);
+  nmos(S, 300, 540, { name: N.tail, gate: Bn.tail, gl: 24 }); gnd(S, 300, 590);
   r(); return g;
 }
 
