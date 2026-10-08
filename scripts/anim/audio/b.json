@@ -40,6 +40,42 @@
   "text": "C M is V 1 plus V 2 over 2, D M is V 1 minus V 2. D M moves the outputs apart, C M moves them together."
  },
  {
+  "k": "3pc55k",
+  "text": "Before the C M F B loop, follow the currents in the amplifier it controls. Two rules: in an N mos, current flows from drain to source, downwards. And current never chooses a path: the sources set it, the devices share it."
+ },
+ {
+  "k": "1ixb78x",
+  "text": "Start at the bottom. The tail source pulls I S S out of node P, where the sources of M 1 and M 2 meet, and sends it to ground."
+ },
+ {
+  "k": "18qlbrx",
+  "text": "That current reaches P through M 1 and M 2. K C L at P: I S S equals I D 1 plus I D 2. With equal inputs the pair is symmetric, so each side carries half, I S S over 2."
+ },
+ {
+  "k": "1tzezu5",
+  "text": "At the top, each load source pushes I 1 down from V D D into its output node."
+ },
+ {
+  "k": "1ssdggs",
+  "text": "K C L at each output: I 1 comes in and I D 1 goes out, so they must be equal. But two separate sources set them. Any mismatch has nowhere to go except the node’s huge resistance: that is the Lecture 9 drift."
+ },
+ {
+  "k": "ycien2",
+  "text": "That is the C M F B amplifier’s job: it trims the tail until I S S equals 2 I 1 exactly. Then both output nodes balance and nothing drifts."
+ },
+ {
+  "k": "32u3jb",
+  "text": "Now a small differential input: V in 1 up a little, V in 2 down. M 1 takes delta I more, M 2 gives up the same delta I. The total is still I S S: the tail does not care how it is shared."
+ },
+ {
+  "k": "19t9l49",
+  "text": "M 1 pulls delta I more than its load gives, so V out 1 falls; V out 2 rises by the same amount. The average does not move, so the C M F B loop sees nothing."
+ },
+ {
+  "k": "uuf26z",
+  "text": "The current rules for this pair, in one card. Sources set the currents; K C L at each node tells you how they split."
+ },
+ {
   "k": "1nbxrd4",
   "text": "Your page’s general structure. The pair M 1, M 2 with current-source loads I 1, the amplifier whose output C M floats."
  },
@@ -80,6 +116,34 @@
   "text": "C M F B: sense V out, C M, compare with V R E F, correct a current source."
  },
  {
+  "k": "1j04qh2",
+  "text": "The same pair, now with P mos loads M 3 and M 4 and two sensing resistors between the outputs. Follow the bias currents first, then the resistor current."
+ },
+ {
+  "k": "wjxsxq",
+  "text": "Bias first. The tail pulls I S S out of node P. M 3 and M 4 each push I S S over 2 down from V D D, straight through M 1 and M 2. P mos: source to drain. N mos: drain to source. Both downwards."
+ },
+ {
+  "k": "y71ikk",
+  "text": "At rest both outputs sit at the same voltage. No voltage across R 1 and R 2 means no current in them."
+ },
+ {
+  "k": "1uf2da2",
+  "text": "Now a differential output: V out 1 up, V out 2 down. A current I R flows from the higher output, through R 1 and R 2, into the lower one. The midpoint stays at the average."
+ },
+ {
+  "k": "1wobwqk",
+  "text": "Where does I R come from? K C L at V out 1: M 3’s current now feeds both M 1 and the resistor. The resistor takes signal current away from the output node. That is the gain loss: R 1 appears in parallel with R O."
+ },
+ {
+  "k": "1kb8oqz",
+  "text": "In common mode the midpoint rises with the outputs, so no extra current flows. The sensing resistors carry only the differential current."
+ },
+ {
+  "k": "1iisi6z",
+  "text": "The current rules for resistive sensing: bias currents go down, the resistor current goes across, and only for a differential signal."
+ },
+ {
   "k": "x02c8b",
   "text": "The simplest C M sensor: two resistors R 1 equals R 2 in series between the outputs. Their midpoint is the C M."
  },
@@ -116,6 +180,34 @@
   "text": "The cost: Ay V equals G M 1 ( R O 1 in parallel with R O 3 in parallel with R 1 )."
  },
  {
+  "k": "2r0hge",
+  "text": "The follower sensor. Three separate groups of current live here: the main pair, follower M 5 with I 1, and follower M 6 with I 2."
+ },
+ {
+  "k": "1qo9rhq",
+  "text": "The followers carry their own bias. I 1 flows from V D D down through M 5, drain to source, into its current source. I 2 does the same through M 6."
+ },
+ {
+  "k": "80o7k7",
+  "text": "The main pair is unchanged: I S S in the tail, half down each side. The outputs touch only the followers’ gates, and a gate takes no current, so these groups never mix."
+ },
+ {
+  "k": "1u0dg4f",
+  "text": "Now a differential signal: M 5’s source goes up, M 6’s goes down. A current I R flows out of M 5’s source, through R 1 and R 2, into M 6’s source."
+ },
+ {
+  "k": "14zzlfg",
+  "text": "K C L at M 5’s source: M 5 now supplies I 1 plus I R, and M 6 supplies I R less. The followers deliver the resistor current."
+ },
+ {
+  "k": "ichkz6",
+  "text": "So the outputs keep their full resistance and the gain is untouched. Only the followers work harder."
+ },
+ {
+  "k": "1iqqhet",
+  "text": "The current rules for follower sensing: each follower carries its own bias, and the resistor current comes from the followers, never from the outputs."
+ },
+ {
   "k": "8hiam2",
   "text": "Your page’s second sensor: each output drives the gate of a source follower (M 5, M 6, biased by I 1, I 2 ). The resistors hang on the followers’ sources instead."
  },
@@ -148,6 +240,30 @@
   "text": "Now every Lecture 10 question: Quiz 2 2024 Q 2, the 2024 mid sem Q 1 (Tutorial 5 Q 3) in two parts, and Tutorial 5 Q 2."
  },
  {
+  "k": "1d73b5m",
+  "text": "The Quiz 2 circuit. Start at the reference: 50 microamps flows from V D D down through diode M 6 into the current source."
+ },
+ {
+  "k": "i78cwc",
+  "text": "M 3 and M 4 have the same W over L and the same gate voltage as M 6, so each copies 50 microamps. Each copy flows straight down through its input transistor, M 1 or M 2, into node P."
+ },
+ {
+  "k": "i6v0lx",
+  "text": "K C L at P: M 5 must pull exactly 100 microamps. Nothing copies that number into M 5. The C M F B amplifier moves M 5’s gate until it does."
+ },
+ {
+  "k": "9onfdy",
+  "text": "Suppose M 5 pulled 110 microamps. The loads still give only 100 microamps, so the extra 10 microamps is drawn out of the output nodes and both outputs fall. The amplifier sees V O, C M below V R E F and lowers M 5’s gate until the tail is back to 100 microamps."
+ },
+ {
+  "k": "1rudiyq",
+  "text": "A differential input only re-shares: M 1 takes 50 microamps plus delta I, M 2 takes 50 microamps minus delta I, and the tail still sees 100 microamps."
+ },
+ {
+  "k": "weczm0",
+  "text": "The current rules for this circuit: the mirrors fix the loads, K C L fixes the tail, and the C M F B amplifier makes M 5 obey it."
+ },
+ {
   "k": "1zndj0",
   "text": "Quiz 2 2024-25 Q 2 times 9 marks, exactly as printed. Read it once, the lesson will make you solve every part before explaining it."
  },
@@ -178,6 +294,30 @@
  {
   "k": "m5yy2w",
   "text": "The circuit, redrawn. Try each part when the lesson stops, then watch how it is done."
+ },
+ {
+  "k": "yz630",
+  "text": "The 2024 mid sem circuit, with I 1 equals 50 microamps, I 2 equals 200 microamps and W over L equals 50 for every device. The main amplifier is the Quiz circuit again: M 3 and M 4 copy 50 microamps, so the tail M 5 carries 100 microamps. Now follow the error amplifier on the right."
+ },
+ {
+  "k": "14jv7nc",
+  "text": "In the error amplifier, I 2 equals 200 microamps flows down through diode M 12. M 11 has the same W over L and gate voltage, so it copies 200 microamps and feeds the joined sources of the P mos pair M 7, M 8."
+ },
+ {
+  "k": "5tha34",
+  "text": "K C L at the pair’s sources: the 200 microamps splits. With V O, C M equals V R E F the gates are equal, so 100 microamps goes down each side, into the diodes M 9 and M 10."
+ },
+ {
+  "k": "4mdexi",
+  "text": "Diode M 9 and the tail M 5 share a gate voltage and have the same W over L, so M 5 copies M 9’s 100 microamps. That is exactly the 100 microamps the main amplifier needs: the loop is balanced."
+ },
+ {
+  "k": "9jnjtj",
+  "text": "V O, C M going up makes M 8 conduct less, so M 7 takes the extra share. M 9’s current rises, M 5 copies it and pulls harder, and both outputs come back down. Negative feedback."
+ },
+ {
+  "k": "17leheg",
+  "text": "The current rules for this C M F B circuit: each mirror copies its reference, the error pair re-shares a fixed 200 microamps, and M 5 copies M 7’s share."
  },
  {
   "k": "9t5hno",
@@ -244,6 +384,30 @@
   "text": "Write-up: loop gain equals product of every gain around the C M loop; closed-loop C M gain equals open-loop C M gain divided by (1 + T); CMRR equals Ay D divided by that."
  },
  {
+  "k": "112kq7m",
+  "text": "The Tutorial 5 Q 2 folded cascode. Two P mos sources at the top each push I P down from V D D into a folding node."
+ },
+ {
+  "k": "bg3mqs",
+  "text": "The input pair hangs from those nodes. The tail pulls I S S, and with equal inputs M 1 and M 2 each take I S S over 2, out of the left and the right folding node."
+ },
+ {
+  "k": "1s3i0fz",
+  "text": "K C L at the left folding node: I P comes in, and leaves either through M 1 or down the cascode branch."
+ },
+ {
+  "k": "w83n5f",
+  "text": "The rest, I P minus I S S over 2, folds down through the P mos cascode, the output node and the N mos cascode into M 3. M 3 must sink exactly that, and its gate is V E: the C M F B amplifier makes it match."
+ },
+ {
+  "k": "b7sb6d",
+  "text": "With a differential input each cascode branch changes opposite to its input transistor. M 3 and M 4 do not change, so the difference flows out of one output and into the other. The outputs move apart; the C M stays."
+ },
+ {
+  "k": "1hryvxm",
+  "text": "The current rules for the folded cascode: the top source current folds, part into the input pair and the rest down the cascode, and the C M F B sets the bottom sinks to match."
+ },
+ {
   "k": "bk1z36",
   "text": "Tutorial 5 Q 2 times Razavi 9.12, exactly as printed. Read it once, the lesson will make you solve every part before explaining it."
  },
@@ -296,6 +460,46 @@
   "text": "R on equals 1 over ( mu n C O X W over L ( V G S minus V threshold ))."
  },
  {
+  "k": "1860ex6",
+  "text": "Let us follow the current in Lecture 11’s telescopic, with the numbers of Tutorial 5 Question 1: each column carries half a milliamp."
+ },
+ {
+  "k": "1sv59vl",
+  "text": "Start at the top. M 8 and M 9 have a fixed gate bias, so they are current sources: each pushes half a milliamp down its own column. A P mos conducts from its source at the supply to its drain, so the current flows down."
+ },
+ {
+  "k": "16hqxbf",
+  "text": "Nothing leaves the column on the way down. The same current passes the output node, then the N mos cascode and the input device. An N mos conducts from drain to source: down again."
+ },
+ {
+  "k": "34vil2",
+  "text": "The blue wires from the outputs to the gates of M 10 and M 11 carry a voltage, not a current: a gate draws no current."
+ },
+ {
+  "k": "1ndigm3",
+  "text": "At node P the two columns meet. Kirchhoff’s current law: whatever flows into P must flow out, and the only way out is down through the triode devices M 10 and M 11."
+ },
+ {
+  "k": "1c5qkb1",
+  "text": "One milliamp arrives at P. With equal outputs, M 10 and M 11 are equal resistors, so they split it equally: half a milliamp each, down to ground."
+ },
+ {
+  "k": "1i6l6to",
+  "text": "Now add a small differential input: the input device M 2 takes a little more, I D plus delta I, and M 3 a little less, I D minus delta I."
+ },
+ {
+  "k": "rs8azb",
+  "text": "Add them at P: plus delta I and minus delta I cancel. The total stays at one milliamp; the input only moves current from one side to the other."
+ },
+ {
+  "k": "1i8iu6x",
+  "text": "But the P mos source on top still gives exactly I D. The extra delta I on the left has to come out of the output node, so V out 1 falls, and on the right V out 2 rises. That current mismatch is the output signal."
+ },
+ {
+  "k": "qd4ge5",
+  "text": "And the tail? V out 1 down makes M 10 a bigger resistor, V out 2 up makes M 11 a smaller one: the split under P shifts, but the sum still matches one milliamp."
+ },
+ {
   "k": "49np7u",
   "text": "Your page’s circuit: a telescopic op amp whose tail is two transistors M 10, M 11 in deep triode, with their gates driven by the two outputs."
  },
@@ -326,6 +530,30 @@
  {
   "k": "22ssq7",
   "text": "R total equals 1 over ( mu n C O X W over L ( V out 1 plus V out 2 minus 2 V threshold )): sees C M, blind to D M."
+ },
+ {
+  "k": "3690id",
+  "text": "Follow the current in the pair sensor. Two sources set everything: M 5 at the top, and the two sinks I 1 at the bottom. Take M 5 as 20 microamps and each sink as 50."
+ },
+ {
+  "k": "jkutot",
+  "text": "M 5 is a P mos with a fixed gate bias: a current source. Its 20 microamps flow down from the supply, source to drain, into the node below it."
+ },
+ {
+  "k": "grnf0t",
+  "text": "At that node it splits: part goes down through M 3, the rest through M 4. K C L: I 5 equals I D 3 plus I D 4. With equal outputs the circuit is symmetric, so the halves are equal."
+ },
+ {
+  "k": "1ilg02j",
+  "text": "Each follower carries its own current from the supply, drain to source. At the follower’s source node it meets M 3’s current, and the sink below takes both: I 1 equals I D 1 plus I D 3."
+ },
+ {
+  "k": "19erhhc",
+  "text": "M 3 gets 10 microamps, so the follower M 1 carries the rest of the sink: 50 minus 10, 40 microamps. The same on the right."
+ },
+ {
+  "k": "1o3avep",
+  "text": "The rule for every node: the sources set the currents, the devices only share them. If M 3 takes more, M 1 must take less, because the sink below is fixed."
  },
  {
   "k": "ywx01s",
@@ -398,6 +626,38 @@
  {
   "k": "wmv23t",
   "text": "V B 1 minus V G S 3 equals 2 I D R total, P pins the output C M."
+ },
+ {
+  "k": "13l2sw4",
+  "text": "Follow the current in the replica circuit. Take the source on the left as I 1 equals 100 microamps."
+ },
+ {
+  "k": "hdkwap",
+  "text": "Start on the left, the replica branch. The source pushes I 1 down through M 14 and M 15 to ground. M 14 is diode-connected: its gate settles at whatever voltage lets it carry I 1."
+ },
+ {
+  "k": "sxhbpr",
+  "text": "Now look right. M 11 is the tail of the input pair, and its gate is tied to M 14’s gate. That wire carries a voltage, not a current."
+ },
+ {
+  "k": "uxefq4",
+  "text": "Same size, same gate voltage: M 11 copies M 14 and carries I 1, 100 microamps. That is the tail current of the input pair."
+ },
+ {
+  "k": "19j853z",
+  "text": "Where does the tail current come from? From the folded cascode above, down through M 1 and M 2, drain to source. They join at the tail node: I D 1 plus I D 2 equals I D 11. Equal inputs, so half each."
+ },
+ {
+  "k": "ckwb6p",
+  "text": "Below M 11 the current splits again, into the two triode sensors M 12 and M 13, and goes to ground. K C L: I D 11 equals I D 12 plus I D 13."
+ },
+ {
+  "k": "6o5i9",
+  "text": "Equal outputs make M 12 and M 13 equal resistors, so they share the 100 microamps: 50 each."
+ },
+ {
+  "k": "wzbhw8",
+  "text": "Now let the output common mode rise. M 12 and M 13 conduct better, the node under M 11 drops, M 11 gets a bigger gate-source voltage and pulls more than I 1. More tail current leaves less for the output branches, and the outputs come back down. The only resting point is V out C M equal to V REF."
  },
  {
   "k": "1pzdycj",
@@ -1660,8 +1920,8 @@
   "text": "More feedback (bigger β) pushes Q up: from coincident to flat to ringing."
  },
  {
-  "k": "1qor1yu",
-  "text": "What it tests: adding the pole angles, and why two poles alone never reach minus 180 degrees with beta A equals 1."
+  "k": "1lxel49",
+  "text": "What it tests: adding the pole angles, and whether two poles alone can ever meet Barkhausen’s criteria."
  },
  {
   "k": "1df1yd4",

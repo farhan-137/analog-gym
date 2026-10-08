@@ -536,8 +536,8 @@
   "text": "Now every question tied to Lecture 6, you solve each part first."
  },
  {
-  "k": "qyh6ge",
-  "text": "What it tests: your page’s first circuit with numbers: floor X minus V threshold P, ceiling V D D minus tail minus V G S 1; then the output range by checks."
+  "k": "4vdjk9",
+  "text": "What it tests: your page’s first circuit with numbers: the P mos input’s fence and the tail’s check give the input C M range, then checks on the output column give the output range."
  },
  {
   "k": "17j0tke",
@@ -824,8 +824,8 @@
   "text": "mid sem 2023-24 Q 3 times 14 marks, exactly as printed. Read it once, the lesson will make you solve every part before explaining it."
  },
  {
-  "k": "w5gpiv",
-  "text": "What it tests: the design order: slew rate, then current; floor, then N mos overdrive; ceiling, then P mos overdrive (the tail’s root 2 times V overdrive at full steering); bias limits by checks and links; two-look gain."
+  "k": "1hsdkc6",
+  "text": "What it tests: the design order: slew rate, then current; floor, then N mos overdrive; ceiling, then P mos overdrive (the tail carries twice the side current); bias limits by checks and links; two-look gain."
  },
  {
   "k": "juv20l",
