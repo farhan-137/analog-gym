@@ -24,9 +24,10 @@ function pairBoost(S, mode) {
   wire(S, [[L, 450], [L, 470], [R, 470], [R, 450]]);
   isrc(S, 340, 515, { label: 'I_SS', len: 45 }); gnd(S, 340, 560);
   if (mode === 'two') {
-    amp(S, 30, 260, { label: 'A₁', w: 80, h: 76 }); wire(S, [[110, 260], [136, 260]]);
+    // label drawn by hand, further into the triangle, so it clears the + / − input signs
+    amp(S, 30, 260, { w: 80, h: 90 }); txt(S, 82, 266, 'A₁', { size: 17, color: C.amb, weight: 700, anchor: 'middle' }); wire(S, [[110, 260], [136, 260]]);
     wire(S, [[L, 330], [16, 330], [16, 279], [30, 279]]);
-    amp(S, 650, 260, { label: 'A₂', w: 80, h: 76, left: true }); wire(S, [[570, 260], [544, 260]]);
+    amp(S, 650, 260, { w: 80, h: 90, left: true }); txt(S, 598, 266, 'A₂', { size: 17, color: C.amb, weight: 700, anchor: 'middle' }); wire(S, [[570, 260], [544, 260]]);
     wire(S, [[R, 330], [664, 330], [664, 279], [650, 279]]);
   } else {
     dbox(S, 290, 222, 100, 120, 'A');
@@ -83,7 +84,8 @@ scene(L9, 'Follow the current: boosted differential pair', 58, (S) => {
   current(S, [[540, 318], [540, 610], [408, 610]], 37, null, 'I_SS/2 − ΔI', { color: C.pink, at: [640, 650] });
   fcTex(S, '\\left(\\tfrac{I_{SS}}{2} + \\Delta I\\right) + \\left(\\tfrac{I_{SS}}{2} - \\Delta I\\right) = I_{SS}', 1170, 290, 37);
   S.say(37, 'Now a small differential input: $V_{in1}$ up, $V_{in2}$ down. The left half takes $\\Delta I$ more and the right half $\\Delta I$ less. The tail still sinks exactly $I_{SS}$.');
-  S.stop(44, { secs: 60, q: 'Take $I_{SS} = 1$ mA. A small differential input adds 20 µA to the left half. How much DC current now flows through the right cascode M4?', answer: 480e-6, unit: 'A', tol: 0.01,
+  S.stop(44, { secs: 60, q: 'Take $I_{SS} = 1$ mA. A small differential input adds 20 µA to the left half. How much DC current now flows through the right cascode M4?', answer: 1e-3 - (0.5e-3 + 20e-6), unit: 'A', tol: 0.01,
+    parts: [{ q: 'Current in the left half, $I_{D1}$, with the input applied?', answer: 0.5e-3 + 20e-6, unit: 'A', tol: 0.01, hint: 'At rest $I_{SS}/2$, plus the 20 µA.', how: ['$$I_{D1} = \\tfrac{1\\,\\text{mA}}{2} + 20\\,\\mu\\text{A} = 520\\,\\mu\\text{A}$$'] }],
     hint: ['The tail fixes the total: whatever the left half gains, the right half loses. M4 is in series with M2.', '$I_{D4} = I_{D2} = I_{SS} - I_{D1}$'],
     how: ['At rest each half carries half the tail: $$\\tfrac{I_{SS}}{2} = \\tfrac{1\\,\\text{mA}}{2} = 500\\,\\mu\\text{A}$$', 'The left half gains 20 µA: $$I_{D1} = 500 + 20 = 520\\,\\mu\\text{A}$$', 'KCL at the tail: the total stays $I_{SS}$: $$I_{D2} = I_{SS} - I_{D1} = 1000 - 520 = 480\\,\\mu\\text{A}$$', 'M4 is in series with M2 (the booster takes no current): $$I_{D4} = I_{D2} = 480\\,\\mu\\text{A}$$'] });
   S.say(44.4, '480 µA. In a pair, the two halves always change by the same amount in opposite directions.');
@@ -401,7 +403,8 @@ scene(L9, 'Follow the current: current-source loads', 48, (S) => {
   S.say(10, 'From the top: M3 and M4 are current sources set by $V_b$. Each pushes its own $I_P$ down into an output node, PMOS source to drain.');
   fcTex(S, 'I_P = I_N + I_X', 1200, 200, 16, { w: 600 });
   S.say(16, 'KCL at each output node: what M3 pushes in should equal what M1 pulls out. Any difference, $I_X$, has to go somewhere.');
-  S.stop(22, { secs: 60, q: 'Take $I_{SS} = 1$ mA, and suppose M3 is biased to push $I_P = 502\\,\\mu$A (a 0.4% mismatch). How much current $I_X$ is left over at that output node?', answer: 2e-6, unit: 'A', tol: 0.01,
+  S.stop(22, { secs: 60, q: 'Take $I_{SS} = 1$ mA, and suppose M3 is biased to push $I_P = 502\\,\\mu$A (a 0.4% mismatch). How much current $I_X$ is left over at that output node?', answer: 502e-6 - 1e-3 / 2, unit: 'A', tol: 0.01,
+    parts: [{ q: 'Current $I_N$ that M1 pulls out of the node?', answer: 1e-3 / 2, unit: 'A', tol: 0.01, hint: 'Half the tail current.', how: ['$$I_N = \\tfrac{I_{SS}}{2} = 500\\,\\mu\\text{A}$$'] }],
     hint: ['M1 takes half the tail current out of the node; M3 puts $I_P$ in. The leftover is the difference.', '$I_X = I_P - I_N$,\\; $I_N = \\tfrac{I_{SS}}{2}$'],
     how: ['M1 pulls half the tail out of the node: $$I_N = \\frac{I_{SS}}{2} = \\frac{1\\,\\text{mA}}{2} = 500\\,\\mu\\text{A}$$', 'KCL at the output node: $$I_X = I_P - I_N = 502 - 500 = 2\\,\\mu\\text{A}$$'] });
   fcTex(S, 'I_X = I_P - I_N', 1200, 270, 22.4, { w: 600, color: '#ffd38a' });
@@ -555,6 +558,16 @@ scene(L9, 'Follow the current: Tutorial 4 Q3 circuit', 52, (S) => {
 
 scene(L9, 'Tutorial 4 Q3: folded booster, every part', 96, (S) => {
   const T = tfm(1, 0, 150);
+  // every intermediate of the solution, from the givens (same numbers as the bank's solver)
+  const sq = Math.sqrt, kn = 200e-6, kp = 100e-6;
+  const vov1 = sq(2 * 500e-6 / (kn * 200)), wl6 = ans('bank-t4q3', 'wl6'), vov6 = 3 - 2.5 - 2 * vov1;
+  const wl3 = 0.5 * wl6, vov3 = sq(2 * 100e-6 / (kp * wl3)), vs3 = vov1 + 0.8 + vov3, r3 = ans('bank-t4q3', 'r3');
+  const vov9 = sq(2 * 300e-6 / (kn * 200)), vF = 1.15 * vov9, vG4 = vF + 0.7 + sq(2 * 200e-6 / (kn * 200)), vD4 = vov1 + 0.7 + vov1;
+  const vgs7 = 0.7 + vov9, vgs8 = 0.8 + sq(2 * 200e-6 / (kp * 0.4 * wl6));
+  const gm3 = 2 * 100e-6 / vov3, Gm3 = gm3 / (1 + gm3 * r3), ro5 = 1 / (0.2 * 200e-6), gm4 = 2 * 200e-6 / 0.1, ro4 = 1 / (0.1 * 200e-6), ro9 = 1 / (0.1 * 300e-6);
+  const roAux = 1 / (1 / ro5 + 1 / (gm4 * ro4 * ro9)), aux = Gm3 * roAux;
+  const gm1 = 2 * 500e-6 / vov1, ro1 = 1 / (0.1 * 500e-6), rdown = (1 + aux) * gm1 * ro1 * ro1 + 2 * ro1, ro6 = 1 / (0.2 * 500e-6);
+  const f = (v, n = 4) => fx(v, n);
   const off = pyqFrame(S, {
     paper: 't4q3', tag: 'LEC 9 · PAST PAPER 1 OF 3', title: 'Folded-cascode booster, designed from a power budget', src: 'Tutorial 4 Q3',
     q: '$V_{DD} = 3$ V, 3 mW in total. $(W/L)_{1,2} = 200$ (100/0.5), each carrying 500 µA. $(W/L)_5 = (W/L)_8 = 0.4(W/L)_6$, $(W/L)_3 = 0.5(W/L)_6$, $(W/L)_{4,9} = (W/L)_1$. (a) $(W/L)_6$ for a 2.5 V swing. (b) $R_3$ with $V_P = V_{ov1}$. (c) $V_{DS9} = 1.15V_{ov9}$: is M4 saturated? (d) $(W/L)_7$, $R_1$, $R_2$. (e) Gain.',
@@ -564,6 +577,10 @@ scene(L9, 'Tutorial 4 Q3: folded booster, every part', 96, (S) => {
     steps: [
       { t: 8, title: '**Currents first.** Total current = power ÷ supply. M5 and M8 share M6’s $|V_{GS}|$ (same gate node $V_{bp}$, sources on $V_{DD}$), so their currents scale with W/L. **M3 gets what is left**, and M9 sinks M4’s + M3’s current', tex: 'I_{tot} = \\frac{3\\,\\mathrm{mW}}{3\\,\\mathrm{V}} = 1\\,\\mathrm{mA},\\; I_5 = I_8 = 0.4\\times500\\,\\mu = 200\\,\\mathrm{\\mu A},\\; I_3 = 1000 - 500 - 200 - 200 = 100\\,\\mathrm{\\mu A},\\; I_9 = 200 + 100 = 300\\,\\mathrm{\\mu A}', hl: [T([60, 150, 820, 120, C.cur])],
         try: { q: 'Start with the power budget. How much current flows in the booster’s input device M3?', answer: 100e-6, unit: 'A', tol: 0.02,
+          parts: [
+            { q: 'Total current drawn from the supply?', answer: 3e-3 / 3, unit: 'A', tol: 0.01, hint: '$I_{tot} = P/V_{DD}$', how: ['$$I_{tot} = \\frac{3\\,\\text{mW}}{3\\,\\text{V}} = 1\\,\\text{mA}$$'] },
+            { q: 'Current in M5 (and in M8)? M6 carries M1’s 500 µA.', answer: 0.4 * 500e-6, unit: 'A', tol: 0.01, hint: 'Same $|V_{GS}|$ as M6, so current ∝ W/L: $I_5 = 0.4\\,I_6$.', how: ['$$I_5 = I_8 = 0.4\\times500\\,\\mu\\text{A} = 200\\,\\mu\\text{A}$$'] },
+          ],
           hint: ['Total current = power ÷ $V_{DD}$. M6 carries M1’s current. M5 and M8 have the same $|V_{GS}|$ as M6 (same gate node), so their currents scale with their W/L. M3 gets what is left.', '$I_{tot} = P/V_{DD}$,\\; $I_5 = I_8 = 0.4\\,I_6$,\\; $I_3 = I_{tot} - I_6 - I_5 - I_8$'],
           how: ['Total current from the supply: $$I_{tot} = \\frac{P}{V_{DD}} = \\frac{3\\,\\text{mW}}{3\\,\\text{V}} = 1\\,\\text{mA}$$',
             'M6 sits in series with M2 and M1, so it carries M1’s current (given): $$I_6 = I_1 = 500\\,\\mu\\text{A}$$',
@@ -572,8 +589,12 @@ scene(L9, 'Tutorial 4 Q3: folded booster, every part', 96, (S) => {
             'Also note for later: M9 sinks M4’s and M3’s currents together: $$I_9 = 200 + 100 = 300\\,\\mu\\text{A}$$'],
           why: 'Design questions always start with currents: power ÷ $V_{DD}$, then W/L ratios at equal $|V_{GS}|$, then KCL.' },
         say: 'Always start with currents. Same gate voltage (all tied to $V_{bp}$) means currents scale with W/L: M5, M8 carry 200 µA; M3 gets 100 µA; M9 carries 300 µA.' },
-      { t: 17, title: '**(a) Swing → overdrive → size.** $V_{out}$ can fall to $2V_{ov1}$ (M1 and M2 each keep one overdrive) and rise to $V_{DD} - |V_{ov6}|$. The 2.5 V gap fixes $|V_{ov6}|$; the 500 µA then fixes the W/L', tex: stepTex('bank-t4q3', 1), hl: [T([690, 150, 160, 290, C.p])],
+      { t: 17, title: '**(a) Swing → overdrive → size.** $V_{out}$ can fall to $2V_{ov1}$ (M1 and M2 each keep one overdrive) and rise to $V_{DD} - |V_{ov6}|$. The 2.5 V gap fixes $|V_{ov6}|$; the 500 µA then fixes the W/L', tex: `V_{ov1} = \\sqrt{\\frac{2(500\\mu)}{200\\mu\\times200}} = ${f(vov1)}\\,\\mathrm{V},\\; |V_{ov6}| = 3 - 2.5 - 2(${f(vov1)}) = ${f(vov6)}\\,\\mathrm{V},\\; (W/L)_6 = \\frac{2(500\\mu)}{100\\mu\\,(${f(vov6)})^2} = ${f(wl6)}`, hl: [T([690, 150, 160, 290, C.p])],
         try: { q: '(a) The output must swing 2.5 V. Find $(W/L)_6$.', answer: ans('bank-t4q3', 'wl6'), unit: '', tol: 0.02,
+          parts: [
+            { q: '$V_{ov1}$ of M1 (W/L = 200, 500 µA)?', answer: vov1, unit: 'V', tol: 0.01, hint: '$V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}\\,W/L)}$', how: [`$$V_{ov1} = \\sqrt{\\frac{2(500\\,\\mu)}{200\\,\\mu\\times200}} = ${f(vov1)}\\,\\text{V}$$`] },
+            { q: '$|V_{ov6}|$ that leaves exactly 2.5 V of swing?', answer: vov6, unit: 'V', tol: 0.01, hint: 'Floor $2V_{ov1}$, ceiling $V_{DD} - |V_{ov6}|$, gap 2.5 V.', how: [`$$|V_{ov6}| = 3 - 2.5 - 2(${f(vov1)}) = ${f(vov6)}\\,\\text{V}$$`] },
+          ],
           hint: ['Floor of the output: M1 and M2 (identical, 500 µA each) each keep one overdrive, so $2V_{ov1}$. Ceiling: M6 keeps its $|V_{ov6}|$ below $V_{DD}$. The swing is the gap between them.', '$V_{ov1} = \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)_1}}$,\\; $|V_{ov6}| = V_{DD} - 2.5 - 2V_{ov1}$,\\; $(W/L)_6 = \\frac{2I_D}{\\mu_pC_{ox}|V_{ov6}|^2}$'],
           how: ['Overdrive of M1 (and M2, identical): $$V_{ov1} = \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)_1}} = \\sqrt{\\frac{2(500\\,\\mu)}{200\\,\\mu\\times200}} = 0.1581\\,\\text{V}$$',
             'Floor of the output: two overdrives stacked: $$V_{out,min} = 2V_{ov1} = 0.3162\\,\\text{V}$$',
@@ -583,8 +604,13 @@ scene(L9, 'Tutorial 4 Q3: folded booster, every part', 96, (S) => {
           calc: [{ what: 'V_ov1 first', keys: '[√] ( 2 × 500µ ÷ ( 200µ × 200 ) ) [EXE]', shows: '0.1581', note: 'Type µ with [CATALOG] ▸ Engineer Symbol ▸ micro.' },
             { what: '|V_ov6| and (W/L)_6 in one line, reusing Ans', keys: '2 × 500µ ÷ ( 100µ × ( 0.5 − 2 [Ans] ) [x²] ) [EXE]', shows: '296.1', note: '0.5 = 3 − 2.5.' }] },
         say: 'Floor: two NMOS overdrives (M1, M2). Ceiling: $V_{DD} - |V_{ov6}|$. With 2.5 V between them, $|V_{ov6}| = 0.184$ V and $(W/L)_6 = 296$.' },
-      { t: 26, title: '**(b) Walk up from M3’s gate.** The gate is at $V_P = V_{ov1}$; the PMOS source sits one $|V_{GS3}|$ higher (a link); $R_3$ drops the rest of $V_{DD}$ while carrying M3’s 100 µA', tex: stepTex('bank-t4q3', 2), hl: [T([260, 150, 140, 180, C.amb])],
+      { t: 26, title: '**(b) Walk up from M3’s gate.** The gate is at $V_P = V_{ov1}$; the PMOS source sits one $|V_{GS3}|$ higher (a link); $R_3$ drops the rest of $V_{DD}$ while carrying M3’s 100 µA', tex: `(W/L)_3 = 0.5(${f(wl6)}) = ${f(wl3)},\\; |V_{ov3}| = \\sqrt{\\frac{2(100\\mu)}{100\\mu\\times${f(wl3)}}} = ${f(vov3)}\\,\\mathrm{V},\\; V_{S3} = ${f(vov1)} + 0.8 + ${f(vov3)} = ${f(vs3)}\\,\\mathrm{V},\\; R_3 = \\frac{3 - ${f(vs3)}}{100\\mu} = ${f(r3 / 1e3, 3)}\\,\\mathrm{k\\Omega}`, hl: [T([260, 150, 140, 180, C.amb])],
         try: { q: '(b) M3’s gate is tied to $V_P$, and $V_P = V_{ov1}$. Find $R_3$.', answer: ans('bank-t4q3', 'r3'), unit: 'Ω', tol: 0.02,
+          parts: [
+            { q: '$(W/L)_3$?', answer: wl3, unit: '', tol: 0.02, hint: '$(W/L)_3 = 0.5(W/L)_6$, with $(W/L)_6$ from (a).', how: [`$$(W/L)_3 = 0.5\\times${f(wl6)} = ${f(wl3)}$$`] },
+            { q: '$|V_{ov3}|$ (M3 carries 100 µA)?', answer: vov3, unit: 'V', tol: 0.01, hint: '$|V_{ov}| = \\sqrt{2I_D/(\\mu_pC_{ox}\\,W/L)}$', how: [`$$|V_{ov3}| = \\sqrt{\\frac{2(100\\,\\mu)}{100\\,\\mu\\times${f(wl3)}}} = ${f(vov3)}\\,\\text{V}$$`] },
+            { q: 'Voltage at M3’s source, $V_{S3}$?', answer: vs3, unit: 'V', tol: 0.01, hint: 'Gate at $V_P = V_{ov1}$; source one $|V_{GS3}| = |V_{thp}| + |V_{ov3}|$ higher.', how: [`$$V_{S3} = ${f(vov1)} + 0.8 + ${f(vov3)} = ${f(vs3)}\\,\\text{V}$$`] },
+          ],
           hint: ['Walk up from M3’s gate: its source is one $|V_{GS3}|$ higher (a link). $R_3$ sits between $V_{DD}$ and that source and carries M3’s 100 µA (from the first step).', '$|V_{ov3}| = \\sqrt{\\frac{2I_3}{\\mu_pC_{ox}(W/L)_3}}$,\\; $V_{S3} = V_P + |V_{thp}| + |V_{ov3}|$,\\; $R_3 = \\frac{V_{DD} - V_{S3}}{I_3}$'],
           how: ['M3 is half the size of M6 (from (a)): $$(W/L)_3 = 0.5\\times296.1 = 148$$',
             'Its overdrive at 100 µA: $$|V_{ov3}| = \\sqrt{\\frac{2(100\\,\\mu)}{100\\,\\mu\\times148}} = 0.1162\\,\\text{V}$$',
@@ -592,8 +618,13 @@ scene(L9, 'Tutorial 4 Q3: folded booster, every part', 96, (S) => {
             '$R_3$ drops the rest of the supply at 100 µA: $$R_3 = \\frac{3 - 1.074}{100\\,\\mu\\text{A}} = 19.3\\,\\text{k}\\Omega$$'],
           calc: [{ what: 'R_3 in one line', keys: '( 3 − ( 0.1581 + 0.8 + [√] ( 2 × 100µ ÷ ( 100µ × 148.05 ) ) ) ) ÷ 100µ [EXE]', shows: '19.26k', note: 'Engineer Symbol display on: [SETTINGS] ▸ Calc Settings ▸ Engineer Symbol ▸ On.' }] },
         say: 'Walk the levels: M3’s gate is $V_P$; its source is one $|V_{GS3}|$ above; $R_3 = (3 - 1.074)/100\\,\\mu$A ≈ 19.3 kΩ.' },
-      { t: 35, title: '**(c) Three levels, one fence.** F = $1.15V_{ov9}$; M4’s gate is one $V_{GS4}$ above F; M4’s drain is M2’s gate, one $V_{GS2}$ above $V_P$. Then the NMOS fence: saturated while $V_D \\ge V_G - V_{th}$', tex: stepTex('bank-t4q3', 3), hl: [T([450, 300, 140, 160, C.n])],
+      { t: 35, title: '**(c) Three levels, one fence.** F = $1.15V_{ov9}$; M4’s gate is one $V_{GS4}$ above F; M4’s drain is M2’s gate, one $V_{GS2}$ above $V_P$. Then the NMOS fence: saturated while $V_D \\ge V_G - V_{th}$', tex: `V_{ov9} = \\sqrt{\\frac{2(300\\mu)}{200\\mu\\times200}} = ${f(vov9)}\\,\\mathrm{V},\\; V_F = 1.15(${f(vov9)}) = ${f(vF)}\\,\\mathrm{V},\\; V_{G4} = ${f(vF)} + 0.7 + 0.1 = ${f(vG4)}\\,\\mathrm{V},\\; V_{D4} = ${f(vov1)} + 0.7 + ${f(vov1)} = ${f(vD4)}\\,\\mathrm{V} \\ge V_{G4} - 0.7 = ${f(vG4 - 0.7)}\\,\\mathrm{V}\\;\\checkmark`, hl: [T([450, 300, 140, 160, C.n])],
         try: { q: '(c) Given $V_{DS9} = 1.15\\,V_{ov9}$: is M4 in saturation?', choices: ['Yes, M4 is saturated', 'No, M4 is in triode'], answer: 0,
+          parts: [
+            { q: 'Voltage at node F ($= V_{DS9}$)? M9 carries 300 µA, W/L = 200.', answer: vF, unit: 'V', tol: 0.01, hint: 'First $V_{ov9} = \\sqrt{2I_D/(\\mu_nC_{ox}W/L)}$, then $V_F = 1.15V_{ov9}$.', how: [`$$V_{ov9} = \\sqrt{\\frac{2(300\\,\\mu)}{200\\,\\mu\\times200}} = ${f(vov9)}\\,\\text{V},\\quad V_F = 1.15\\times${f(vov9)} = ${f(vF)}\\,\\text{V}$$`] },
+            { q: 'M4’s gate voltage $V_{G4}$? (M4: 200 µA, W/L = 200)', answer: vG4, unit: 'V', tol: 0.01, hint: 'One link above F: $V_{G4} = V_F + V_{thn} + V_{ov4}$.', how: [`$$V_{ov4} = \\sqrt{\\frac{2(200\\,\\mu)}{200\\,\\mu\\times200}} = 0.1\\,\\text{V},\\quad V_{G4} = ${f(vF)} + 0.7 + 0.1 = ${f(vG4)}\\,\\text{V}$$`] },
+            { q: 'M4’s drain voltage $V_{D4}$ (it is M2’s gate)?', answer: vD4, unit: 'V', tol: 0.01, hint: 'One link above $V_P = V_{ov1}$: $V_{D4} = V_P + V_{thn} + V_{ov2}$, with $V_{ov2} = V_{ov1}$.', how: [`$$V_{D4} = ${f(vov1)} + 0.7 + ${f(vov1)} = ${f(vD4)}\\,\\text{V}$$`] },
+          ],
           hint: ['You need three voltages: F (M4’s source, = $V_{DS9}$), M4’s gate (one $V_{GS4}$ above F), and M4’s drain, which is M2’s gate (one $V_{GS2}$ above $V_P$).', 'NMOS saturated while $V_{D4} \\ge V_{G4} - V_{thn}$, with $V_{G4} = V_F + V_{GS4}$ and $V_{D4} = V_P + V_{GS2}$'],
           how: ['M9 carries 300 µA with W/L = 200: $$V_{ov9} = \\sqrt{\\frac{2(300\\,\\mu)}{200\\,\\mu\\times200}} = 0.1225\\,\\text{V},\\quad V_F = 1.15\\times0.1225 = 0.1408\\,\\text{V}$$',
             'M4 carries 200 µA with W/L = 200, so $V_{ov4} = 0.1$ V; its gate is one link above F: $$V_{G4} = 0.1408 + 0.7 + 0.1 = 0.9408\\,\\text{V}$$',
@@ -608,18 +639,29 @@ scene(L9, 'Tutorial 4 Q3: folded booster, every part', 96, (S) => {
             'M9 carries 300 µA (first step) with $(W/L)_9 = (W/L)_1 = 200$.',
             'Same $V_{GS}$, so W/L in proportion to current: $$(W/L)_7 = 200\\times\\frac{200\\,\\mu}{300\\,\\mu} = 133.3$$'] },
         say: 'Same $V_{GS}$, so W/L ∝ current: $(W/L)_7 = 200\\times200/300 = 133$.' },
-      { t: 51, title: '**Walk the bias string.** Each resistor = (voltage across it) ÷ 200 µA: $R_2$ from M7’s drain ($V_{GS7}$) up to $V_{G4}$, $R_1$ from $V_{G4}$ up to M8’s drain ($V_{DD} - |V_{GS8}|$)', tex: stepTex('bank-t4q3', 5), hl: [T([80, 260, 120, 190, C.amb])],
+      { t: 51, title: '**Walk the bias string.** Each resistor = (voltage across it) ÷ 200 µA: $R_2$ from M7’s drain ($V_{GS7}$) up to $V_{G4}$, $R_1$ from $V_{G4}$ up to M8’s drain ($V_{DD} - |V_{GS8}|$)', tex: `V_{GS7} = 0.7 + ${f(vov9)} = ${f(vgs7)}\\,\\mathrm{V},\\; R_2 = \\frac{${f(vG4)} - ${f(vgs7)}}{200\\mu} = ${f(ans('bank-t4q3', 'r2'), 3)}\\,\\Omega,\\; |V_{GS8}| = 0.8 + ${f(vgs8 - 0.8)} = ${f(vgs8)}\\,\\mathrm{V},\\; R_1 = \\frac{${f(3 - vgs8)} - ${f(vG4)}}{200\\mu} = ${f(ans('bank-t4q3', 'r1') / 1e3, 3)}\\,\\mathrm{k\\Omega}`, hl: [T([80, 260, 120, 190, C.amb])],
         try: { q: '(d, continued) Walk the bias string: find $R_2$, the resistor between M7’s drain and the node that feeds M4’s gate.', answer: ans('bank-t4q3', 'r2'), unit: 'Ω', tol: 0.02,
+          parts: [
+            { q: '$V_{GS7}$, the voltage at M7’s drain (diode-connected, mirrors M9)?', answer: vgs7, unit: 'V', tol: 0.01, hint: 'Same $V_{GS}$ as M9, so the same overdrive $V_{ov9}$ from (c).', how: [`$$V_{GS7} = V_{thn} + V_{ov9} = 0.7 + ${f(vov9)} = ${f(vgs7)}\\,\\text{V}$$`] },
+          ],
           hint: ['$R_2$ sits between two levels you already have: M7’s drain (diode-connected, so $V_{GS7}$ above ground) and $V_{G4}$ from part (c). It carries the string current, 200 µA.', '$R_2 = \\frac{V_{G4} - V_{GS7}}{I_8}$'],
           how: ['M7 has the same $V_{GS}$ as M9 (a mirror), so the same overdrive 0.1225 V: $$V_{GS7} = 0.7 + 0.1225 = 0.8225\\,\\text{V}$$',
             'The node between $R_1$ and $R_2$ is M4’s gate, from part (c): $$V_{G4} = 0.9408\\,\\text{V}$$',
             'Ohm’s law with the string current: $$R_2 = \\frac{0.9408 - 0.8225}{200\\,\\mu\\text{A}} = 592\\,\\Omega$$',
             'Same walk for $R_1$, up to M8’s drain at $V_{DD} - |V_{GS8}| = 3 - (0.8 + 0.1838) = 2.016$ V: $$R_1 = \\frac{2.016 - 0.9408}{200\\,\\mu\\text{A}} = 5.38\\,\\text{k}\\Omega$$'] },
         say: 'Bias string: each resistor is (voltage across it)/200 µA. $R_2 ≈ 592$ Ω, $R_1 ≈ 5.38$ kΩ.' },
-      { t: 59, title: '**(e) The booster’s gain.** M3 has $R_3$ in its source, so its $G_m = g_{m3}/(1 + g_{m3}R_3)$ is small; it drives $r_{O5}\\parallel$(M4 cascoded over $r_{O9}$)', tex: stepTex('bank-t4q3', 7), hl: [T([260, 150, 400, 400, C.amb])],
+      { t: 59, title: '**(e) The booster’s gain.** M3 has $R_3$ in its source, so its $G_m = g_{m3}/(1 + g_{m3}R_3)$ is small; it drives $r_{O5}\\parallel$(M4 cascoded over $r_{O9}$)', tex: `g_{m3} = \\frac{2(100\\mu)}{${f(vov3)}} = ${f(gm3 * 1e3)}\\,\\mathrm{mS},\\; G_{m3} = \\frac{${f(gm3 * 1e3)}\\mathrm{m}}{1 + ${f(gm3 * 1e3)}\\mathrm{m}\\times${f(r3 / 1e3)}\\mathrm{k}} = ${f(Gm3 * 1e6, 3)}\\,\\mathrm{\\mu S},\\; R_{out,aux} = r_{O5}\\parallel g_{m4}r_{O4}r_{O9} = 25\\mathrm{k}\\parallel${f(gm4 * ro4 * ro9 / 1e6, 3)}\\mathrm{M} = ${f(roAux / 1e3, 3)}\\,\\mathrm{k\\Omega},\\; A_{aux} = ${f(Gm3 * 1e6, 3)}\\,\\mathrm{\\mu S}\\times${f(roAux / 1e3, 3)}\\,\\mathrm{k\\Omega} = ${f(aux, 3)}`, hl: [T([260, 150, 400, 400, C.amb])],
         say: 'The booster’s input device has $R_3$ in its source, so its $G_m$ is only $g_{m3}/(1 + g_{m3}R_3)$ — a weak booster here, $A_{aux} ≈ 1.26$.' },
-      { t: 67, title: '**The load trap.** The boost makes $R_{down}$ several MΩ, but M6 above is a plain PMOS source ($r_{O6} = 10$ kΩ). In parallel, **the smaller one wins**', tex: stepTex('bank-t4q3', 8), hl: [T([690, 150, 160, 120, C.bad])],
-        try: { q: '(e) Find the overall gain $|A_v|$. Use $A_{aux} ≈ 1.26$ from the step above.', answer: ans('bank-t4q3', 'av'), unit: 'V/V', tol: 0.03,
+      { t: 67, title: '**The load trap.** The boost makes $R_{down}$ several MΩ, but M6 above is a plain PMOS source ($r_{O6} = 10$ kΩ). In parallel, **the smaller one wins**', tex: `g_{m1} = \\frac{2(500\\mu)}{${f(vov1)}} = ${f(gm1 * 1e3)}\\,\\mathrm{mS},\\; r_{O1} = r_{O2} = \\frac{1}{0.1(500\\mu)} = 20\\,\\mathrm{k\\Omega},\\; R_{down} = (1 + ${f(aux, 3)})(${f(gm1 * 1e3)}\\mathrm{m})(20\\mathrm{k})^2 + 40\\mathrm{k} = ${f(rdown / 1e6, 3)}\\,\\mathrm{M\\Omega},\\; R_{up} = r_{O6} = \\frac{1}{0.2(500\\mu)} = 10\\,\\mathrm{k\\Omega},\\; |A_v| = g_{m1}(R_{down}\\parallel R_{up}) = ${f(ans('bank-t4q3', 'av'), 4)}`, hl: [T([690, 150, 160, 120, C.bad])],
+        try: { q: '(e) Find the overall gain $|A_v|$. Start with the booster’s gain, then the resistances seen at the output.', answer: ans('bank-t4q3', 'av'), unit: 'V/V', tol: 0.03,
+          parts: [
+            { q: 'The booster input M3’s effective transconductance $G_{m3}$ (degenerated by $R_3$)?', answer: Gm3, unit: 'S', tol: 0.03, hint: ['$g_{m3} = 2I_3/|V_{ov3}|$ with 100 µA and $|V_{ov3}|$ from (b).', '$G_{m3} = \\frac{g_{m3}}{1 + g_{m3}R_3}$'], how: [`$$g_{m3} = \\frac{2(100\\,\\mu)}{${f(vov3)}} = ${f(gm3 * 1e3)}\\,\\text{mS}$$`, `$$G_{m3} = \\frac{${f(gm3 * 1e3)}\\,\\text{m}}{1 + ${f(gm3 * 1e3)}\\,\\text{m}\\times${f(r3 / 1e3)}\\,\\text{k}} = ${f(Gm3 * 1e6, 3)}\\,\\mu\\text{S}$$`] },
+            { q: 'The booster’s output resistance $R_{out,aux}$ (at M4’s drain)?', answer: roAux, unit: 'Ω', tol: 0.03, hint: ['Up: $r_{O5}$ (M5: 200 µA, $\\lambda_p = 0.2$). Down: M4 (200 µA, $V_{ov} = 0.1$ V) cascoded over $r_{O9}$ (300 µA).', '$R_{out,aux} = r_{O5}\\parallel g_{m4}r_{O4}r_{O9}$, $r_O = 1/(\\lambda I_D)$'], how: [`$$r_{O5} = \\frac{1}{0.2\\times200\\,\\mu} = 25\\,\\text{k}\\Omega,\\quad g_{m4}r_{O4}r_{O9} = 4\\,\\text{m}\\times50\\,\\text{k}\\times${f(ro9 / 1e3, 3)}\\,\\text{k} = ${f(gm4 * ro4 * ro9 / 1e6, 3)}\\,\\text{M}\\Omega$$`, `$$R_{out,aux} = 25\\,\\text{k}\\parallel${f(gm4 * ro4 * ro9 / 1e6, 3)}\\,\\text{M} = ${f(roAux / 1e3, 3)}\\,\\text{k}\\Omega$$`] },
+            { q: 'The booster’s gain $A_{aux}$?', answer: aux, unit: '', tol: 0.03, hint: '$A_{aux} = G_{m3}R_{out,aux}$', how: [`$$A_{aux} = ${f(Gm3 * 1e6, 3)}\\,\\mu\\text{S}\\times${f(roAux / 1e3, 3)}\\,\\text{k}\\Omega = ${f(aux, 3)}$$`] },
+            { q: '$g_{m1}$ of the main input device (500 µA)?', answer: gm1, unit: 'S', tol: 0.02, hint: '$g_m = 2I_D/V_{ov}$ with $V_{ov1}$ from (a).', how: [`$$g_{m1} = \\frac{2(500\\,\\mu)}{${f(vov1)}} = ${f(gm1 * 1e3)}\\,\\text{mS}$$`] },
+            { q: '$R_{down}$, the boosted resistance looking down from the output?', answer: rdown, unit: 'Ω', tol: 0.03, hint: ['$r_{O1} = r_{O2} = 1/(\\lambda_nI_D)$; M2 = M1, so $g_{m2} = g_{m1}$.', '$R_{down} = (1 + A_{aux})g_{m2}r_{O2}r_{O1} + r_{O2} + r_{O1}$'], how: ['$$r_{O1} = r_{O2} = \\frac{1}{0.1\\times500\\,\\mu} = 20\\,\\text{k}\\Omega$$', `$$R_{down} = ${f(1 + aux, 4)}\\times${f(gm1 * 1e3)}\\,\\text{m}\\times(20\\,\\text{k})^2 + 40\\,\\text{k} = ${f(rdown / 1e6, 3)}\\,\\text{M}\\Omega$$`] },
+            { q: '$R_{up}$, looking up into M6?', answer: ro6, unit: 'Ω', tol: 0.02, hint: 'M6 is a plain PMOS source: $R_{up} = r_{O6} = 1/(\\lambda_pI_D)$.', how: ['$$R_{up} = r_{O6} = \\frac{1}{0.2\\times500\\,\\mu} = 10\\,\\text{k}\\Omega$$'] },
+          ],
           hint: ['Looking down from the output, the boosted cascode gives $(1 + A_{aux})g_{m2}r_{O2}r_{O1}$, which is huge. Looking up, M6 is a plain PMOS source: only $r_{O6}$. The output sees both in parallel.', '$|A_v| = g_{m1}\\,(R_{down}\\parallel r_{O6})$,\\; $g_m = \\frac{2I_D}{V_{ov}}$,\\; $r_O = \\frac{1}{\\lambda I_D}$'],
           how: ['M1 and M2 at 500 µA, $V_{ov} = 0.1581$ V, $\\lambda_n = 0.1$: $$g_{m1} = g_{m2} = \\frac{2(500\\,\\mu)}{0.1581} = 6.325\\,\\text{mS},\\quad r_{O1} = r_{O2} = \\frac{1}{0.1\\times500\\,\\mu} = 20\\,\\text{k}\\Omega$$',
             'Boosted resistance looking down ($g_{m2}r_{O2}r_{O1} = 2.53$ MΩ): $$R_{down} = (1 + A_{aux})g_{m2}r_{O2}r_{O1} + r_{O2} + r_{O1} = 2.256\\times2.53\\,\\text{M} + 40\\,\\text{k} ≈ 5.75\\,\\text{M}\\Omega$$',
@@ -663,6 +705,10 @@ function m24q4Fig(S) {
 
 scene(L9, '2024 mid-sem Q4: R_out of a folded-boosted cascode', 72, (S) => {
   const T = tfm(1, 0, 110);
+  // intermediates from the givens: 10 µA in M2, M4, M5, M6, M7; 20 µA in M3; NMOS Vov 0.1 V, PMOS 0.2 V
+  const gm5 = 2 * 10e-6 / 0.2, roP = 1 / (0.2 * 10e-6), gm4 = 2 * 10e-6 / 0.1, ro4 = 1 / (0.1 * 10e-6), ro3 = 1 / (0.1 * 20e-6);
+  const rup = gm5 * roP * roP, rdn = gm4 * ro4 * (1 / (1 / ro3 + 1 / roP)), casc = gm4 * ro4 * ro4; // M2 = M4 numbers: 0.2 mS, 1 MΩ
+  const f = (v, n = 4) => fx(v, n);
   const off = pyqFrame(S, {
     paper: 'm24q4', tag: 'LEC 9 · PAST PAPER 2 OF 3', title: 'How big is R_out with a folded-cascode booster?', src: 'Mid-sem 2024-25 Q4 · 7 marks',
     q: 'All NMOS $V_{ov} = 0.1$ V, all PMOS $|V_{ov}| = 0.2$ V, $I_{D2} = I_{D4} = I_{D7} = 10\\,\\mu$A. Find $R_{out}$ and the minimum and maximum $V_{b2}$.',
@@ -678,8 +724,12 @@ scene(L9, '2024 mid-sem Q4: R_out of a folded-boosted cascode', 72, (S) => {
             'Same habit for the rest. KCL at F gives M3 = 10 + 10 = 20 µA; then $$g_{m4} = \\frac{2(10\\,\\mu)}{0.1} = 0.2\\,\\text{mS},\\quad r_{O4} = \\frac{1}{0.1\\times10\\,\\mu} = 1\\,\\text{M}\\Omega,\\quad r_{O3} = \\frac{1}{0.1\\times20\\,\\mu} = 500\\,\\text{k}\\Omega$$'],
           why: 'First KCL for every current, then $g_m$ and $r_O$ for every device, and only then the formulas.' },
         say: 'KCL at the fold node F: M4 and M7 each bring 10 µA, so M3 sinks 20 µA. Then every $g_m = 2I_D/V_{ov}$ and $r_O = 1/(\\lambda I_D)$.' },
-      { t: 17, title: '**Booster gain = $g_{m7}$ × (look up ∥ look down) at node G.** Up: the PMOS cascode M5 on M6. Down: the NMOS cascode M4 sitting on the fold node, which carries **two** resistances, $r_{O3}\\parallel r_{O7}$', tex: stepTex('pyq-m24-q4', 1), hl: [T([230, 150, 300, 480, C.amb])],
+      { t: 17, title: '**Booster gain = $g_{m7}$ × (look up ∥ look down) at node G.** Up: the PMOS cascode M5 on M6. Down: the NMOS cascode M4 sitting on the fold node, which carries **two** resistances, $r_{O3}\\parallel r_{O7}$', tex: `R_{up} = g_{m5}r_{O5}r_{O6} = 0.1\\mathrm{m}\\times500\\mathrm{k}\\times500\\mathrm{k} = ${f(rup / 1e6, 3)}\\,\\mathrm{M\\Omega},\\; R_{down} = g_{m4}r_{O4}(r_{O3}\\parallel r_{O7}) = 0.2\\mathrm{m}\\times1\\mathrm{M}\\times250\\mathrm{k} = ${f(rdn / 1e6, 3)}\\,\\mathrm{M\\Omega},\\; A_{aux} = 0.1\\,\\mathrm{mS}\\,(${f(rup / 1e6, 3)}\\mathrm{M}\\parallel ${f(rdn / 1e6, 3)}\\mathrm{M}) = ${f(ans('pyq-m24-q4', 'aux'), 4)}`, hl: [T([230, 150, 300, 480, C.amb])],
         try: { q: 'Find the booster’s gain $A_{aux}$ (from X, M7’s gate, to G, M2’s gate).', answer: ans('pyq-m24-q4', 'aux'), unit: '', tol: 0.02,
+          parts: [
+            { q: '$R_{up}$, looking up from G into the PMOS cascode M5 on M6 (10 µA each)?', answer: rup, unit: 'Ω', tol: 0.02, hint: ['PMOS at 10 µA, $|V_{ov}| = 0.2$ V, $\\lambda_p = 0.2$: find $g_{m5}$ and $r_{O5} = r_{O6}$.', '$R_{up} = g_{m5}r_{O5}r_{O6}$'], how: ['$$g_{m5} = \\frac{2(10\\,\\mu)}{0.2} = 0.1\\,\\text{mS},\\quad r_{O5} = r_{O6} = \\frac{1}{0.2\\times10\\,\\mu} = 500\\,\\text{k}\\Omega$$', `$$R_{up} = 0.1\\,\\text{m}\\times500\\,\\text{k}\\times500\\,\\text{k} = ${f(rup / 1e6, 3)}\\,\\text{M}\\Omega$$`] },
+            { q: '$R_{down}$, looking down from G into M4 over the fold node?', answer: rdn, unit: 'Ω', tol: 0.02, hint: ['$g_{m4}$, $r_{O4}$, $r_{O3}$ are on the first card; $r_{O7} = 500$ kΩ (PMOS, 10 µA).', '$R_{down} = g_{m4}r_{O4}(r_{O3}\\parallel r_{O7})$'], how: ['$$r_{O3}\\parallel r_{O7} = 500\\,\\text{k}\\parallel500\\,\\text{k} = 250\\,\\text{k}\\Omega$$', `$$R_{down} = 0.2\\,\\text{m}\\times1\\,\\text{M}\\times250\\,\\text{k} = ${f(rdn / 1e6, 3)}\\,\\text{M}\\Omega$$`] },
+          ],
           hint: ['The booster is the input device M7 driving node G: gain = $g_{m7}$ × (resistance at G). Look up from G: PMOS cascode M5 on M6. Look down: M4 cascoded over the fold node F, where $r_{O3}$ and $r_{O7}$ meet in parallel.', '$A_{aux} = g_{m7}\\,(R_{up}\\parallel R_{down})$,\\; $R_{up} = g_{m5}r_{O5}r_{O6}$,\\; $R_{down} = g_{m4}r_{O4}(r_{O3}\\parallel r_{O7})$'],
           how: ['PMOS devices at 10 µA ($\\lambda_p = 0.2$): $$g_{m5} = \\frac{2(10\\,\\mu)}{0.2} = 0.1\\,\\text{mS},\\quad r_{O5} = r_{O6} = r_{O7} = \\frac{1}{0.2\\times10\\,\\mu} = 500\\,\\text{k}\\Omega$$',
             'Look up from G (PMOS cascode): $$R_{up} = g_{m5}r_{O5}r_{O6} = 0.1\\,\\text{m}\\times500\\,\\text{k}\\times500\\,\\text{k} = 25\\,\\text{M}\\Omega$$',
@@ -688,8 +738,11 @@ scene(L9, '2024 mid-sem Q4: R_out of a folded-boosted cascode', 72, (S) => {
           why: 'Folded cascode: the fold node carries two $r_O$ in parallel. Don’t forget the input device’s own $r_{O7}$.',
           calc: [{ what: 'parallel and gain in one line', keys: '0.1m × ( 25M [SHIFT][^] + 50M [SHIFT][^] ) [SHIFT][^] [EXE]', shows: '1666.67', note: '[SHIFT][^] is x⁻¹. Type M with [CATALOG] ▸ Engineer Symbol ▸ Mega.' }] },
         say: 'Look up from G: the PMOS cascode, 25 MΩ. Look down: M4 cascoded over $r_{O3}\\parallel r_{O7}$ (two r_O on the fold node), 50 MΩ. $A_{aux} = 0.1\\,\\text{mS}\\times16.7\\,\\text{M} ≈ 1667$.' },
-      { t: 26, title: '**$R_{out}$:** the main cascode’s own $g_{m2}r_{O2}r_{O1}$, multiplied by $(1 + A_{aux})$', tex: stepTex('pyq-m24-q4', 2), hl: [T([570, 230, 160, 380, C.n])],
+      { t: 26, title: '**$R_{out}$:** the main cascode’s own $g_{m2}r_{O2}r_{O1}$, multiplied by $(1 + A_{aux})$', tex: `g_{m2} = \\frac{2(10\\mu)}{0.1} = 0.2\\,\\mathrm{mS},\\; r_{O2} = r_{O1} = \\frac{1}{0.1(10\\mu)} = 1\\,\\mathrm{M\\Omega},\\; g_{m2}r_{O2}r_{O1} = ${f(casc / 1e6, 3)}\\,\\mathrm{M\\Omega},\\; R_{out} = (1 + ${f(ans('pyq-m24-q4', 'aux'), 4)})\\times${f(casc / 1e6, 3)}\\,\\mathrm{M\\Omega} ≈ ${f(ans('pyq-m24-q4', 'rout') / 1e9, 3)}\\,\\mathrm{G\\Omega}`, hl: [T([570, 230, 160, 380, C.n])],
         try: { q: 'Now find $R_{out}$, looking down into M2’s drain.', answer: ans('pyq-m24-q4', 'rout'), unit: 'Ω', tol: 0.03,
+          parts: [
+            { q: 'The plain (unboosted) cascode $g_{m2}r_{O2}r_{O1}$? M2 and M1 carry 10 µA, NMOS $V_{ov} = 0.1$ V.', answer: casc, unit: 'Ω', tol: 0.02, hint: '$g_{m2} = 2I_D/V_{ov}$, $r_O = 1/(\\lambda_nI_D)$', how: ['$$g_{m2} = \\frac{2(10\\,\\mu)}{0.1} = 0.2\\,\\text{mS},\\quad r_{O2} = r_{O1} = \\frac{1}{0.1\\times10\\,\\mu} = 1\\,\\text{M}\\Omega$$', `$$g_{m2}r_{O2}r_{O1} = 0.2\\,\\text{m}\\times1\\,\\text{M}\\times1\\,\\text{M} = ${f(casc / 1e6, 3)}\\,\\text{M}\\Omega$$`] },
+          ],
           hint: ['A boosted cascode is a plain cascode multiplied by $(1 + A_{aux})$. M2 and M1 both carry $I_{D2} = 10$ µA, NMOS $V_{ov} = 0.1$ V.', '$R_{out} ≈ (1 + A_{aux})\\,g_{m2}r_{O2}r_{O1}$'],
           how: ['Main devices at 10 µA ($\\lambda_n = 0.1$): $$g_{m2} = \\frac{2(10\\,\\mu)}{0.1} = 0.2\\,\\text{mS},\\quad r_{O2} = r_{O1} = \\frac{1}{0.1\\times10\\,\\mu} = 1\\,\\text{M}\\Omega$$',
             'The plain cascode: $$g_{m2}r_{O2}r_{O1} = 0.2\\,\\text{m}\\times1\\,\\text{M}\\times1\\,\\text{M} = 200\\,\\text{M}\\Omega$$',
@@ -698,13 +751,15 @@ scene(L9, '2024 mid-sem Q4: R_out of a folded-boosted cascode', 72, (S) => {
         say: '$R_{out} ≈ A_{aux}g_{m2}r_{O2}r_{O1} = 1667\\times0.2\\,\\text{mS}\\times1\\,\\text{M}\\times1\\,\\text{M} ≈ 333$ GΩ.' },
       { t: 35, title: '**$V_{b2,min}$:** F sits one $V_{GS4}$ below $V_{b2}$ (a link), and M3 under F needs at least its $V_{ov3}$ (a check)', tex: stepTex('pyq-m24-q4', 3), hl: [T([230, 400, 140, 230, C.bad])],
         try: { q: 'Find the smallest $V_{b2}$ that keeps every device in saturation.', answer: ans('pyq-m24-q4', 'vb2min'), unit: 'V', tol: 0.01,
+          parts: [{ q: 'M4’s gate-source voltage $V_{GS4}$?', answer: 0.4 + 0.1, unit: 'V', tol: 0.01, hint: '$V_{GS} = V_{thn} + V_{ov}$', how: ['$$V_{GS4} = 0.4 + 0.1 = 0.5\\,\\text{V}$$'] }],
           hint: ['Lowering $V_{b2}$ pulls F down, because F sits one $V_{GS4}$ below M4’s gate. The device under F, M3, must keep at least its $V_{ov}$.', '$V_F = V_{b2} - V_{GS4} \\ge V_{ov3}$'],
           how: ['M4’s gate-source drop (NMOS, $V_{thn} = 0.4$ V, $V_{ov} = 0.1$ V): $$V_{GS4} = 0.4 + 0.1 = 0.5\\,\\text{V}$$',
             'F is one link below $V_{b2}$ and must stay at or above M3’s overdrive: $$V_{b2} - 0.5 \\ge 0.1$$',
             'So $$V_{b2,min} = 0.1 + 0.5 = 0.6\\,\\text{V}$$'] },
         say: 'F is one link below $V_{b2}$; M3 needs F ≥ $V_{ov3}$. So $V_{b2,min} = 0.1 + 0.5 = 0.6$ V.' },
       { t: 43, title: '**$V_{b2,max}$:** M4 must stay saturated. Its drain G is M2’s gate, one link above X; X is lowest at $V_{ov1}$. So $V_{b2} \\le G + V_{th4}$', tex: 'V_{b2} - V_{th4} \\le V_{ov1} + V_{GS2} \\Rightarrow V_{b2,max} = 0.1 + 0.5 + 0.4 = 1.0\\,\\mathrm{V}', hl: [T([230, 330, 140, 160, C.n]), T([570, 320, 160, 160, C.n])],
-        try: { q: 'And the largest $V_{b2}$?', answer: 1.0, unit: 'V', tol: 0.01,
+        try: { q: 'And the largest $V_{b2}$?', answer: 0.1 + 0.5 + 0.4, unit: 'V', tol: 0.01,
+          parts: [{ q: 'Lowest voltage of node G (M4’s drain = M2’s gate), with X at its lowest, $V_{ov1}$?', answer: 0.1 + 0.5, unit: 'V', tol: 0.01, hint: '$V_G = V_X + V_{GS2}$, $V_{GS2} = V_{thn} + V_{ov}$', how: ['$$V_G = 0.1 + (0.4 + 0.1) = 0.6\\,\\text{V}$$'] }],
           hint: ['Raising $V_{b2}$ lifts M4’s gate towards its drain G. G is M2’s gate: one $V_{GS2}$ above X, and X can sit as low as $V_{ov1}$ (M1 just saturated).', 'M4 saturated: $V_{b2} - V_{thn} \\le V_G = V_{ov1} + V_{GS2}$'],
           how: ['G is M2’s gate, one link above X; take X at its lowest, $V_{ov1} = 0.1$ V: $$V_G = V_X + V_{GS2} = 0.1 + (0.4 + 0.1) = 0.6\\,\\text{V}$$',
             'NMOS fence on M4: its gate may sit at most one $V_{thn}$ above its drain: $$V_{b2} \\le V_G + V_{thn} = 0.6 + 0.4 = 1.0\\,\\text{V}$$',
@@ -728,7 +783,8 @@ scene(L9, 'Exam-style check: the booster’s headroom and input type', 42, (S) =
     fig: (S2) => { const g = diffCsBoost(S2); g.setAttribute('transform', 'translate(40 220) scale(0.8)'); },
     steps: [
       { t: 8, title: '**(a) Walk up from ground** on the left: the booster’s tail (a check), then the link to M5’s gate, which is X, then M3’s overdrive above X (a check)', tex: 'V_{out,min} = V_{ISS1} + V_{GS5} + V_{ov3} = 0.2 + 0.7 + 0.2 = 1.1\\,\\mathrm{V}', hl: [T([180, 300, 820, 520, C.amb])],
-        try: { q: '(a) With this booster in place, what is the lowest output voltage $V_{out,min}$?', answer: 1.1, unit: 'V', tol: 0.01,
+        try: { q: '(a) With this booster in place, what is the lowest output voltage $V_{out,min}$?', answer: 0.2 + 0.7 + 0.2, unit: 'V', tol: 0.01,
+          parts: [{ q: 'Lowest voltage of node X (M5’s gate)?', answer: 0.2 + 0.7, unit: 'V', tol: 0.01, hint: 'Booster tail headroom, then one $V_{GS5}$ up to M5’s gate.', how: ['$$V_X = V_{ISS1} + V_{GS5} = 0.2 + 0.7 = 0.9\\,\\text{V}$$'] }],
           hint: ['Walk up from ground on the left: the booster’s tail source, then M5 (its gate is node X), then the cascode M3 above X.', '$V_{out,min} = V_{ISS1} + V_{GS5} + V_{ov3}$'],
           how: ['The booster’s tail needs its headroom (a check): $$V_{ISS1} = 0.2\\,\\text{V}$$',
             'M5’s gate is X, a whole $V_{GS5}$ above M5’s source (a link): $$V_X = 0.2 + 0.7 = 0.9\\,\\text{V}$$',
