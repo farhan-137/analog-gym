@@ -6,3 +6,7 @@ playwright-report
 dist-single
 *.tsbuildinfo
 scripts/anim/.kokoro
+
+Analog VLSI Vault/Attachments/Large/
+Analog VLSI Vault/.obsidian/workspace*.json
+Analog VLSI Vault/.obsidian/plugins/obsidian-spaced-repetition/data.json
