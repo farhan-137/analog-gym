@@ -1,6 +1,9 @@
 /* Lesson D, Lecture 15: the loop gain on a Bode plot, gain and phase crossover, phase and gain margin, one and two poles. */
 'use strict';
 const L15 = 'Lec 15 · Margins on the Bode plot';
+const atD15 = (x) => Math.atan(x) * 180 / Math.PI; // degrees
+/* PS2 P2: with u = f/fp2 far above fp1, u²(1 + u²) = k² where k = βA0·fp1/fp2 */
+const u2PS2 = (k) => (-1 + Math.sqrt(1 + 4 * k * k)) / 2;
 
 scene(L15, 'Where Lec 14 left you: the walk to the cliff', 58, (S) => {
   header(S, 'LEC 14 → 15 · THE PICTURE FOR ALL THREE LECTURES', 'Run out of gain before you run out of phase');
@@ -311,6 +314,11 @@ scene(L15, 'Past tutorial Ex 3: a one-pole op amp at gain 100', 44, (S) => {
             'Far above the pole, $|\\beta A| = \\frac{\\beta A_0}{\\sqrt{1+(f/f_p)^2}} \\approx \\frac{\\beta A_0 f_p}{f}$. Set it to 1 and solve for f. $$f_1 = \\beta A_0\\,f_p = 1000\\times10 = 10^4\\,\\mathrm{Hz}$$',
           ],
           why: 'One pole: crossover = $\\beta A_0 f_p$ (the gain-bandwidth times β).',
+          parts: [
+            { q: 'What is the low-frequency loop gain $\\beta A_0$?', answer: 1e5 / 100, unit: '', tol: 0.01,
+              hint: ['Gain 100 (non-inverting) means $\\beta = 1/100$.'],
+              how: ['$$\\beta A_0 = \\frac{10^5}{100} = 1000$$'] },
+          ],
           answer: ans('pyq-t24-ex3', 'f'), unit: 'Hz', tol: 0.02,
         }, say: 'Three decades above 10 Hz: 10 kHz. That is just $\\beta A_0 f_p$.' },
       { t: 14, title: '**Phase margin:** the only pole is 1000 times below the crossover, so its lag there is almost the full 90°.', tex: 'PM = 180^\\circ - \\tan^{-1}\\frac{f_1}{f_p} = 180^\\circ - \\tan^{-1}\\frac{10\\,\\mathrm{kHz}}{10\\,\\mathrm{Hz}} = 180^\\circ - 89.94^\\circ = 90.06^\\circ',
@@ -349,6 +357,14 @@ scene(L15, 'Problem Set 2 P2: the buffer versus gain 5', 66, (S) => {
           ],
           why: 'Always check the one-pole crossover against $f_{p2}$; if it is past it, solve with both poles.',
           calc: [{ what: 'Quadratic in u² (y² + y − 4 = 0)', keys: '[HOME] ▸ Equation ▸ Polynomial ▸ ax²+bx+c:  a = 1, b = 1, c = [SHIFT] [−] 4', shows: 'x₁ = 1.5616 (keep the positive root)' }, { what: 'Back to hertz', keys: '√( 1.5616 ) × 50M', shows: '62.48M', note: 'In Calculate, [Ans] does not hold the Polynomial root: retype it.' }],
+          parts: [
+            { q: 'Write $|\\beta A| \\approx \\frac{k}{u\\sqrt{1+u^2}}$ with $u = f/f_{p2}$. What is $k = \\beta A_0 f_{p1}/f_{p2}$?', answer: 2000 * 50e3 / 50e6, unit: '', tol: 0.01,
+              hint: ['β = 1, $A_0$ = 2000, $f_{p1}$ = 50 kHz, $f_{p2}$ = 50 MHz.'],
+              how: ['$$k = \\frac{2000\\times50\\,\\mathrm{k}}{50\\,\\mathrm{M}} = 2$$'] },
+            { q: 'Setting $|\\beta A| = 1$ gives $u^2(1+u^2) = k^2$. Solve for $u^2$.', answer: u2PS2(2), unit: '', tol: 0.01,
+              hint: ['It is a quadratic in $y = u^2$: $y^2 + y - 4 = 0$. Keep the positive root.'],
+              how: ['$$u^2 = \\frac{-1+\\sqrt{1+16}}{2} = 1.56$$'] },
+          ],
           answer: ans('bank-ps2-p2', 'gx1'), unit: 'Hz', tol: 0.03,
         }, say: 'The quadratic gives $f_{GX} = 62.5$ MHz: above the second pole.' },
       { t: 15, title: '**PM at 62.5 MHz:** add the two pole lags at the crossover and take them from 180°.', tex: 'PM = 180^\\circ - \\tan^{-1}\\frac{62.5\\,\\mathrm{M}}{50\\,\\mathrm{k}} - \\tan^{-1}\\frac{62.5\\,\\mathrm{M}}{50\\,\\mathrm{M}} = 180^\\circ - 89.95^\\circ - 51.33^\\circ = 38.7^\\circ',
@@ -363,6 +379,14 @@ scene(L15, 'Problem Set 2 P2: the buffer versus gain 5', 66, (S) => {
           ],
           why: 'Under 45°: as a buffer this op amp rings badly.',
           calc: [{ what: 'PM in one line (degree mode, prefixes)', keys: '180 − [SHIFT] [tan] 62.48M ÷ 50k ) − [SHIFT] [tan] 62.48 ÷ 50 )', shows: '38.71', note: 'For (b), edit 62.48 to 18.73 (both places) and [EXE] again: 69.62.' }],
+          parts: [
+            { q: 'Lag of the first pole (50 kHz) at $f_{GX}$ = 62.5 MHz?', answer: atD15(ans('bank-ps2-p2', 'gx1') / 50e3), unit: '°', tol: 0.002,
+              hint: ['$\\tan^{-1}(f_{GX}/f_{p1})$, degree mode.'],
+              how: ['$$\\tan^{-1}\\frac{62.5\\,\\mathrm{M}}{50\\,\\mathrm{k}} = \\tan^{-1}1250 = 89.95^\\circ$$'] },
+            { q: 'Lag of the second pole (50 MHz) at the same frequency?', answer: atD15(ans('bank-ps2-p2', 'gx1') / 50e6), unit: '°', tol: 0.01,
+              hint: ['$\\tan^{-1}(f_{GX}/f_{p2})$.'],
+              how: ['$$\\tan^{-1}\\frac{62.5}{50} = \\tan^{-1}1.25 = 51.33^\\circ$$'] },
+          ],
           answer: ans('bank-ps2-p2', 'pm1'), unit: '°', tol: 0.02,
         }, say: '89.95° + 51.3° of lag: PM = 38.7°. Too little.' },
       { t: 24, title: '**(b) β = 0.2** lowers the loop-gain curve by $20\\log 5$ = 14 dB, so it crosses 0 dB earlier, where the second pole has eaten less phase. Same equation with $\\beta A_0 f_{p1}/f_{p2} = 0.4$.', tex: 'u^2(1+u^2) = 0.4^2 \\Rightarrow u^2 = 0.140,\\; f_{GX} = 0.375\\times50\\,\\mathrm{MHz} = 18.7\\,\\mathrm{MHz},\\quad PM = 180^\\circ - 89.85^\\circ - 20.53^\\circ = 69.6^\\circ',
@@ -376,6 +400,17 @@ scene(L15, 'Problem Set 2 P2: the buffer versus gain 5', 66, (S) => {
             'Add the lags and subtract from 180°. $$PM = 180^\\circ - \\tan^{-1}\\frac{18.7\\,\\mathrm{M}}{50\\,\\mathrm{k}} - \\tan^{-1}\\frac{18.7}{50} = 180^\\circ - 89.85^\\circ - 20.53^\\circ = 69.6^\\circ$$',
           ],
           why: 'Smaller β → lower curve → earlier crossover → more phase margin.',
+          parts: [
+            { q: 'With β = 0.2, find the new crossover $f_{GX}$.', answer: Math.sqrt(u2PS2(0.4)) * 50e6, unit: 'Hz', tol: 0.02,
+              hint: ['Now $k = \\beta A_0 f_{p1}/f_{p2} = 400\\times50\\,\\mathrm{k}/50\\,\\mathrm{M} = 0.4$.', 'Solve $u^2(1+u^2) = 0.16$ for $u^2$, then $f_{GX} = u\\,f_{p2}$.'],
+              how: ['$$u^2 = \\frac{-1+\\sqrt{1.64}}{2} = 0.140,\\quad u = 0.375$$', '$$f_{GX} = 0.375\\times50\\,\\mathrm{MHz} = 18.7\\,\\mathrm{MHz}$$'] },
+            { q: 'Lag of the first pole (50 kHz) at 18.7 MHz?', answer: atD15(Math.sqrt(u2PS2(0.4)) * 50e6 / 50e3), unit: '°', tol: 0.002,
+              hint: ['$\\tan^{-1}(f_{GX}/f_{p1})$.'],
+              how: ['$$\\tan^{-1}\\frac{18.7\\,\\mathrm{M}}{50\\,\\mathrm{k}} = \\tan^{-1}375 = 89.85^\\circ$$'] },
+            { q: 'Lag of the second pole (50 MHz) at 18.7 MHz?', answer: atD15(Math.sqrt(u2PS2(0.4))), unit: '°', tol: 0.01,
+              hint: ['$\\tan^{-1}(f_{GX}/f_{p2})$.'],
+              how: ['$$\\tan^{-1}\\frac{18.7}{50} = \\tan^{-1}0.375 = 20.53^\\circ$$'] },
+          ],
           answer: ans('bank-ps2-p2', 'pm2'), unit: '°', tol: 0.02,
         }, say: 'Crossover at 18.7 MHz, where the second pole has eaten only 20°: PM = 69.6°. Weaker feedback, more margin.' },
       { t: 33, title: '**(c) Lecture 16’s peaking formula:** at $\\omega_{GX}$ the closed-loop gain is $1/\\beta$ divided by $2\\sin(PM/2)$. Use the buffer’s PM from (a).', tex: '\\frac{|A_f(\\omega_{GX})|}{1/\\beta} = \\frac{1}{2\\sin(PM/2)} = \\frac{1}{2\\sin19.36^\\circ} = \\frac{1}{2\\times0.331} = 1.51',
@@ -388,6 +423,11 @@ scene(L15, 'Problem Set 2 P2: the buffer versus gain 5', 66, (S) => {
             'Divide. $$\\frac{1}{2\\times0.331} = 1.51$$',
           ],
           why: 'A 51 % peak. Remember 45° → 1.3×, 60° → 1×.',
+          parts: [
+            { q: 'Using PM = 38.7° from (a), what is $|1 + \\beta A|$ at the crossover?', answer: 2 * Math.sin(ans('bank-ps2-p2', 'pm1') / 2 * Math.PI / 180), unit: '', tol: 0.01,
+              hint: ['Two unit arrows with angle PM between them: $|1 + \\beta A| = 2\\sin(PM/2)$.'],
+              how: ['$$2\\sin\\frac{38.7^\\circ}{2} = 2\\times0.331 = 0.663$$'] },
+          ],
           answer: ans('bank-ps2-p2', 'pk'), unit: '×', tol: 0.02,
         }, say: '$1/(2\\sin 19.4°) = 1.51$: a 51 % peak. Lecture 16 explains why.' },
       { t: 41, ans: true, title: '**Answers:** (a) $f_{GX}$ = 62.5 MHz, PM = 38.7° · (b) $f_{GX}$ = 18.7 MHz, PM = 69.6° · (c) peak 1.51× (51 %)', say: 'Same op amp: unstable-looking as a buffer, comfortable at gain 5.' },
@@ -415,6 +455,14 @@ scene(L15, '2025 mid-sem Q5 (= Razavi 10.3, 10.4): two close poles', 62, (S) => 
           ],
           why: 'Almost an oscillator: both poles sit far below the crossover and each eats nearly 90°.',
           calc: [{ what: 'Exact crossover with the Solver (x = ω/ωp1)', keys: '[HOME] ▸ Equation ▸ Solver:  1000 ÷ ( √(1+x²) × √(1+(x÷2)²) ) = 1, start 40', shows: 'x = 44.69' }, { what: 'PM (degree mode)', keys: '180 − [SHIFT] [tan] 44.69 ) − [SHIFT] [tan] 44.69 ÷ 2 )', shows: '3.84' }],
+          parts: [
+            { q: 'Lag of the first pole at $\\omega_{GX} = 44.7\\,\\omega_{p1}$ (from the card above)?', answer: atD15(Math.sqrt(2000)), unit: '°', tol: 0.002,
+              hint: ['$\\tan^{-1}(\\omega_{GX}/\\omega_{p1})$.'],
+              how: ['$$\\tan^{-1}44.7 = 88.72^\\circ$$'] },
+            { q: 'Lag of the second pole ($2\\omega_{p1}$) at $\\omega_{GX}$?', answer: atD15(Math.sqrt(2000) / 2), unit: '°', tol: 0.002,
+              hint: ['$\\tan^{-1}(\\omega_{GX}/\\omega_{p2})$ = $\\tan^{-1}(44.7/2)$.'],
+              how: ['$$\\tan^{-1}22.4 = 87.44^\\circ$$'] },
+          ],
           answer: ans('pyq-m25-q5', 'pm2'), unit: '°', tol: 0.03,
         }, say: '88.7° + 87.4° = 176.2°: PM = 3.8°. Almost an oscillator.' },
       { t: 22, title: '**(ii) Same recipe with $\\omega_{p2} = 4\\omega_{p1}$:** new crossover, then the two lags. Moving one pole a little hardly helps.', tex: '\\omega_{GX} \\approx \\sqrt{1000\\times4}\\,\\omega_{p1} = 63.2\\,\\omega_{p1},\\quad PM = 180^\\circ - \\tan^{-1}63.2 - \\tan^{-1}15.8 = 180^\\circ - 89.09^\\circ - 86.38^\\circ = 4.53^\\circ',
@@ -428,6 +476,17 @@ scene(L15, '2025 mid-sem Q5 (= Razavi 10.3, 10.4): two close poles', 62, (S) => 
             'Subtract both from 180°. $$PM = 180^\\circ - 89.09^\\circ - 86.38^\\circ = 4.53^\\circ$$',
           ],
           why: 'Moving $\\omega_{p2}$ from 2 to 4 times $\\omega_{p1}$ gains less than 1°: close poles under a big gain need compensation (Lec 17).',
+          parts: [
+            { q: 'New crossover: $\\omega_{GX}/\\omega_{p1}$ with $\\omega_{p2} = 4\\omega_{p1}$?', answer: Math.sqrt(4000), unit: '', tol: 0.01,
+              hint: ['Same as (i): $\\omega_{GX} \\approx \\sqrt{A_M\\,\\omega_{p1}\\omega_{p2}}$.'],
+              how: ['$$\\frac{\\omega_{GX}}{\\omega_{p1}} \\approx \\sqrt{1000\\times4} = 63.2$$'] },
+            { q: 'Lag of the first pole there?', answer: atD15(Math.sqrt(4000)), unit: '°', tol: 0.002,
+              hint: ['$\\tan^{-1}63.2$.'],
+              how: ['$$\\tan^{-1}63.2 = 89.09^\\circ$$'] },
+            { q: 'Lag of the second pole ($4\\omega_{p1}$) there?', answer: atD15(Math.sqrt(4000) / 4), unit: '°', tol: 0.002,
+              hint: ['$\\tan^{-1}(63.2/4)$.'],
+              how: ['$$\\tan^{-1}15.8 = 86.38^\\circ$$'] },
+          ],
           answer: ans('pyq-m25-q5', 'pm4'), unit: '°', tol: 0.03,
         }, say: 'Only 4.5°. Moving one pole a little does nothing: with this much gain both poles eat almost 90° each.' },
       { t: 31, title: '**(b) Lecture 16 backwards.** At the crossover the closed-loop gain is $1/\\beta$ divided by $2\\sin(PM/2)$. A 50 % peak means that factor is 1.5; solve for PM.', tex: '\\frac{1}{2\\sin(PM/2)} = 1.5 \\Rightarrow \\sin\\frac{PM}{2} = \\frac{1}{3} \\Rightarrow PM = 2\\sin^{-1}\\frac13 = 2\\times19.47^\\circ = 38.9^\\circ',
@@ -441,6 +500,11 @@ scene(L15, '2025 mid-sem Q5 (= Razavi 10.3, 10.4): two close poles', 62, (S) => 
           ],
           why: 'Check: 45° gives 1.3×, so a bigger 1.5× peak must mean less than 45°.',
           calc: [{ what: 'PM from the peak (degree mode)', keys: '2 [SHIFT] [sin] ( 1 ÷ ( 2 × 1.5 ) )', shows: '38.94' }],
+          parts: [
+            { q: 'A 50 % peak: what is $\\sin(PM/2)$?', answer: 1 / 3, unit: '', tol: 0.01,
+              hint: ['$\\frac{1}{2\\sin(PM/2)} = 1.5$.'],
+              how: ['$$\\sin\\frac{PM}{2} = \\frac{1}{2\\times1.5} = 0.333$$'] },
+          ],
           answer: ans('pyq-m25-q5', 'pmb'), unit: '°', tol: 0.01,
         }, say: '$\\sin(PM/2) = 1/3$: PM = 38.9°. Lecture 16 shows where that formula comes from.' },
       { t: 39, ans: true, title: '**Answers:** (a)(i) PM = 3.84° · (a)(ii) PM = 4.53° · (b) PM = 38.9°', say: 'Two poles close together under a big loop gain leave almost no margin: they need compensation (Lecture 17).' },
@@ -456,7 +520,7 @@ scene(L15, 'Razavi 10.1: the largest A0 for 60°', 50, (S) => {
     fig: eqFig([['|\\beta A| = \\frac{A_0}{\\sqrt{1 + (f/f_{p1})^2}\\,\\sqrt{1 + (f/f_{p2})^2}}', 330, 30], ['\\angle\\beta A = -\\tan^{-1}\\tfrac{f}{f_{p1}} - \\tan^{-1}\\tfrac{f}{f_{p2}}', 470, 28, '#ffd38a']]),
     steps: [
       { t: 6, title: '**Work backwards from the phase.** PM = 60° means the loop phase at the crossover must be −120°: the two pole lags add up to 120°.', tex: '\\tan^{-1}\\frac{f_{GX}}{10\\,\\mathrm{MHz}} + \\tan^{-1}\\frac{f_{GX}}{500\\,\\mathrm{MHz}} = 180^\\circ - 60^\\circ = 120^\\circ' },
-      { t: 11, title: '**Solve for the crossover.** The first pole gives almost 90° (88.2°), so the second must give about 31.8°.', tex: '\\tan^{-1}\\frac{f_{GX}}{500\\,\\mathrm{M}} = 120^\\circ - 88.2^\\circ = 31.8^\\circ \\Rightarrow f_{GX} = 500\\,\\mathrm{M}\\times\\tan31.8^\\circ = 311\\,\\mathrm{MHz}',
+      { t: 11, title: '**Solve for the crossover.** First guess: the first pole gives 90°, the second 30°. Correct it: near 300 MHz the first pole gives 88.2°, so the second must give 31.8°.', tex: 'f_{GX} \\approx 500\\,\\mathrm{M}\\times\\tan30^\\circ = 289\\,\\mathrm{MHz},\\quad \\tan^{-1}\\frac{f_{GX}}{500\\,\\mathrm{M}} = 120^\\circ - 88.2^\\circ = 31.8^\\circ \\Rightarrow f_{GX} = 500\\,\\mathrm{M}\\times\\tan31.8^\\circ = 311\\,\\mathrm{MHz}',
         try: {
           q: 'First step: at what frequency $f_{GX}$ must the gain crossover sit for PM = 60°?',
           hint: ['PM = 60° means the two pole lags must add to 120° at $f_{GX}$. The first pole is far below, so it gives almost (not quite) 90°.', '$\\tan^{-1}\\frac{f_{GX}}{10\\,\\mathrm{M}} + \\tan^{-1}\\frac{f_{GX}}{500\\,\\mathrm{M}} = 120^\\circ$. Guess with 90° for the first pole, then correct it.'],
@@ -468,6 +532,14 @@ scene(L15, 'Razavi 10.1: the largest A0 for 60°', 50, (S) => {
           ],
           why: 'Calculator Solver works too: solve atan(x/10) + atan(x/500) = 120 for x in MHz.',
           calc: [{ what: 'Crossover with the Solver (x in MHz, degree mode)', keys: '[HOME] ▸ Equation ▸ Solver:  tan⁻¹(x ÷ 10) + tan⁻¹(x ÷ 500) = 120, start 300', shows: 'x = 310.55  (MHz)', note: 'tan⁻¹ = [SHIFT] [tan]; = is [SHIFT] [(]. Check L−R ≈ 0.' }],
+          parts: [
+            { q: 'First guess: if the first pole gave a full 90°, where would the second pole give the remaining 30°?', answer: 500e6 * Math.tan(Math.PI / 6), unit: 'Hz', tol: 0.02,
+              hint: ['$\\tan^{-1}(f/500\\,\\mathrm{M}) = 30^\\circ$.'],
+              how: ['$$f \\approx 500\\,\\mathrm{M}\\times\\tan30^\\circ = 289\\,\\mathrm{MHz}$$'] },
+            { q: 'Correction: the first pole’s actual lag near 300 MHz (10 MHz pole)?', answer: atD15(ans('bank-r10-1', 'fgx') / 10e6), unit: '°', tol: 0.005,
+              hint: ['$\\tan^{-1}(f/10\\,\\mathrm{M})$ at about 300–311 MHz.'],
+              how: ['$$\\tan^{-1}31 = 88.2^\\circ$$ so the second pole must give $120 - 88.2 = 31.8^\\circ$.'] },
+          ],
           answer: ans('bank-r10-1', 'fgx'), unit: 'Hz', tol: 0.03,
         }, say: 'The first pole gives about 88°, so the second needs about 32°: $f_{GX}$ = 311 MHz.' },
       { t: 21, title: '**Make |βA| = 1 there.** With β = 1, $A_0$ must exactly cancel the two pole sizes at 311 MHz.', tex: 'A_0 = \\sqrt{1 + \\left(\\frac{311}{10}\\right)^2}\\,\\sqrt{1 + \\left(\\frac{311}{500}\\right)^2} = 31.07\\times1.177 = 36.6',
@@ -482,6 +554,14 @@ scene(L15, 'Razavi 10.1: the largest A0 for 60°', 50, (S) => {
           ],
           why: 'Backwards recipe: phase → crossover → gain. Two poles 50× apart allow only about 36 for 60°.',
           calc: [{ what: 'A0 in one line', keys: '√( 1 + ( 310.55 ÷ 10 ) [x²] ) × √( 1 + ( 310.55 ÷ 500 ) [x²] )', shows: '36.58' }],
+          parts: [
+            { q: 'Size of the first pole factor at 311 MHz: $\\sqrt{1 + (f_{GX}/f_{p1})^2}$?', answer: Math.hypot(1, ans('bank-r10-1', 'fgx') / 10e6), unit: '', tol: 0.01,
+              hint: ['$f_{GX}/f_{p1} = 311/10$.'],
+              how: ['$$\\sqrt{1 + 31.05^2} = 31.07$$'] },
+            { q: 'Size of the second pole factor: $\\sqrt{1 + (f_{GX}/f_{p2})^2}$?', answer: Math.hypot(1, ans('bank-r10-1', 'fgx') / 500e6), unit: '', tol: 0.01,
+              hint: ['$f_{GX}/f_{p2} = 311/500$.'],
+              how: ['$$\\sqrt{1 + 0.621^2} = 1.177$$'] },
+          ],
           answer: ans('bank-r10-1', 'a0'), unit: '', tol: 0.02,
         }, say: '$A_0$ = 36.6. Only 36: two poles 50 times apart leave very little room for gain at 60°.' },
       { t: 29, ans: true, title: '**Answer:** $A_0 ≈ 36.6$ (crossover $f_{GX}$ = 311 MHz)', say: 'Forwards: find the crossover, then the angles. Backwards: pick the angle, then the gain.' },

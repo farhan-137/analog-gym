@@ -1,6 +1,7 @@
 /* Lecture 14: slewing in the telescopic and folded cascode; the concept of stability; Barkhausen; complex numbers; two poles. */
 'use strict';
 const L14 = 'Lec 14 · Slewing & stability';
+const atD14 = (x) => Math.atan(x) * 180 / Math.PI; // degrees
 
 function teleFD(S) {
   const g = S.g(); const r = S.into(g);
@@ -258,6 +259,11 @@ scene(L14, 'Problem Set 2 P1: telescopic slew rate', 44, (S) => {
             'A capacitor obeys $i = C\\,dv/dt$, so divide by $C_L$. $$\\left|\\frac{dV_{out1}}{dt}\\right| = \\frac{I_{SS}}{2C_L} = \\frac{0.5\\times10^{-3}}{2\\times10^{-12}} = 2.5\\times10^{8}\\,\\mathrm{V/s} = 250\\,\\mathrm{V/\\mu s}$$',
           ],
           why: 'Slewing = KCL with fixed currents: (in − out) / C. Each single output of a fully differential pair slews at $I_{SS}/(2C_L)$.',
+          parts: [
+            { q: 'KCL at $V_{out1}$: what is the size of the net current flowing out of $C_L$?', answer: 1e-3 / 2, unit: 'A', tol: 0.02,
+              hint: ['In: the top source’s $I_{SS}/2$. Out: M1 now carries all of $I_{SS}$.'],
+              how: ['$$|I_{C_L}| = I_{SS} - \\frac{I_{SS}}{2} = 1\\,\\mathrm{mA} - 0.5\\,\\mathrm{mA} = 0.5\\,\\mathrm{mA}$$'] },
+          ],
           answer: ans('bank-ps2-p1', 'se'), unit: 'V/s', tol: 0.02,
         }, say: 'Left output: in 0.5 mA, out 1 mA. Net 0.5 mA out of 2 pF: falls at 250 V/µs.' },
       { t: 14, title: '**KCL at the right output.** M8 pushes $I_{SS}/2$ in and nothing pulls out (M2 is off), so all of it charges $C_L$: $V_{out2}$ **rises** at the same rate.', tex: '\\frac{dV_{out2}}{dt} = +\\frac{I_{SS}}{2C_L} = \\frac{0.5\\,\\mathrm{mA}}{2\\,\\mathrm{pF}} = +250\\,\\mathrm{V/\\mu s}', say: 'Right output: rises at the same 250 V/µs.' },
@@ -318,6 +324,11 @@ scene(L14, 'Tutorial 6 Q3: folded-cascode slew rate', 66, (S) => {
           ],
           why: 'Not $I_{SS}/C_L$ (= 75 V/µs): with $I_P < I_{SS}$ the slewing current is $I_P$.',
           calc: [{ what: 'Slew rate with prefixes (Engineer Symbol on)', keys: '200µ ÷ 4p', shows: '50M  (V/s = 50 V/µs)', note: 'Type µ and p with [CATALOG] ▸ Engineer Symbol.' }],
+          parts: [
+            { q: 'With M2 off: what net current flows into $C_L$ (right branch minus the mirror’s copy of the left branch)?', answer: 200e-6, unit: 'A', tol: 0.02,
+              hint: ['Right branch: $I_P - I_{D2} = I_P - 0$. Left branch: $I_P - I_{SS} < 0$, so it is off and the mirror copies 0.'],
+              how: ['Right branch carries $I_P - 0 = 200\\,\\mu$A; left branch would be $200 - 300 < 0$, so it is off and the mirror sinks 0.', '$$I_{C_L} = 200 - 0 = 200\\,\\mu\\mathrm{A}$$'] },
+          ],
           answer: ans('bank-t6q3', 'srp'), unit: 'V/s', tol: 0.02,
         }, say: 'Positive slewing: 200 µA into 4 pF = 50 V/µs.' },
       { t: 25, title: '**(b) Falling output:** now M1 is off and M2 takes all of $I_{SS}$. The right branch would need $I_P - I_{SS} < 0$, so it is off; the left branch carries the full $I_P$ and the mirror sinks a copy of it. **$I_P$ limits it, not $I_{SS}$.**', tex: 'SR_- = \\frac{0 - I_P}{C_L} = \\frac{-200\\,\\mathrm{\\mu A}}{4\\,\\mathrm{pF}} = -50\\,\\mathrm{V/\\mu s}',
@@ -331,6 +342,11 @@ scene(L14, 'Tutorial 6 Q3: folded-cascode slew rate', 66, (S) => {
             'Divide by $C_L$. $$|SR_-| = \\frac{I_P}{C_L} = \\frac{200\\times10^{-6}}{4\\times10^{-12}} = 50\\,\\mathrm{V/\\mu s}$$',
           ],
           why: 'Both directions are set by $I_P$ because $I_P < I_{SS}$: a branch turns off and the rest of $I_{SS}$ is wasted.',
+          parts: [
+            { q: 'With M1 off: what is the size of the net current pulled out of $C_L$?', answer: 200e-6, unit: 'A', tol: 0.02,
+              hint: ['Right branch: $I_P - I_{SS} < 0$, so it is off. Left branch: $I_P - 0$, and the mirror sinks a copy of it.'],
+              how: ['Right branch off (0); the mirror sinks a copy of the left branch, $I_P = 200\\,\\mu$A.', '$$|I_{C_L}| = |0 - 200| = 200\\,\\mu\\mathrm{A}$$'] },
+          ],
           answer: ans('bank-t6q3', 'srm'), unit: 'V/s', tol: 0.02,
         }, say: 'Negative slewing: also 200 µA / 4 pF = 50 V/µs. Limited by $I_P$, not $I_{SS}$.' },
       { t: 33, title: '**(c) No branch may turn off.** The worst branch carries $I_P - I_{SS}$; keep it ≥ 0 and both slew rates become $I_{SS}/C_L$.', tex: 'I_P - I_{SS} \\ge 0 \\Rightarrow I_P \\ge I_{SS} = 300\\,\\mathrm{\\mu A},\\quad SR = \\frac{I_{SS}}{C_L} = \\frac{300\\,\\mathrm{\\mu A}}{4\\,\\mathrm{pF}} = 75\\,\\mathrm{V/\\mu s}',
@@ -380,6 +396,11 @@ scene(L14, 'Past tutorial: two poles closing in', 60, (S) => {
           ],
           why: 'Q = 0.5: coincident (fastest without overshoot). Q = 0.707: maximally flat.',
           calc: [{ what: 'β in one line', keys: '( ( 1.01 × 10 [^] 6 ) [x²] ÷ ( 4 × 10 [^] 10 ) − 1 ) ÷ 100', shows: '0.245025', note: 'For the flat case, edit 4 to 2 with ◀ and [EXE] again.' }],
+          parts: [
+            { q: 'What must $1 + \\beta A_0$ be for Q = 0.5?', answer: 1 + 100 * ans('pyq-t24-ex2', 'b1'), unit: '', tol: 0.02,
+              hint: ['Set $Q^2 = \\frac{(1+\\beta A_0)\\,\\omega_{p1}\\omega_{p2}}{(\\omega_{p1}+\\omega_{p2})^2} = \\frac14$, with $\\omega_{p1}\\omega_{p2} = 10^{10}$ and $\\omega_{p1}+\\omega_{p2} = 1.01\\times10^6$.'],
+              how: ['$$1 + \\beta A_0 = \\frac{(1.01\\times10^6)^2}{4\\times10^{10}} = 25.5$$'] },
+          ],
           answer: ans('pyq-t24-ex2', 'b1'), unit: '', tol: 0.02,
         }, say: '$(1.01\\times10^6)^2/(4\\times10^{10}) = 25.5 = 1 + 100\\beta$, so β = 0.245.' },
       { t: 15, title: '**Maximally flat means Q = 1/√2**, i.e. $Q^2 = 1/2$: the same equation with 2 in place of 4.', tex: '1 + \\beta A_0 = \\frac{(\\omega_{p1}+\\omega_{p2})^2}{2\\,\\omega_{p1}\\omega_{p2}} = \\frac{(1.01\\times10^6)^2}{2\\times10^{10}} = 51.0,\\quad \\beta = \\frac{51.0 - 1}{100} = 0.500',
@@ -392,6 +413,11 @@ scene(L14, 'Past tutorial: two poles closing in', 60, (S) => {
             'With $A_0 = 100$: $$\\beta = \\frac{51.0 - 1}{100} = 0.500$$',
           ],
           why: 'More feedback (bigger β) raises Q: coincident → flat → ringing.',
+          parts: [
+            { q: 'What must $1 + \\beta A_0$ be for $Q = 1/\\sqrt2$?', answer: 1 + 100 * ans('pyq-t24-ex2', 'b2'), unit: '', tol: 0.02,
+              hint: ['Same $Q^2$ equation, now $= \\frac12$.'],
+              how: ['$$1 + \\beta A_0 = \\frac{(1.01\\times10^6)^2}{2\\times10^{10}} = 51.0$$'] },
+          ],
           answer: ans('pyq-t24-ex2', 'b2'), unit: '', tol: 0.02,
         }, say: '$1 + 100\\beta = 51.0$, so β ≈ 0.50.' },
       { t: 23, title: '**Closed-loop gain** at low frequency: the usual $A_0/(1 + \\beta A_0)$, with $1 + \\beta A_0 = 51.0$ from the flat case.', tex: 'A_f = \\frac{A_0}{1+\\beta A_0} = \\frac{100}{51.0} = 1.96',
@@ -429,6 +455,14 @@ scene(L14, 'Exam-style check: loop phase and Barkhausen', 46, (S) => {
           ],
           why: 'At a pole: 45°. A decade above it: about 84°. Never more than 90° per pole.',
           calc: [{ what: 'Both lags in one line (degree mode)', keys: '[SHIFT] [−] [SHIFT] [tan] 10 ) − [SHIFT] [tan] 1 )', shows: '−129.29' }],
+          parts: [
+            { q: 'Phase lag of the **first** pole ($\\omega_{p1}$ = 1 Mrad/s) at ω = 10 Mrad/s?', answer: atD14(10), unit: '°', tol: 0.01,
+              hint: ['$\\tan^{-1}(\\omega/\\omega_{p1})$, degree mode.'],
+              how: ['$$\\tan^{-1}\\frac{10}{1} = 84.3^\\circ$$'] },
+            { q: 'Phase lag of the **second** pole ($\\omega_{p2}$ = 10 Mrad/s) at the same ω?', answer: atD14(1), unit: '°', tol: 0.01,
+              hint: ['$\\tan^{-1}(\\omega/\\omega_{p2})$: ω sits right on this pole.'],
+              how: ['$$\\tan^{-1}\\frac{10}{10} = \\tan^{-1}1 = 45^\\circ$$'] },
+          ],
           answer: -129.3, unit: '°', tol: 0.01,
         }, say: 'First pole: $\\tan^{-1}(10) = 84.3°$; second: $\\tan^{-1}(1) = 45°$. Total −129.3°.' },
       { t: 14, title: '**(b) Barkhausen needs −180° at |βA| = 1.** Each pole gives strictly less than 90°, so two poles reach −180° only as ω → ∞, where |βA| has already fallen to 0.', tex: '\\angle\\beta A > -90^\\circ - 90^\\circ = -180^\\circ \\;\\text{for every finite}\\;\\omega \\;\\Rightarrow\\; \\beta A \\ne -1',

@@ -136,52 +136,48 @@ scene(L8, 'Putting it together: (g_m r_O)³', 52, (S) => {
 /* current path through a FET drawn by fet(): drain lead, across the channel, source lead. d = -1 gate left, +1 gate right */
 const fetPath = (x, y, d) => [[x, y - 50], [x, y - 18], [x + 20 * d, y - 18], [x + 20 * d, y + 18], [x, y + 18], [x, y + 50]];
 
-/* Follow the current: implementation 1 (same figure and labels as the next scene) */
-scene(L8, 'Follow the current: the CS booster (implementation 1)', 64, (S) => {
-  header(S, 'LEC 8 · FOLLOW THE CURRENT', 'Two columns, joined only by gates');
+/* Follow the current: implementation 1. Lec 7 already followed these currents ('Follow the current: regulated cascode');
+   here only what is new: the page's swapped names, and the booster current pinning X (the swing penalty). */
+scene(L8, 'Follow the current: the CS booster (implementation 1)', 56, (S) => {
+  header(S, 'LEC 8 · FOLLOW THE CURRENT', 'Same currents as Lec 7, new names, and what they pin');
   const c = regCascode(S, { iout: 'I_1', iaux: 'I_2' });
   c.g.setAttribute('transform', 'translate(40 40)');
   S.draw(c.g, 0.3, 2);
-  S.say(0.3, 'Before the booster’s maths, follow its currents. Two columns hang from $V_{DD}$: the output column ($I_1$, M2, M1) and the booster column ($I_2$, M3).');
-  whyBox(S, 880, 140, 660, 140, '**Direction:** current flows **down**, from $V_{DD}$ to ground. An NMOS takes it in at the **drain** and lets it out at the **source**. The **sources set** how much; devices in series share it.', 5);
-  S.say(5, 'The direction rule: current flows down from $V_{DD}$ to ground. An NMOS takes it in at the drain and lets it out at the source. The current sources decide how much.');
-  S.stop(10, {
+  S.say(0.3, 'You met these currents in Lecture 7: two columns from $V_{DD}$, joined only by gates. Your Lec 8 page draws the same circuit — but with the names swapped. Watch the letters.');
+  current(S, [[600, 214], [600, 402], [580, 402], [580, 438], [600, 438], [600, 562], [620, 562], [620, 598], [600, 598], [600, 628]], 4, null, 'I_1: output', { color: C.cur, at: [725, 260] });
+  current(S, [[370, 214], [370, 562], [390, 562], [390, 598], [370, 598], [370, 628]], 4, null, 'I_2: booster', { color: C.p, at: [250, 470] });
+  S.say(4, 'Quick recap in the page’s names: the output source is $I_1$, through M2 and M1; the booster load is $I_2$, through M3 alone. Gates take no current, so the two never mix.');
+  whyBox(S, 880, 140, 660, 140, '**Names swap between sources:** your Lec 8 page calls the output source $I_1$. The 2025 mid-sem and Tutorial 4 call it $I_2$, and $I_1$ is M3’s load. **Follow the branch, not the letter.**', 11);
+  S.say(11, 'In the 2025 mid-sem and Tutorial 4 it is the other way round: $I_2$ is the output source and $I_1$ is M3’s load. Follow the branch, not the letter.');
+  S.stop(18, {
     src: 'Follow the current',
-    q: 'Look at M3’s drain node (the wire that also goes to M2’s gate). Where does M3’s drain current come from?',
-    choices: ['All of it from the current source above it ($I_2$)', 'Partly from M2’s gate, through the wire at M3’s drain', 'From the output column, through X'], answer: 0,
-    hint: ['Which wires at M3’s drain node can carry a DC current? Can a gate wire?', 'KCL at that node: $I_2 = I_{D3} + I_{G2}$, and a MOSFET gate draws no current.'],
-    how: ['Three wires meet at M3’s drain: the source $I_2$ above, M3’s drain, and M2’s gate.', 'KCL at that node, in = out: $$I_2 = I_{D3} + I_{G2}$$', 'A MOSFET gate is insulated, so $I_{G2} = 0$ and all of $I_2$ goes down through M3: $$I_{D3} = I_2$$', 'X is wired to M3’s **gate**, so nothing flows from the output column into M3 either.'],
-    why: 'Gate wires carry a voltage, never a DC current.',
+    q: 'The 2025 mid-sem gives $I_1 = 100\\,\\mu$A and $I_2 = 0.5$ mA, with $I_2$ on the output column. In that paper, how much current flows through M1?',
+    choices: ['0.5 mA: the paper’s $I_2$ is the output source', '100 µA: $I_1$ is always the output current', '0.6 mA: both currents add up at X'], answer: 0,
+    hint: ['Find the source that sits on top of the output column (M2 over M1) in that paper.', 'M1 carries only the output column’s current; the booster’s current stays in M3.'],
+    how: ['In the paper the output column is $I_2$ → M2 → M1, so $$I_{D1} = I_2 = 0.5\\,\\mathrm{mA}$$', 'Not 100 µA: that is $I_1$, M3’s load in the paper’s naming. Not 0.6 mA: X touches M3 only at its gate, which carries no current.'],
+    why: 'Decide which source feeds which column from the picture, never from the subscript.',
   });
-  current(S, [[370, 214], [370, 562], [390, 562], [390, 598], [370, 598], [370, 628]], 10.4, null, 'I_2 = 100 µA', { color: C.p, at: [255, 470] });
-  eqAt(S, '\\text{booster column: }\\; I_{D3} = I_2', 1210, 340, 10.4, { size: 30, w: 640, color: C.p });
-  S.say(10.4, 'The booster column: $I_2$ pushes its current down into M3’s drain, and M3 sinks all of it to ground. With the 2025 mid-sem numbers that is 100 µA.');
-  const gz = chip(S, 440, 393, 'I_G = 0', { color: C.muted, size: 16 }); gz.style.opacity = 0; S.fade(gz, 17, 0.5);
-  eqAt(S, '\\text{gates: }\\; I_{G2} = I_{G3} = 0', 1210, 410, 17, { size: 30, w: 640, color: C.muted });
-  S.say(17, 'That node also feeds M2’s gate, and X feeds M3’s gate — but gates draw <b>no</b> current. Nothing crosses between the columns: they are two separate loops.');
-  S.stop(24, {
+  S.say(18.4, 'In the paper, $I_2 = 0.5$ mA runs through M2 and M1, and $I_1 = 100\\,\\mu$A runs through M3 alone.');
+  eqAt(S, 'V_X = V_{GS3} = V_{th} + \\sqrt{\\tfrac{2I_{D3}}{\\mu_nC_{ox}(W/L)_3}}', 1210, 360, 25, { size: 32, w: 660, color: C.p });
+  S.say(25, 'What is new in Lecture 8: M3’s source is on ground and the booster current flows through it. That current fixes M3’s $V_{GS}$ — and X is M3’s gate. So the booster current <b>pins X</b> at $V_{GS3}$.');
+  const vov3 = Math.sqrt(2 * 100e-6 / (135e-6 * 200));
+  S.stop(32, {
     src: 'Follow the current',
-    q: 'Use the 2025 mid-sem numbers: the output current source pushes 0.5 mA, and the booster column carries 100 µA. How much current flows down through M2, the cascode?',
-    answer: 0.5e-3, unit: 'A', tol: 0.01,
-    hint: ['Follow the output column from $V_{DD}$: which parts are in series with M2? Does the booster’s current ever join it?', 'Series parts carry the same current, and gates carry none: $I_{D2} = I_{D1} = $ the output source current.'],
-    how: ['The output source, M2 and M1 are stacked in one column with nothing branching off: they are in **series**, so they carry the same current. $$I_{D2} = I_{D1} = I_1$$', 'The booster column touches this column only through **gates**, and a gate carries no current, so its 100 µA does not add in. $$I_{D2} = 0.5\\,\\mathrm{mA}\\;(\\text{not } 0.6\\,\\mathrm{mA})$$'],
-    why: 'Only drain/source wires can split a current. Gate wires never do.',
+    q: `In the 2025 mid-sem, M3 carries 100 µA with an overdrive $V_{ov3} = ${fx(vov3, 3)}$ V. If the booster current were made 4 times bigger (same M3), what would $V_{ov3}$ become?`,
+    answer: 2 * vov3, unit: 'V', tol: 0.02,
+    hint: ['In saturation the overdrive grows with the square root of the current.', '$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu_nC_{ox}(W/L)}} \\propto \\sqrt{I_D}$'],
+    how: ['Square law: $$V_{ov} \\propto \\sqrt{I_D}$$', `4 times the current gives $\\sqrt{4} = 2$ times the overdrive: $$V_{ov3} = 2\\times ${fx(vov3, 3)} = ${fx(2 * vov3, 3)}\\,\\mathrm{V}$$`, `So X rises from ${fx(0.7 + vov3, 3)} V to ${fx(0.7 + 2 * vov3, 3)} V, and the output floor (X + $V_{ov2}$) rises with it.`],
+    why: 'More booster current → X higher → less output swing. The booster runs on a small current.',
   });
-  current(S, [[600, 214], [600, 402], [580, 402], [580, 438], [600, 438], [600, 562], [620, 562], [620, 598], [600, 598], [600, 628]], 24.4, null, 'I_1 = 0.5 mA', { color: C.cur, at: [720, 260] });
-  eqAt(S, '\\text{output column: }\\; I_{D2} = I_{D1} = I_1', 1210, 480, 24.4, { size: 30, w: 640, color: C.cur });
-  S.say(24.4, 'The output column is one series string: $I_1$, then M2, then M1. The same current all the way down: $I_{D2} = I_{D1} = I_1$.');
-  whyBox(S, 880, 530, 660, 130, '**Watch the names:** your Lec 8 page calls the output source $I_1$. The 2025 mid-sem and Tutorial 4 call it $I_2$ (and $I_1$ is M3’s load). **Follow the branch, not the letter.**', 31);
-  S.say(31, 'Watch the names: your Lec 8 page calls the output source $I_1$, but the 2025 mid-sem and Tutorial 4 call it $I_2$, and $I_1$ is M3’s load there. Follow the branch, not the letter.');
-  whyBox(S, 880, 680, 660, 150, '**With a signal:** the sources still hold the currents. If X rises, M3 wants more current than $I_2$ can give, so its drain node — M2’s gate — **falls** instead. Currents stay put; voltages move.', 39);
-  S.say(39, 'With a signal, the sources still hold the currents. If X rises, M3 wants more than $I_2$ can give, so its drain — M2’s gate — falls instead. The currents stay put; the voltages move.');
+  S.say(32.4, 'Twice the overdrive: X goes up, and since the output floor is X plus $V_{ov2}$, the swing shrinks. That is why the booster runs on a small current.');
+  whyBox(S, 880, 450, 660, 150, '**The current sets the voltage:** the booster current through M3 decides $V_{GS3}$, which is where X sits. That is the implementation-1 swing penalty, seen from the currents.', 32.4);
   remember(S, [
-    'Two columns, both flowing **down** from $V_{DD}$: output ($I_1$ → M2 → M1) and booster ($I_2$ → M3).',
-    'Series devices carry the same current: $I_{D2} = I_{D1} = I_1$ and $I_{D3} = I_2$.',
-    'Gates draw **no** current: the columns talk only through voltages (X → M3’s gate, M3’s drain → M2’s gate).',
-    'Names swap between sources: on your page $I_1$ is the output source; in the 2025 mid-sem and Tutorial 4 it is $I_2$.',
-    'With a signal the sources hold the currents and the node voltages move (X up → M2’s gate down).',
-  ], 48, 'Follow the current · implementation 1');
-  S.say(48, 'Remember: two columns flowing down, series devices share one current, and gates carry none. Now the same circuit, with its gain.');
+    'Same two columns as Lec 7: output through M2 and M1, booster through M3 alone; gates carry no current.',
+    'Names swap: on your page $I_1$ is the output source; in the 2025 mid-sem and Tutorial 4 it is $I_2$. Follow the branch.',
+    'The booster current pins X: $V_X = V_{GS3} = V_{th} + \\sqrt{2I_{D3}/(\\mu_nC_{ox}(W/L)_3)}$.',
+    'More booster current → bigger $V_{ov3}$ → X higher → output floor higher → less swing.',
+  ], 41, 'Follow the current · implementation 1');
+  S.say(41, 'Remember: same currents as Lecture 7, but on this page the names are swapped, and the booster current pins X at $V_{GS3}$. Next: the gain and the swing cost.');
 });
 
 /* implementation 1, labelled as on the Lec 8 page: I1 on the output, I2 for M3 */
@@ -413,6 +409,12 @@ function foldedBoost(S) {
 /* ── Lecture 8 past papers ── */
 scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
   const T = tfm(1, 0, 90);
+  // every intermediate, from the givens (M1–M3 W/L = 200, µnCox = 135µ, PMOS W/L = 100, µpCox = 40µ, λn = 0.1, λp = 0.2)
+  const un = 135e-6, I1 = 100e-6, I2 = 0.5e-3;
+  const vov3 = Math.sqrt(2 * I1 / (un * 200)), vov2 = Math.sqrt(2 * I2 / (un * 200)), vovp = Math.sqrt(2 * I2 / (40e-6 * 100));
+  const gm3 = Math.sqrt(2 * un * 200 * I1), rO3 = 1 / (0.1 * I1), rOI1 = 1 / (0.2 * I1), A1 = gm3 * rO3 * rOI1 / (rO3 + rOI1);
+  const gm1 = Math.sqrt(2 * un * 200 * I2), rO1 = 1 / (0.1 * I2), Rdown = A1 * gm1 * rO1 * rO1, Rup = 1 / (0.2 * I2), Rout = Rup * Rdown / (Rup + Rdown);
+  const vmin = ans('pyq-m25-q1', 'vx') + vov2;
   const off = pyqFrame(S, {
     paper: 'm25q1', tag: 'LEC 8 · PAST PAPER 1 OF 3', title: 'The regulated cascode, as asked in the 2025 mid-sem', src: 'Mid-sem 2025-26 Q1 · 13 marks',
     q: '$I_1 = 100\\,\\mu$A (M3’s load, feeds P), $I_2 = 0.5$ mA (output), $(W/L)_{1,2,3} = 200$; $I_1, I_2$ are PMOS with $W/L = 100$. (a) DC voltages at X and P. (b) Maximum swing. (c) Gain.',
@@ -424,6 +426,7 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
         tex: 'V_X = V_{th} + \\sqrt{\\tfrac{2I_1}{\\mu_nC_{ox}(W/L)}} = 0.7 + \\sqrt{\\tfrac{2(100\\mu)}{135\\mu\\times 200}} = 0.7 + 0.0861 = 0.786\\,\\mathrm{V}', hl: [T([250, 470, 170, 140, C.volt])],
         try: {
           q: '**(a)** M3 carries $I_1 = 100\\,\\mu$A with its source on ground. Find the DC voltage at X.', answer: ans('pyq-m25-q1', 'vx'), unit: 'V', tol: 0.01,
+          parts: [{ q: 'First M3’s overdrive $V_{ov3}$ at $I_1 = 100\\,\\mu$A.', answer: vov3, unit: 'V', tol: 0.02, hint: ['$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu_nC_{ox}(W/L)}}$'], how: ['$$V_{ov3} = \\sqrt{\\tfrac{2(100\\mu)}{135\\mu\\times 200}} = 0.0861\\,\\mathrm{V}$$'] }],
           hint: ['X is M3’s gate and M3’s source is on ground, so X sits exactly one $V_{GS3}$ above ground (a link).', '$V_X = V_{GS3} = V_{th} + \\sqrt{\\dfrac{2I_1}{\\mu_nC_{ox}(W/L)_3}}$'],
           how: ['M3’s source is on ground and its gate is X, so X is one gate–source drop up: $$V_X = V_{GS3} = V_{th} + V_{ov3}$$', 'M3’s overdrive from its current $I_1 = 100\\,\\mu$A (square law): $$V_{ov3} = \\sqrt{\\tfrac{2I_1}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\tfrac{2(100\\mu)}{135\\mu\\times 200}} = 0.0861\\,\\mathrm{V}$$', 'Add the threshold: $$V_X = 0.7 + 0.0861 = 0.786\\,\\mathrm{V}$$'],
           why: 'Gate on X, source on ground: $V_X = V_{GS3}$. Bias voltages here are links from ground.',
@@ -434,6 +437,7 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
         tex: 'V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{135\\mu\\times 200}} = 0.192\\,\\mathrm{V},\\; V_P = V_X + V_{th} + V_{ov2} = 0.786 + 0.7 + 0.192 = 1.679\\,\\mathrm{V}', hl: [T([470, 330, 190, 100, C.volt])],
         try: {
           q: '**(a)** P is M2’s gate. M2 carries $I_2 = 0.5$ mA. Using $V_X$ from above, find the DC voltage at P.', answer: ans('pyq-m25-q1', 'vp'), unit: 'V', tol: 0.01,
+          parts: [{ q: 'First M2’s overdrive $V_{ov2}$ (M2 carries $I_2 = 0.5$ mA).', answer: vov2, unit: 'V', tol: 0.02, hint: ['M2 is in series with M1: it carries the output current. $V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}(W/L))}$'], how: ['$$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{135\\mu\\times 200}} = 0.192\\,\\mathrm{V}$$'] }],
           hint: ['P is M2’s gate and X is M2’s source: a second link stacked on the first.', '$V_P = V_X + V_{GS2} = V_X + V_{th} + \\sqrt{\\dfrac{2I_2}{\\mu_nC_{ox}(W/L)_2}}$'],
           how: ['M2’s source is X and its gate is P, so P is one $V_{GS2}$ above X: $$V_P = V_X + V_{GS2}$$', 'M2 is in series with M1, so it carries the output current $I_2 = 0.5$ mA: $$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{135\\mu\\times 200}} = 0.192\\,\\mathrm{V}$$', 'Stack the two links (X from the step above): $$V_P = 0.786 + 0.7 + 0.192 = 1.679\\,\\mathrm{V}$$'],
           why: 'Two links from ground: $V_P = V_{GS3} + V_{GS2}$.',
@@ -443,6 +447,7 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
         tex: '|V_{ov}| = \\sqrt{\\tfrac{2I_2}{\\mu_pC_{ox}(W/L)_p}} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{40\\mu\\times 100}} = 0.5\\,\\mathrm{V},\\; V_{out,max} = V_{DD} - |V_{ov}| = 3 - 0.5 = 2.5\\,\\mathrm{V}', hl: [T([470, 170, 190, 110, C.p])],
         try: {
           q: '**(b)** The output current source $I_2$ is a PMOS ($W/L = 100$) carrying 0.5 mA. How high can $V_{out}$ go before it leaves saturation?', answer: 2.5, unit: 'V', tol: 0.01,
+          parts: [{ q: 'First the PMOS source’s overdrive $|V_{ov}|$ at 0.5 mA.', answer: vovp, unit: 'V', tol: 0.02, hint: ['$|V_{ov}| = \\sqrt{\\dfrac{2I_D}{\\mu_pC_{ox}(W/L)_p}}$ with $\\mu_pC_{ox} = 40\\,\\mu$A/V², $W/L = 100$.'], how: ['$$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{40\\mu\\times 100}} = 0.5\\,\\mathrm{V}$$'] }],
           hint: ['A PMOS current source needs its drain at least $|V_{ov}|$ below its source, which is $V_{DD}$.', '$V_{out,max} = V_{DD} - |V_{ov}|,\\quad |V_{ov}| = \\sqrt{\\dfrac{2I_2}{\\mu_pC_{ox}(W/L)_p}}$'],
           how: ['The PMOS source’s source is $V_{DD}$ and its drain is the output. To stay saturated it needs $|V_{SD}| \\ge |V_{ov}|$, so $$V_{out,max} = V_{DD} - |V_{ov}|$$', 'Its overdrive at 0.5 mA with $\\mu_pC_{ox} = 40\\,\\mu$A/V²: $$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{40\\mu\\times 100}} = 0.5\\,\\mathrm{V}$$', 'Subtract from the supply: $$V_{out,max} = 3 - 0.5 = 2.5\\,\\mathrm{V}$$'],
           why: 'Ceiling = $V_{DD}$ minus the top device’s $|V_{ov}|$ (not its $|V_{GS}|$).',
@@ -452,25 +457,38 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
         tex: 'V_{out,min} = V_X + V_{ov2} = 0.786 + 0.192 = 0.979\\,\\mathrm{V},\\; \\text{swing} = V_{out,max} - V_{out,min} = 2.5 - 0.979 = 1.521\\,\\mathrm{V}', hl: [T([470, 330, 190, 160, C.bad])],
         try: {
           q: '**(b)** Using $V_X$ from part (a) and the ceiling just found, what is the maximum output swing?', answer: ans('pyq-m25-q1', 'swing'), unit: 'V', tol: 0.01,
+          parts: [{ q: 'First the floor $V_{out,min}$, set by M2.', answer: vmin, unit: 'V', tol: 0.01, hint: ['M2 needs its drain at least $V_{ov2}$ above its source X: $V_{out,min} = V_X + V_{ov2}$.'], how: ['$V_X$ and $V_{ov2}$ from part (a): $$V_{out,min} = 0.786 + 0.192 = 0.979\\,\\mathrm{V}$$'] }],
           hint: ['The floor is set by M2: its drain (the output) must stay at least $V_{ov2}$ above its source X.', '$V_{out,min} = V_X + V_{ov2}$, then swing $= V_{out,max} - V_{out,min}$.'],
           how: ['M2 stays saturated while its drain is at least $V_{ov2}$ above its source X, and X is pinned at $V_{GS3}$ by the booster: $$V_{out,min} = V_X + V_{ov2}$$', 'Use $V_X$ from (a) and M2’s overdrive at 0.5 mA (also from (a)): $$V_{out,min} = 0.786 + 0.192 = 0.979\\,\\mathrm{V}$$', 'Swing is the room between ceiling and floor: $$\\text{swing} = 2.5 - 0.979 = 1.521\\,\\mathrm{V}$$'],
           why: 'With a CS booster the floor is $V_{GS3} + V_{ov2}$, not $2V_{ov}$: one $V_{th}$ of swing lost.',
         },
         say: 'Floor: X is at $V_{GS3}$ (the implementation-1 penalty) plus $V_{ov2}$: 0.979 V. Swing = 2.5 − 0.979 = 1.52 V.' },
       { t: 42, title: '**(c) Booster gain.** M3 is a CS stage whose load $I_1$ is a **real PMOS** with its own $r_O$, so $A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1})$. It multiplies the cascode’s $R_{down}$.',
-        tex: 'g_{m3} = \\sqrt{2(135\\mu)(200)(100\\mu)} = 2.32\\,\\mathrm{mS},\\; A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1}) = 2.32\\mathrm{m}\\,(100\\mathrm{k}\\parallel 50\\mathrm{k}) = 77.5,\\; R_{down} = A_1g_{m2}r_{O2}r_{O1} = 161\\,\\mathrm{M\\Omega}', hl: [T([250, 170, 170, 450, C.amb])],
+        tex: 'g_{m3} = \\sqrt{2(135\\mu)(200)(100\\mu)} = 2.32\\,\\mathrm{mS},\\; r_{O3} = \\tfrac{1}{0.1\\times 100\\mu} = 100\\,\\mathrm{k\\Omega},\\; r_{O,I1} = \\tfrac{1}{0.2\\times 100\\mu} = 50\\,\\mathrm{k\\Omega},\\; A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1}) = 2.32\\mathrm{m}\\times 33.3\\mathrm{k} = 77.5', hl: [T([250, 170, 170, 450, C.amb])],
         try: {
-          q: '**(c)** First the booster. M3 runs at $I_1 = 100\\,\\mu$A, and its load $I_1$ is a PMOS ($\\lambda_p = 0.2$ V⁻¹), M3 has $\\lambda_n = 0.1$ V⁻¹. Find the booster gain $A_1$.', answer: 77.5, unit: 'V/V', tol: 0.02,
+          q: '**(c)** First the booster. M3 runs at $I_1 = 100\\,\\mu$A, and its load $I_1$ is a PMOS ($\\lambda_p = 0.2$ V⁻¹), M3 has $\\lambda_n = 0.1$ V⁻¹. Find the booster gain $A_1$.', answer: A1, unit: 'V/V', tol: 0.02,
+          parts: [
+            { q: 'M3’s transconductance $g_{m3}$ at 100 µA.', answer: gm3, unit: 'S', tol: 0.02, hint: ['$g_m = \\sqrt{2\\mu_nC_{ox}(W/L)I_D}$'], how: ['$$g_{m3} = \\sqrt{2(135\\mu)(200)(100\\mu)} = 2.32\\,\\mathrm{mS}$$'] },
+            { q: 'M3’s own output resistance $r_{O3}$ ($\\lambda_n = 0.1$ V⁻¹).', answer: rO3, unit: 'Ω', tol: 0.02, hint: ['$r_O = \\dfrac{1}{\\lambda I_D}$'], how: ['$$r_{O3} = \\tfrac{1}{0.1\\times 100\\mu} = 100\\,\\mathrm{k\\Omega}$$'] },
+            { q: 'The PMOS load’s output resistance $r_{O,I1}$ ($\\lambda_p = 0.2$ V⁻¹, same 100 µA).', answer: rOI1, unit: 'Ω', tol: 0.02, hint: ['$r_O = \\dfrac{1}{\\lambda_p I_D}$'], how: ['$$r_{O,I1} = \\tfrac{1}{0.2\\times 100\\mu} = 50\\,\\mathrm{k\\Omega}$$'] },
+          ],
           hint: ['M3 is a common-source stage. Its load is not ideal: the PMOS source’s own $r_O$ sits in parallel with $r_{O3}$.', '$A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1}),\\; g_{m3} = \\sqrt{2\\mu_nC_{ox}(W/L)I_1},\\; r_O = \\dfrac{1}{\\lambda I_D}$'],
           how: ['M3’s transconductance at 100 µA: $$g_{m3} = \\sqrt{2\\mu_nC_{ox}(W/L)I_1} = \\sqrt{2(135\\mu)(200)(100\\mu)} = 2.32\\,\\mathrm{mS}$$', 'The two resistances at M3’s drain, from $r_O = 1/(\\lambda I_D)$: $$r_{O3} = \\tfrac{1}{0.1\\times 100\\mu} = 100\\,\\mathrm{k\\Omega},\\; r_{O,I1} = \\tfrac{1}{0.2\\times 100\\mu} = 50\\,\\mathrm{k\\Omega}$$', 'They are in parallel (33.3 kΩ), so $$A_1 = 2.32\\mathrm{m}\\times 33.3\\mathrm{k} = 77.5$$'],
           why: 'The real PMOS load cuts the booster gain: an ideal load would give $g_{m3}r_{O3} = 232$.',
           calc: [{ what: 'g_m3 × (r_O3 ∥ r_O,I1) in one line', keys: '[√] ( 2 × 135µ × 200 × 100µ ) × ( 100k [SHIFT][^] + 50k [SHIFT][^] ) [SHIFT][^] [EXE]', shows: '77.46', note: '[SHIFT][^] is x⁻¹: (1/R1 + 1/R2)⁻¹ is the parallel combination.' }],
         },
-        say: 'Careful: M3’s load $I_1$ is a real PMOS, so $A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1}) = 77.5$, and $R_{down} = A_1g_{m2}r_{O2}r_{O1} ≈ 161$ MΩ.' },
+        say: 'Careful: M3’s load $I_1$ is a real PMOS, so $A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1}) = 77.5$, not the ideal-load 232.' },
       { t: 51, title: '**(c) The load trap.** Looking down the output sees $R_{down} ≈ 161$ MΩ, but looking up it sees only the PMOS source’s $r_O = 10$ kΩ. In parallel, the small one wins.',
-        tex: 'R_{up} = \\tfrac{1}{\\lambda_pI_2} = \\tfrac{1}{0.2\\times 0.5\\mathrm{m}} = 10\\,\\mathrm{k\\Omega},\\; A_v = -g_{m1}(R_{up}\\parallel R_{down}) = -5.2\\mathrm{m}\\,(10\\mathrm{k}\\parallel 161\\mathrm{M}) = -51.96', hl: [T([470, 170, 190, 110, C.bad])],
+        tex: 'g_{m1} = g_{m2} = \\sqrt{2(135\\mu)(200)(0.5\\mathrm{m})} = 5.20\\,\\mathrm{mS},\\; r_{O1} = r_{O2} = \\tfrac{1}{0.1\\times 0.5\\mathrm{m}} = 20\\,\\mathrm{k\\Omega},\\; R_{down} = A_1g_{m2}r_{O2}r_{O1} = 77.5\\times 5.20\\mathrm{m}\\times 20\\mathrm{k}\\times 20\\mathrm{k} = 161\\,\\mathrm{M\\Omega},\\; R_{up} = \\tfrac{1}{\\lambda_pI_2} = \\tfrac{1}{0.2\\times 0.5\\mathrm{m}} = 10\\,\\mathrm{k\\Omega},\\; A_v = -g_{m1}(R_{up}\\parallel R_{down}) = -5.20\\mathrm{m}\\,(10\\mathrm{k}\\parallel 161\\mathrm{M}) = -51.96', hl: [T([470, 170, 190, 110, C.bad])],
         try: {
-          q: '**(c)** From the step above, looking down into M2 the output sees $R_{down} ≈ 161$ MΩ. The output current source is a PMOS at 0.5 mA ($\\lambda_p = 0.2$ V⁻¹). Find the size of the overall gain, $|A_v|$.', answer: 51.96, unit: 'V/V', tol: 0.03,
+          q: '**(c)** Now the whole gain. The output current source is a PMOS at 0.5 mA ($\\lambda_p = 0.2$ V⁻¹), and $A_1$ comes from the step above. Find the size of the overall gain, $|A_v|$.', answer: -ans('pyq-m25-q1', 'av'), unit: 'V/V', tol: 0.03,
+          parts: [
+            { q: '$g_{m1}$ (= $g_{m2}$): M1 and M2 carry 0.5 mA.', answer: gm1, unit: 'S', tol: 0.02, hint: ['$g_m = \\sqrt{2\\mu_nC_{ox}(W/L)I_D}$'], how: ['$$g_{m1} = \\sqrt{2(135\\mu)(200)(0.5\\mathrm{m})} = 5.20\\,\\mathrm{mS}$$'] },
+            { q: '$r_{O1}$ (= $r_{O2}$) at 0.5 mA, $\\lambda_n = 0.1$ V⁻¹.', answer: rO1, unit: 'Ω', tol: 0.02, hint: ['$r_O = \\dfrac{1}{\\lambda I_D}$'], how: ['$$r_{O1} = \\tfrac{1}{0.1\\times 0.5\\mathrm{m}} = 20\\,\\mathrm{k\\Omega}$$'] },
+            { q: '$R_{down}$, looking down into M2’s drain, boosted by $A_1$ from the step above.', answer: Rdown, unit: 'Ω', tol: 0.03, hint: ['$R_{down} ≈ A_1\\,g_{m2}r_{O2}r_{O1}$'], how: ['$$R_{down} = 77.5\\times 5.20\\mathrm{m}\\times 20\\mathrm{k}\\times 20\\mathrm{k} = 161\\,\\mathrm{M\\Omega}$$'] },
+            { q: '$R_{up}$, looking up into the PMOS output source (0.5 mA, $\\lambda_p = 0.2$ V⁻¹).', answer: Rup, unit: 'Ω', tol: 0.02, hint: ['A plain current-source transistor shows just its $r_O = 1/(\\lambda_pI_D)$.'], how: ['$$R_{up} = \\tfrac{1}{0.2\\times 0.5\\mathrm{m}} = 10\\,\\mathrm{k\\Omega}$$'] },
+            { q: '$R_{out} = R_{up}\\parallel R_{down}$.', answer: Rout, unit: 'Ω', tol: 0.02, hint: ['In parallel, the much smaller resistance wins.'], how: ['$$R_{out} = 10\\mathrm{k}\\parallel 161\\mathrm{M} ≈ 10\\,\\mathrm{k\\Omega}$$'] },
+          ],
           hint: ['Gain = $G_m \\times R_{out}$, with $G_m ≈ g_{m1}$ and $R_{out} = R_{up}\\parallel R_{down}$.', '$|A_v| = g_{m1}(R_{up}\\parallel R_{down}),\\; R_{up} = r_{O,I2} = \\dfrac{1}{\\lambda_pI_2}$'],
           how: ['M1 is the input device at 0.5 mA: $$g_{m1} = \\sqrt{2(135\\mu)(200)(0.5\\mathrm{m})} = 5.2\\,\\mathrm{mS}$$', 'Looking up, the PMOS source is just its $r_O$: $$R_{up} = \\tfrac{1}{0.2\\times 0.5\\mathrm{m}} = 10\\,\\mathrm{k\\Omega}$$', 'In parallel with 161 MΩ the 10 kΩ wins: $$R_{out} = 10\\mathrm{k}\\parallel 161\\mathrm{M} ≈ 10\\,\\mathrm{k\\Omega}$$', 'Multiply: $$|A_v| = 5.2\\mathrm{m}\\times 10\\mathrm{k} = 51.96$$ It is inverting, so $A_v ≈ -52$.'],
           why: 'Boosting one side is wasted if the other side is a plain $r_O$: always check both $R_{up}$ and $R_{down}$.',
@@ -507,6 +525,10 @@ function pmosBoostFig(S) {
 
 scene(L8, 'Tutorial 4 Q2: the PMOS booster with numbers', 80, (S) => {
   const T = tfm(1, 0, 110);
+  // intermediates from the givens: µnCox = 150µ, µpCox = 100µ, (W/L)n = 150, (W/L)p = 100, ID = 0.1 mA
+  const vov5 = Math.sqrt(2 * 0.1e-3 / (100e-6 * 100)), vov1 = Math.sqrt(2 * 0.1e-3 / (150e-6 * 150));
+  const vd3 = vov1 + 0.7 + vov1, fence3 = vov1 + 0.85;
+  const gmn = Math.sqrt(2 * 150e-6 * 150 * 0.1e-3), gmro = Math.sqrt(2550), ron = gmro / gmn;
   const off = pyqFrame(S, {
     paper: 't4q2', tag: 'LEC 8 · PAST PAPER 2 OF 3', title: 'Is the PMOS booster’s M3 saturated?', src: 'Tutorial 4 Q2',
     q: 'M5 (PMOS load, gate $V_{bp}$), M2 and M1 carry $I_{D1} = 0.1$ mA. (a) $V_{bp}$. (b) With $V_P = V_{ov1}$, is M3 saturated? (c) With $V_{ov4} = 0.1$ V, the required $V_S$. (d) Booster removed, M5 ideal: λ for a gain ≈ 2550. (e) Gain with $\\lambda_p = 1.3\\lambda_n$.',
@@ -518,15 +540,21 @@ scene(L8, 'Tutorial 4 Q2: the PMOS booster with numbers', 80, (S) => {
         tex: 'V_{bp} = V_{DD} - |V_{GS5}| = 1.8 - \\left(0.85 + \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{100\\mu\\times 100}}\\right) = 1.8 - 0.991 = 0.809\\,\\mathrm{V}', hl: [T([540, 170, 220, 120, C.p])],
         try: {
           q: '**(a)** M5 is a PMOS load carrying 0.1 mA. Find its gate bias $V_{bp}$.', answer: ans('bank-t4q2', 'vbp'), unit: 'V', tol: 0.01,
+          parts: [{ q: 'First M5’s overdrive $|V_{ov5}|$ at 0.1 mA.', answer: vov5, unit: 'V', tol: 0.02, hint: ['$|V_{ov}| = \\sqrt{\\dfrac{2I_D}{\\mu_pC_{ox}(W/L)_p}}$'], how: ['$$|V_{ov5}| = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{100\\mu\\times 100}} = 0.141\\,\\mathrm{V}$$'] }],
           hint: ['M5’s source is on $V_{DD}$, so its gate is one $|V_{GS5}|$ below $V_{DD}$ (a link).', '$V_{bp} = V_{DD} - |V_{GS5}|,\\; |V_{GS5}| = |V_{thp}| + \\sqrt{\\dfrac{2I_D}{\\mu_pC_{ox}(W/L)_p}}$'],
           how: ['M5’s source sits on $V_{DD}$ and its gate is $V_{bp}$: $$V_{bp} = V_{DD} - |V_{GS5}|$$', 'Its overdrive at 0.1 mA: $$|V_{ov5}| = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{100\\mu\\times 100}} = 0.141\\,\\mathrm{V}$$', 'Add the threshold, then subtract from the supply: $$V_{bp} = 1.8 - (0.85 + 0.141) = 0.809\\,\\mathrm{V}$$'],
           why: 'Common slip: subtracting only $|V_{ov}|$ gives 1.66 V. A gate bias needs the full $|V_{GS}|$.',
         },
         say: '(a) A link from the top: $V_{bp} = V_{DD} - |V_{GS5}| = 0.809$ V.' },
       { t: 16, title: '**(b) The Lec 8 fence.** M3’s drain is M2’s gate, at $V_P + V_{GS2}$. A PMOS stays saturated while its drain is at most $|V_{thp}|$ above its gate, which is P.',
-        tex: 'V_{ov1} = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{150\\mu\\times 150}} = 0.094\\,\\mathrm{V},\\; V_{D3} = V_P + V_{GS2} = 0.094 + 0.794 = 0.889\\,\\mathrm{V},\\; V_{G3} + |V_{thp}| = 0.094 + 0.85 = 0.944\\,\\mathrm{V}\\;\\Rightarrow\\; 0.889 \\le 0.944\\;\\checkmark', hl: [T([250, 240, 170, 170, C.amb])],
+        tex: 'V_{ov1} = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{150\\mu\\times 150}} = 0.094\\,\\mathrm{V},\\; V_{D3} = V_P + V_{thn} + V_{ov2} = 0.094 + 0.7 + 0.094 = 0.889\\,\\mathrm{V},\\; V_{G3} + |V_{thp}| = 0.094 + 0.85 = 0.944\\,\\mathrm{V}\\;\\Rightarrow\\; 0.889 \\le 0.944\\;\\checkmark', hl: [T([250, 240, 170, 170, C.amb])],
         try: {
           q: '**(b)** Take $V_P = V_{ov1}$ (M1 and M2 carry 0.1 mA). Is the booster PMOS M3 saturated?',
+          parts: [
+            { q: '$V_P = V_{ov1}$: M1’s overdrive at 0.1 mA.', answer: vov1, unit: 'V', tol: 0.02, hint: ['$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu_nC_{ox}(W/L)_n}}$'], how: ['$$V_{ov1} = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{150\\mu\\times 150}} = 0.094\\,\\mathrm{V}$$'] },
+            { q: 'M3’s drain voltage $V_{D3}$ (it is M2’s gate; M2 also carries 0.1 mA).', answer: vd3, unit: 'V', tol: 0.01, hint: ['$V_{D3} = V_P + V_{GS2} = V_P + V_{thn} + V_{ov2}$, with $V_{ov2} = V_{ov1}$.'], how: ['$$V_{D3} = 0.094 + 0.7 + 0.094 = 0.889\\,\\mathrm{V}$$'] },
+            { q: 'The highest drain voltage M3 allows in saturation, $V_{G3} + |V_{thp}|$ (its gate is P).', answer: fence3, unit: 'V', tol: 0.01, hint: ['PMOS fence: $V_D \\le V_G + |V_{thp}|$.'], how: ['$$V_{G3} + |V_{thp}| = 0.094 + 0.85 = 0.944\\,\\mathrm{V}$$'] },
+          ],
           choices: ['Yes, just: its drain sits below its gate + $|V_{thp}|$', 'No: its drain is too high, so it is in triode', 'Cannot tell without λ'], answer: 0,
           hint: ['M3’s gate is P and its drain is M2’s gate. Find both voltages, then use the PMOS fence.', 'PMOS saturated while $V_{D3} \\le V_{G3} + |V_{thp}|$, with $V_{D3} = V_P + V_{GS2}$ and $V_{G3} = V_P$.'],
           how: ['M1 and M2 carry 0.1 mA with $(W/L)_n = 150$: $$V_{ov1} = V_{ov2} = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{150\\mu\\times 150}} = 0.094\\,\\mathrm{V}$$', 'M3’s drain is M2’s gate, one $V_{GS2} = 0.7 + 0.094$ above P: $$V_{D3} = 0.094 + 0.794 = 0.889\\,\\mathrm{V}$$', 'The fence for M3, whose gate is P: $$V_{G3} + |V_{thp}| = 0.094 + 0.85 = 0.944\\,\\mathrm{V}$$', '0.889 ≤ 0.944, so M3 is saturated — by only about 56 mV, because $V_{GS2} = 0.794$ V is barely below $|V_{thp}| = 0.85$ V.'],
@@ -546,6 +574,11 @@ scene(L8, 'Tutorial 4 Q2: the PMOS booster with numbers', 80, (S) => {
         tex: 'g_m = \\sqrt{2(150\\mu)(150)(0.1\\mathrm{m})} = 2.12\\,\\mathrm{mS},\\; g_mr_O = \\sqrt{2550} = 50.5,\\; r_O = \\tfrac{50.5}{2.12\\mathrm{m}} = 23.8\\,\\mathrm{k\\Omega},\\; \\lambda_n = \\tfrac{1}{r_OI_D} = \\tfrac{1}{23.8\\mathrm{k}\\times 0.1\\mathrm{m}} = 0.42\\,\\mathrm{V^{-1}}',
         try: {
           q: '**(d)** Remove the booster and make M5 an ideal 0.1 mA source. Which $\\lambda_n$ makes the gain about 2550?', answer: ans('bank-t4q2', 'lam'), unit: 'V⁻¹', tol: 0.025,
+          parts: [
+            { q: '$g_mr_O$ needed for a gain of 2550.', answer: gmro, unit: '', tol: 0.01, hint: ['Gain $≈ (g_mr_O)^2$: take the square root.'], how: ['$$g_mr_O = \\sqrt{2550} = 50.5$$'] },
+            { q: '$g_m$ of each NMOS at 0.1 mA.', answer: gmn, unit: 'S', tol: 0.02, hint: ['$g_m = \\sqrt{2\\mu_nC_{ox}(W/L)I_D}$'], how: ['$$g_m = \\sqrt{2(150\\mu)(150)(0.1\\mathrm{m})} = 2.12\\,\\mathrm{mS}$$'] },
+            { q: 'So the $r_O$ each device must have.', answer: ron, unit: 'Ω', tol: 0.02, hint: ['$r_O = (g_mr_O)/g_m$'], how: ['$$r_O = \\tfrac{50.5}{2.12\\mathrm{m}} = 23.8\\,\\mathrm{k\\Omega}$$'] },
+          ],
           hint: ['A plain cascode with an ideal load has gain $≈ (g_mr_O)^2$. Undo the square first.', '$g_mr_O = \\sqrt{2550},\\; g_m = \\sqrt{2\\mu_nC_{ox}(W/L)I_D},\\; r_O = \\dfrac{1}{\\lambda I_D}$'],
           how: ['Undo the square: $$g_mr_O = \\sqrt{2550} = 50.5$$', 'Each NMOS at 0.1 mA: $$g_m = \\sqrt{2(150\\mu)(150)(0.1\\mathrm{m})} = 2.12\\,\\mathrm{mS}$$', 'So $$r_O = \\tfrac{50.5}{2.12\\mathrm{m}} = 23.8\\,\\mathrm{k\\Omega}$$', 'And from $r_O = 1/(\\lambda I_D)$: $$\\lambda_n = \\tfrac{1}{23.8\\mathrm{k}\\times 0.1\\mathrm{m}} = 0.42\\,\\mathrm{V^{-1}}$$'],
           why: 'Exam form: gain ≈ $(g_mr_O)^2$. The exact $2g_mr_O + (g_mr_O)^2$ gives 0.428; both are accepted.',
@@ -553,7 +586,7 @@ scene(L8, 'Tutorial 4 Q2: the PMOS booster with numbers', 80, (S) => {
         },
         say: '(d) Without the booster the gain is about $(g_mr_O)^2 = 2550$, so $g_mr_O = 50.5$ and $\\lambda_n = 0.42$ V⁻¹.' },
       { t: 42, title: '**(e) The load trap again.** With the booster the cascode’s $R_{out}$ is huge, but M5 (now $\\lambda_p = 1.3\\lambda_n$) shows only its own $r_{O5}$, and that small resistance sets the gain.',
-        tex: 'r_{O5} = \\tfrac{1}{1.3(0.42)(0.1\\mathrm{m})} = 18.3\\,\\mathrm{k\\Omega},\\; |A_v| ≈ g_m(R_{boost}\\parallel r_{O5}) ≈ 2.12\\mathrm{m}\\times 18.3\\mathrm{k} ≈ 38.8', hl: [T([540, 170, 220, 120, C.bad])],
+        tex: 'r_{O5} = \\tfrac{1}{1.3(0.42)(0.1\\mathrm{m})} = 18.3\\,\\mathrm{k\\Omega},\\; R_{boost} \\gg r_{O5}\\;\\Rightarrow\\; |A_v| ≈ g_m(R_{boost}\\parallel r_{O5}) ≈ 2.12\\mathrm{m}\\times 18.3\\mathrm{k} ≈ 38.8', hl: [T([540, 170, 220, 120, C.bad])],
         say: '(e) The load trap again: M5 is a plain PMOS source, so the gain is about 39, although the boosted cascode alone would give 37 841.' },
       { t: 50, ans: true, title: `**Answers:** $V_{bp} = ${fx(ans('bank-t4q2', 'vbp'), 3)}$ V · M3 saturated (just) · $V_S = ${fx(ans('bank-t4q2', 'vs'), 4)}$ V · $\\lambda_n ≈ 0.42$ V⁻¹ · gain ≈ 39`, say: 'Lesson of (b): a PMOS booster only works if $V_{GS2}$ is squeezed below $|V_{th3}|$ — exactly why your page calls it a bad idea.' },
     ],
@@ -575,6 +608,7 @@ scene(L8, 'Tutorial 4 Q1 (a), (c): biases and swing', 70, (S) => {
         tex: 'V_X = V_{th} + \\sqrt{\\tfrac{2I_1}{\\mu_nC_{ox}(W/L)}} = 0.7 + \\sqrt{\\tfrac{2(100\\mu)}{172.35\\mu\\times 200}} = 0.7 + 0.0762 = 0.776\\,\\mathrm{V}', hl: [T([250, 470, 170, 140, C.volt])],
         try: {
           q: '**(a)** Find the gate bias of M3 (the voltage at X).', answer: ans('bank-t4q1', 'vx'), unit: 'V', tol: 0.01,
+          parts: [{ q: 'First M3’s overdrive $V_{ov3}$ at $I_1 = 100\\,\\mu$A.', answer: Math.sqrt(2 * 100e-6 / (172.35e-6 * 200)), unit: 'V', tol: 0.02, hint: ['$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu_nC_{ox}(W/L)}}$'], how: ['$$V_{ov3} = \\sqrt{\\tfrac{2(100\\mu)}{172.35\\mu\\times 200}} = 0.0762\\,\\mathrm{V}$$'] }],
           hint: ['M3’s gate is X and its source is on ground: one link up.', '$V_X = V_{th} + \\sqrt{\\dfrac{2I_1}{\\mu_nC_{ox}(W/L)}}$'],
           how: ['X is M3’s gate and M3’s source is ground: $$V_X = V_{GS3} = V_{th} + V_{ov3}$$', 'M3 carries $I_1 = 100\\,\\mu$A: $$V_{ov3} = \\sqrt{\\tfrac{2(100\\mu)}{172.35\\mu\\times 200}} = 0.0762\\,\\mathrm{V}$$', 'Add the threshold: $$V_X = 0.7 + 0.0762 = 0.776\\,\\mathrm{V}$$'],
           why: 'Same move as the 2025 mid-sem: a gate whose device sits on ground is one $V_{GS}$ up.',
@@ -584,6 +618,7 @@ scene(L8, 'Tutorial 4 Q1 (a), (c): biases and swing', 70, (S) => {
         tex: 'V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{172.35\\mu\\times 200}} = 0.170\\,\\mathrm{V},\\; V_{G2} = V_X + V_{th} + V_{ov2} = 0.776 + 0.7 + 0.170 = 1.646\\,\\mathrm{V}', hl: [T([470, 330, 190, 100, C.volt])],
         try: {
           q: '**(a)** Using $V_X$ from the step above, find the gate bias of M2.', answer: ans('bank-t4q1', 'vg2'), unit: 'V', tol: 0.01,
+          parts: [{ q: 'First M2’s overdrive $V_{ov2}$ at $I_2 = 0.5$ mA.', answer: Math.sqrt(2 * 0.5e-3 / (172.35e-6 * 200)), unit: 'V', tol: 0.02, hint: ['M2 is in series with M1, so it carries $I_2$. $V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}(W/L))}$'], how: ['$$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{172.35\\mu\\times 200}} = 0.170\\,\\mathrm{V}$$'] }],
           hint: ['M2’s gate is one $V_{GS2}$ above its source X, and M2 carries the output current $I_2$.', '$V_{G2} = V_X + V_{th} + \\sqrt{\\dfrac{2I_2}{\\mu_nC_{ox}(W/L)}}$'],
           how: ['M2’s source is X, so its gate is one link higher: $$V_{G2} = V_X + V_{GS2}$$', 'M2 is in series with M1, so it carries $I_2 = 0.5$ mA: $$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{172.35\\mu\\times 200}} = 0.170\\,\\mathrm{V}$$', 'Stack them: $$V_{G2} = 0.776 + 0.7 + 0.170 = 1.646\\,\\mathrm{V}$$'],
           why: '$V_{G2} = V_{GS3} + V_{GS2}$: two links stacked from ground.',
@@ -603,6 +638,7 @@ scene(L8, 'Tutorial 4 Q1 (a), (c): biases and swing', 70, (S) => {
         tex: '|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{51.7\\mu\\times 100}} = 0.440\\,\\mathrm{V},\\; V_{out,max} = 3 - 0.440 = 2.56\\,\\mathrm{V},\\; \\text{swing} = 2.56 - 0.946 = 1.61\\,\\mathrm{V}', hl: [T([470, 170, 190, 110, C.p])],
         try: {
           q: '**(c)** The output current source is a PMOS ($W/L = 100$) carrying 0.5 mA from $V_{DD} = 3$ V. What is the highest output voltage?', answer: ans('bank-t4q1', 'vmax'), unit: 'V', tol: 0.01,
+          parts: [{ q: 'First the PMOS source’s overdrive $|V_{ov}|$ at 0.5 mA.', answer: Math.sqrt(2 * 0.5e-3 / (51.7e-6 * 100)), unit: 'V', tol: 0.02, hint: ['$|V_{ov}| = \\sqrt{\\dfrac{2I_D}{\\mu_pC_{ox}(W/L)_p}}$'], how: ['$$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{51.7\\mu\\times 100}} = 0.440\\,\\mathrm{V}$$'] }],
           hint: ['The PMOS source stays saturated while its drain is at least $|V_{ov}|$ below $V_{DD}$.', '$V_{out,max} = V_{DD} - \\sqrt{\\dfrac{2I_2}{\\mu_pC_{ox}(W/L)_p}}$'],
           how: ['The top PMOS needs $|V_{SD}| \\ge |V_{ov}|$: $$V_{out,max} = V_{DD} - |V_{ov}|$$', 'Its overdrive at 0.5 mA with $\\mu_pC_{ox} = 51.7\\,\\mu$A/V²: $$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{51.7\\mu\\times 100}} = 0.440\\,\\mathrm{V}$$', 'Subtract from the supply: $$V_{out,max} = 3 - 0.440 = 2.56\\,\\mathrm{V}$$'],
           why: 'Swing = 2.56 − 0.946 ≈ 1.61 V. The ceiling uses only $|V_{ov}|$; no threshold appears.',
