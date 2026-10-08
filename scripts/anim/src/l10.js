@@ -1,5 +1,23 @@
 /* Lecture 10: CM and DM, the CMFB loop, resistive and source-follower sensing. */
 'use strict';
+/* intermediates of the past papers, computed from the givens (they reproduce the bank's answers) */
+const Q24 = (() => { // Quiz 2 2024 Q2
+  const lam = 0.2, Ad = 50, vdd = 1.8, vthn = 0.4;
+  const vov1 = 1 / (lam * Ad), vov5 = 2 * vov1, vov3 = 3 * vov1, vomin = vov5 + vov1, vomax = vdd - vov3, vref = (vomin + vomax) / 2;
+  const vgs1 = vthn + vov1, vinmin = vov5 + vgs1, vinmax = vref + vthn, dvo = 2 * 0.01 * vref, dvin = vinmax - vinmin;
+  return { vov1, vov5, vov3, vomin, vomax, vref, vgs1, vinmin, vinmax, dvo, dvin };
+})();
+const T5V = (() => { // Tutorial 5 Q3 = mid-sem 2024 Q1 (W/L = 50 for all)
+  const un = 100e-6, up = 50e-6, WL = 50, I1 = 50e-6, I2 = 200e-6, R = 10e6, ln = 0.1, lp = 0.2, vdd = 1.8, vthn = 0.4;
+  const id1 = I1, id5 = 2 * I1, id7 = I2 / 2;
+  const gm1 = Math.sqrt(2 * un * WL * id1), rO1 = 1 / (ln * id1), rO3 = 1 / (lp * I1), rO5 = 1 / (ln * id5);
+  const par = 1 / (1 / rO1 + 1 / rO3 + 1 / R), inv = 1 / gm1;
+  const vov1 = Math.sqrt(2 * id1 / (un * WL)), vov5 = Math.sqrt(2 * id5 / (un * WL)), vov3 = Math.sqrt(2 * I1 / (up * WL));
+  const vocm = (vov5 + vov1 + vdd - vov3) / 2, vinmin = vov5 + vthn + vov1, vinmax = vocm + vthn, dvo = 2 * 0.01 * vocm;
+  const gm7 = Math.sqrt(2 * up * WL * id7), gm9 = Math.sqrt(2 * un * WL * id7), gm5 = Math.sqrt(2 * un * WL * id5);
+  const R9 = 1 / (gm9 + ln * id7 + lp * id7), Rdn = rO1 + 2 * rO5 * (1 + gm1 * rO1), T = (gm7 / 2) * R9 * gm5 * 0.5 / (1 / rO3 + 1 / Rdn);
+  return { id1, gm1, rO1, rO3, rO5, par, inv, vov1, vov5, vov3, vocm, vinmin, vinmax, dvo, gm7, gm5, R9, Rdn, T };
+})();
 const L10 = 'Lec 10 · CMFB: structure & sensing';
 
 scene(L10, 'Common mode and differential mode', 62, (S) => {
@@ -285,6 +303,8 @@ scene(L10, 'Follow the current: source-follower sensing', 56, (S) => {
   S.say(18, 'Now a differential signal: M5’s source goes up, M6’s goes down. A current $I_R$ flows out of M5’s source, through $R_1$ and $R_2$, into M6’s source.');
   S.stop(25, {
     src: 'Exam-style check',
+    parts: [{ q: 'First: how much current $I_R$ flows through $R_1$ and $R_2$?', answer: 0.2 / 100e3, unit: 'A', tol: 0.02,
+      hint: '$I_R = \\dfrac{V_{S5} - V_{S6}}{R_1 + R_2}$', how: ['$$I_R = \\frac{0.6 - 0.4}{50\\,\\text{k} + 50\\,\\text{k}} = 2\\,\\mu\\text{A}$$'] }],
     q: 'Example: $I_1 = I_2 = 20\\,\\mu$A and $R_1 = R_2 = 50$ kΩ. A differential signal puts M5’s source at 0.6 V and M6’s source at 0.4 V. How much current does M5 carry now?',
     hint: ['First the resistor current (the two R’s are in series between the follower sources). Then KCL at M5’s source.',
       '$I_R = \\dfrac{V_{S5} - V_{S6}}{R_1 + R_2}$, $\\;I_{D5} = I_1 + I_R$'],
@@ -386,6 +406,8 @@ scene(L10, 'Follow the current: mirror loads, tail set by CMFB', 56, (S) => {
   eqAt(S, 'I_{D3} = I_{D4} = I_{REF} = 50\\,\\mu\\text{A}', 1250, 250, 10, { size: 28, w: 600 });
   S.stop(17, {
     src: 'Exam-style check',
+    parts: [{ q: 'First: how much current does M3 carry?', answer: 50e-6, unit: 'A', tol: 0.02,
+      hint: 'M3 has the same W/L and the same $V_{GS}$ as diode M6.', how: ['A mirror copy with equal W/L: $$I_{D3} = I_{REF} = 50\\,\\mu\\text{A}$$ (M4 the same).'] }],
     q: 'In this circuit the reference is 50 µA and $(W/L)_{3} = (W/L)_{4} = (W/L)_{6}$. With the outputs at rest (no current in the R’s), how much current must the tail M5 carry?',
     hint: ['M3 and M4 copy the reference. Follow both copies down to node P.',
       'KCL at P: $I_{D5} = I_{D1} + I_{D2}$, with $I_{D1} = I_{D3}$ and $I_{D2} = I_{D4}$'],
@@ -438,30 +460,37 @@ scene(L10, 'Quiz 2 2024 Q2: VREF, optimum input CM, CM gain for ±1%', 84, (S) =
     fig: (S2) => { const g = q24bq2Fig(S2); g.setAttribute('transform', 'translate(0 110)'); },
     steps: [
       { t: 8, title: '**Turn the gain into an overdrive.** With equal λ the bias current cancels out of $A_d = g_{m1}(r_{O1}\\parallel r_{O3})$, leaving $A_d = 1/(\\lambda V_{ov1})$. The given ratios then give the other two overdrives.',
-        tex: 'V_{ov1} = \\frac{1}{\\lambda A_d} = \\frac{1}{0.2\\times 50} = 0.1\\,\\text{V},\; V_{ov5} = 2V_{ov1} = 0.2\\,\\text{V},\; |V_{ov3}| = 3V_{ov1} = 0.3\\,\\text{V}', hl: [T([330, 380, 400, 110, C.n])],
+        tex: 'V_{ov1} = \\frac{1}{\\lambda A_d} = \\frac{1}{0.2\\times 50} = 0.1\\,\\text{V},\\; V_{ov5} = 2V_{ov1} = 0.2\\,\\text{V},\\; |V_{ov3}| = 3V_{ov1} = 0.3\\,\\text{V}', hl: [T([330, 380, 400, 110, C.n])],
         try: { q: 'The differential gain is $A_d = 50$ (without the R’s and the feedback amp), with $\\lambda_n = \\lambda_p = 0.2$ V⁻¹. Find the overdrive of the input pair, $V_{ov1}$.', answer: 0.1, unit: 'V', tol: 0.01,
           hint: ['Write $A_d = g_{m1}(r_{O1}\\parallel r_{O3})$ with $g_m$ and $r_O$ in terms of the drain current $I_D$: the current cancels.',
-            '$g_{m1} = \\frac{2I_D}{V_{ov1}}$, $\;r_{O1}\\parallel r_{O3} = \\frac{1}{2\\lambda I_D}$ $\;\\Rightarrow\; A_d = \\frac{1}{\\lambda V_{ov1}}$'],
+            '$g_{m1} = \\frac{2I_D}{V_{ov1}}$, $\\;r_{O1}\\parallel r_{O3} = \\frac{1}{2\\lambda I_D}$ $\\;\\Rightarrow\\; A_d = \\frac{1}{\\lambda V_{ov1}}$'],
           how: ['Write $g_m$ and $r_O$ with the same drain current $I_D$ (equal λ, so $r_{O1} = r_{O3}$): $$g_{m1} = \\frac{2I_D}{V_{ov1}},\\quad r_{O1}\\parallel r_{O3} = \\frac{1}{2\\lambda I_D}$$',
             'Multiply them; $I_D$ cancels: $$A_d = \\frac{2I_D}{V_{ov1}}\\cdot\\frac{1}{2\\lambda I_D} = \\frac{1}{\\lambda V_{ov1}}$$',
             'Solve for the overdrive: $$V_{ov1} = \\frac{1}{\\lambda A_d} = \\frac{1}{0.2\\times 50} = 0.1\\,\\text{V}$$'],
           why: 'Equal λ on both devices ⇒ $A_d = 1/(\\lambda V_{ov})$: no current needed.' },
         say: 'The trick: with equal λ, $r_{O1}\\parallel r_{O3} = 1/(2\\lambda I_D)$ and $g_m = 2I_D/V_{ov}$, so the current cancels: $A_d = 1/(\\lambda V_{ov1})$, giving $V_{ov1} = 0.1$ V, $V_{ov5} = 0.2$ V, $|V_{ov3}| = 0.3$ V.' },
       { t: 17, title: '**Output range from the checks.** Lowest output: the tail M5 and M1 must stay saturated. Highest: M3 must stay saturated. A **symmetric swing** puts $V_{REF}$ in the middle.',
-        tex: 'V_{o,min} = V_{ov5} + V_{ov1} = 0.2 + 0.1 = 0.3\\,\\text{V},\; V_{o,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.3 = 1.5\\,\\text{V},\; V_{REF} = \\frac{0.3 + 1.5}{2} = 0.9\\,\\text{V}', hl: [T([330, 160, 400, 380, C.volt])],
-        try: { q: 'The CMFB loop holds the output CM at $V_{REF}$. Using the overdrives from the first part, choose $V_{REF}$ so the outputs can swing equally far up and down.', answer: 0.9, unit: 'V', tol: 0.01,
+        tex: 'V_{o,min} = V_{ov5} + V_{ov1} = 0.2 + 0.1 = 0.3\\,\\text{V},\\; V_{o,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.3 = 1.5\\,\\text{V},\\; V_{REF} = \\frac{0.3 + 1.5}{2} = 0.9\\,\\text{V}', hl: [T([330, 160, 400, 380, C.volt])],
+        try: { parts: [
+          { q: 'First: the lowest output $V_{o,min}$ that keeps M5 and M1 saturated?', answer: Q24.vomin, unit: 'V', tol: 0.01, hint: '$V_{o,min} = V_{ov5} + V_{ov1}$, with $V_{ov5} = 2V_{ov1}$', how: ['$$V_{o,min} = 0.2 + 0.1 = 0.3\\,\\text{V}$$'] },
+          { q: 'Next: the highest output $V_{o,max}$ that keeps M3 saturated?', answer: Q24.vomax, unit: 'V', tol: 0.01, hint: '$V_{o,max} = V_{DD} - |V_{ov3}|$, with $|V_{ov3}| = 3V_{ov1}$', how: ['$$V_{o,max} = 1.8 - 0.3 = 1.5\\,\\text{V}$$'] }],
+          q: 'The CMFB loop holds the output CM at $V_{REF}$. Using the overdrives from the first part, choose $V_{REF}$ so the outputs can swing equally far up and down.', answer: 0.9, unit: 'V', tol: 0.01,
           hint: ['Find the lowest and the highest output that keep every device saturated; $V_{REF}$ sits in the middle.',
-            '$V_{o,min} = V_{ov5} + V_{ov1}$, $\;V_{o,max} = V_{DD} - |V_{ov3}|$, $\;V_{REF} = \\frac{V_{o,min} + V_{o,max}}{2}$'],
+            '$V_{o,min} = V_{ov5} + V_{ov1}$, $\\;V_{o,max} = V_{DD} - |V_{ov3}|$, $\\;V_{REF} = \\frac{V_{o,min} + V_{o,max}}{2}$'],
           how: ['Lowest output: going down from the output, M1 and the tail M5 each need their overdrive: $$V_{o,min} = V_{ov5} + V_{ov1} = 0.2 + 0.1 = 0.3\\,\\text{V}$$',
             'Highest output: the PMOS load M3 needs $|V_{ov3}|$ below $V_{DD}$: $$V_{o,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.3 = 1.5\\,\\text{V}$$',
             'Equal swing both ways means resting in the middle, and CMFB makes the output rest at $V_{REF}$: $$V_{REF} = \\frac{0.3 + 1.5}{2} = 0.9\\,\\text{V}$$'],
           why: '$V_{REF}$ = the middle of the output range.' },
         say: 'Lowest output: the tail’s and M1’s overdrives, 0.3 V. Highest: $1.8 - 0.3 = 1.5$ V. CMFB holds the CM at $V_{REF}$, so put it in the middle: 0.9 V.' },
       { t: 26, title: '**Input-CM range.** Floor: the tail needs $V_{ov5}$ at P, and the gate sits one $V_{GS1}$ above P. Ceiling: M1’s gate may be at most $V_{thn}$ above its drain, which sits at $V_{o,CM}$. The **optimum is the middle**.',
-        tex: 'V_{in,min} = V_{ov5} + V_{GS1} = 0.2 + 0.5 = 0.7\\,\\text{V},\; V_{in,max} = V_{o,CM} + V_{thn} = 0.9 + 0.4 = 1.3\\,\\text{V},\; V_{in,CM} = \\frac{0.7 + 1.3}{2} = 1.0\\,\\text{V}', hl: [T([330, 380, 400, 260, C.amb])],
-        try: { q: 'Find the optimum input common-mode level $V_{in,CM}$: the middle of the range of input CM that keeps M5 and M1 saturated, with the output CM at $V_{REF}$ from the previous part.', answer: 1.0, unit: 'V', tol: 0.01,
+        tex: 'V_{in,min} = V_{ov5} + V_{GS1} = 0.2 + 0.5 = 0.7\\,\\text{V},\\; V_{in,max} = V_{o,CM} + V_{thn} = 0.9 + 0.4 = 1.3\\,\\text{V},\\; V_{in,CM} = \\frac{0.7 + 1.3}{2} = 1.0\\,\\text{V}', hl: [T([330, 380, 400, 260, C.amb])],
+        try: { parts: [
+          { q: 'First: M1’s gate–source voltage $V_{GS1}$?', answer: Q24.vgs1, unit: 'V', tol: 0.01, hint: '$V_{GS1} = V_{thn} + V_{ov1}$', how: ['$$V_{GS1} = 0.4 + 0.1 = 0.5\\,\\text{V}$$'] },
+          { q: 'The lowest input CM $V_{in,min}$ (tail M5 just saturated)?', answer: Q24.vinmin, unit: 'V', tol: 0.01, hint: '$V_{in,min} = V_{ov5} + V_{GS1}$', how: ['$$V_{in,min} = 0.2 + 0.5 = 0.7\\,\\text{V}$$'] },
+          { q: 'The highest input CM $V_{in,max}$ (M1 just saturated, drain at $V_{o,CM} = 0.9$ V)?', answer: Q24.vinmax, unit: 'V', tol: 0.01, hint: '$V_{in,max} = V_{o,CM} + V_{thn}$', how: ['$$V_{in,max} = 0.9 + 0.4 = 1.3\\,\\text{V}$$'] }],
+          q: 'Find the optimum input common-mode level $V_{in,CM}$: the middle of the range of input CM that keeps M5 and M1 saturated, with the output CM at $V_{REF}$ from the previous part.', answer: 1.0, unit: 'V', tol: 0.01,
           hint: ['Bottom: keep the tail M5 saturated, then add M1’s gate–source voltage. Top: keep M1 saturated with its drain at $V_{o,CM}$.',
-            '$V_{in,min} = V_{ov5} + (V_{thn} + V_{ov1})$, $\;V_{in,max} = V_{o,CM} + V_{thn}$'],
+            '$V_{in,min} = V_{ov5} + (V_{thn} + V_{ov1})$, $\\;V_{in,max} = V_{o,CM} + V_{thn}$'],
           how: ['M1’s gate–source voltage: $$V_{GS1} = V_{thn} + V_{ov1} = 0.4 + 0.1 = 0.5\\,\\text{V}$$',
             'Lowest input CM: the tail needs $V_{ov5}$ at node P, and the gate sits $V_{GS1}$ above P: $$V_{in,min} = V_{ov5} + V_{GS1} = 0.2 + 0.5 = 0.7\\,\\text{V}$$',
             'Highest input CM: M1 stays saturated while its gate is at most $V_{thn}$ above its drain, at $V_{o,CM} = 0.9$ V: $$V_{in,max} = 0.9 + 0.4 = 1.3\\,\\text{V}$$',
@@ -469,8 +498,11 @@ scene(L10, 'Quiz 2 2024 Q2: VREF, optimum input CM, CM gain for ±1%', 84, (S) =
           why: 'Floor = check + link; ceiling = the fence $V_{G} \\le V_{D} + V_{th}$.' },
         say: 'Floor: tail check plus the link up to M1’s gate, $0.2 + 0.5 = 0.7$ V. Ceiling: M1’s drain sits at $V_{o,CM} = 0.9$ V and its gate may be $V_{th}$ above: 1.3 V. The middle, 1.0 V, is the optimum.' },
       { t: 35, title: '**What “±1%” allows.** The output CM may move from −1% to +1% of $V_{o,CM}$ (a 2% window) while the input CM sweeps its whole range. The CM gain is the ratio of the two.',
-        tex: '\\Delta V_{o,CM} = 2(0.01)(0.9) = 0.018\\,\\text{V},\; \\Delta V_{in,CM} = 1.3 - 0.7 = 0.6\\,\\text{V},\; |A_{CM}| = \\frac{0.018}{0.6} = 0.03',
-        try: { q: 'The output CM may vary by ±1% of its value while the input CM moves over its full range (previous part). What is the largest CM gain $|A_{CM}|$ allowed?', answer: 0.03, unit: 'V/V', tol: 0.02,
+        tex: '\\Delta V_{o,CM} = 2(0.01)(0.9) = 0.018\\,\\text{V},\\; \\Delta V_{in,CM} = 1.3 - 0.7 = 0.6\\,\\text{V},\\; |A_{CM}| = \\frac{0.018}{0.6} = 0.03',
+        try: { parts: [
+          { q: 'First: how much may the output CM move in total (±1% of 0.9 V)?', answer: Q24.dvo, unit: 'V', tol: 0.02, hint: '±1% is a 2% window: $\\Delta V_{o,CM} = 2(0.01)V_{o,CM}$', how: ['$$\\Delta V_{o,CM} = 2\\times 0.01\\times 0.9 = 0.018\\,\\text{V}$$'] },
+          { q: 'Next: the full input-CM range $\\Delta V_{in,CM}$?', answer: Q24.dvin, unit: 'V', tol: 0.02, hint: '$\\Delta V_{in,CM} = V_{in,max} - V_{in,min}$ (previous part)', how: ['$$\\Delta V_{in,CM} = 1.3 - 0.7 = 0.6\\,\\text{V}$$'] }],
+          q: 'The output CM may vary by ±1% of its value while the input CM moves over its full range (previous part). What is the largest CM gain $|A_{CM}|$ allowed?', answer: 0.03, unit: 'V/V', tol: 0.02,
           hint: ['CM gain = (output-CM change) ÷ (input-CM change). “±1%” is a total window of 2%.',
             '$|A_{CM}| = \\dfrac{2(0.01)\\,V_{o,CM}}{V_{in,max} - V_{in,min}}$'],
           how: ['Allowed output-CM change, from −1% to +1%: $$\\Delta V_{o,CM} = 2\\times0.01\\times0.9 = 0.018\\,\\text{V}$$',
@@ -535,6 +567,8 @@ scene(L10, 'Follow the current: the CMFB error amplifier M7–M12', 58, (S) => {
   S.say(12, 'In the error amplifier, $I_2 = 200$ µA flows down through diode M12. M11 has the same W/L and gate voltage, so it copies 200 µA and feeds the joined sources of the PMOS pair M7, M8.');
   S.stop(20, {
     src: 'Exam-style check',
+    parts: [{ q: 'First: how much current does M11 carry?', answer: 200e-6, unit: 'A', tol: 0.02,
+      hint: 'M11 has the same W/L and the same $V_{GS}$ as diode M12, which carries $I_2$.', how: ['A mirror copy with equal W/L: $$I_{D11} = I_2 = 200\\,\\mu\\text{A}$$'] }],
     q: 'At balance ($V_{O,CM} = V_{REF}$), how much current flows in M7? ($I_2 = 200\\,\\mu$A, all W/L = 50.)',
     hint: ['M11 copies $I_2$; then the pair M7, M8 shares M11’s current, like any differential pair shares its tail.',
       '$I_{D11} = I_{D7} + I_{D8}$; equal gate voltages ⇒ $I_{D7} = I_{D8}$'],
@@ -599,8 +633,10 @@ scene(L10, '2024 mid-sem Q1 (Tutorial 5 Q3), part 1: no CMFB', 80, (S) => {
     },
     steps: [
       { t: 8, title: '**Currents first, from the mirrors.** M3, M4 copy $I_1$ (same W/L as diode M6): 50 µA each, so the tail M5 carries 100 µA. Then each device’s $g_m$ and $r_O$ from its current.',
-        tex: 'g_{m1} = \\sqrt{2\\mu_nC_{ox}\\tfrac{W}{L}I_{D1}} = \\sqrt{2(100\\,\\mu)(50)(50\\,\\mu)} = 0.707\\,\\text{mS},\; r_{O1} = \\frac{1}{\\lambda_n I_{D1}} = \\frac{1}{0.1\\times 50\\,\\mu} = 200\\,\\text{k}\\Omega,\; r_{O3} = \\frac{1}{\\lambda_p I_{D3}} = \\frac{1}{0.2\\times 50\\,\\mu} = 100\\,\\text{k}\\Omega,\; r_{O5} = \\frac{1}{\\lambda_n I_{D5}} = \\frac{1}{0.1\\times 100\\,\\mu} = 100\\,\\text{k}\\Omega', hl: [T([60, 150, 500, 440, C.cur])],
-        try: { q: 'First find the bias currents from the mirrors (all W/L = 50). Then find $g_{m1}$ of the input transistor M1.', answer: 7.0711e-4, unit: 'S', tol: 0.02,
+        tex: 'g_{m1} = \\sqrt{2\\mu_nC_{ox}\\tfrac{W}{L}I_{D1}} = \\sqrt{2(100\\,\\mu)(50)(50\\,\\mu)} = 0.707\\,\\text{mS},\\; r_{O1} = \\frac{1}{\\lambda_n I_{D1}} = \\frac{1}{0.1\\times 50\\,\\mu} = 200\\,\\text{k}\\Omega,\\; r_{O3} = \\frac{1}{\\lambda_p I_{D3}} = \\frac{1}{0.2\\times 50\\,\\mu} = 100\\,\\text{k}\\Omega,\\; r_{O5} = \\frac{1}{\\lambda_n I_{D5}} = \\frac{1}{0.1\\times 100\\,\\mu} = 100\\,\\text{k}\\Omega', hl: [T([60, 150, 500, 440, C.cur])],
+        try: { parts: [
+          { q: 'First: the drain current of M1?', answer: T5V.id1, unit: 'A', tol: 0.02, hint: 'M3 copies $I_1$ from diode M6 (equal W/L), and that current flows down through M1.', how: ['$$I_{D1} = I_{D3} = I_1 = 50\\,\\mu\\text{A}$$ (and the tail $I_{D5} = 100\\,\\mu$A)'] }],
+          q: 'First find the bias currents from the mirrors (all W/L = 50). Then find $g_{m1}$ of the input transistor M1.', answer: 7.0711e-4, unit: 'S', tol: 0.02,
           hint: ['M6 is a diode carrying $I_1$; M3 and M4 have the same W/L and gate voltage, so they copy it. That current flows down through M1.',
             '$g_{m1} = \\sqrt{2\\,\\mu_nC_{ox}\\,(W/L)\\,I_{D1}}$'],
           how: ['M3 and M4 copy the reference (same W/L as diode M6): $$I_{D3} = I_{D4} = I_1 = 50\\,\\mu\\text{A}$$',
@@ -610,8 +646,12 @@ scene(L10, '2024 mid-sem Q1 (Tutorial 5 Q3), part 1: no CMFB', 80, (S) => {
           calc: [{ what: 'g_m in one line (Engineer Symbol on)', keys: '[√] ( 2 × 100µ × 50 × 50µ ) [EXE]', shows: '707.1µ', note: 'Type µ with [CATALOG] ▸ Engineer Symbol ▸ micro.' }] },
         say: 'Mirrors first: M3, M4 copy 50 µA, so M5 carries 100 µA. $g_{m1} = 0.707$ mS, $r_{O1} = 200$ kΩ, $r_{O3} = r_{O5} = 100$ kΩ.' },
       { t: 17, title: '**$A_d$ from the DM half circuit.** For a differential signal the midpoint of the R’s does not move (**AC ground**), so each output sees $r_{O1}\\parallel r_{O3}\\parallel R$.',
-        tex: 'A_d = g_{m1}(r_{O1}\\parallel r_{O3}\\parallel R) = 0.707\\,\\text{m}\\times(200\\,\\text{k}\\parallel 100\\,\\text{k}\\parallel 10\\,\\text{M}) = 0.707\\,\\text{m}\\times 66.2\\,\\text{k} = 46.83', hl: [T([250, 270, 220, 60, C.volt])],
-        try: { q: 'Find the differential gain $A_d$ with the sensing resistors $R$ connected (no CMFB amplifier yet). Use $g_m$ and $r_O$ from the first step.', answer: ans('bank-t5q3', 'ad'), unit: 'V/V', tol: 0.02,
+        tex: 'r_{O1}\\parallel r_{O3}\\parallel R = 200\\,\\text{k}\\parallel 100\\,\\text{k}\\parallel 10\\,\\text{M} = 66.2\\,\\text{k}\\Omega,\\; A_d = g_{m1}(r_{O1}\\parallel r_{O3}\\parallel R) = 0.707\\,\\text{m}\\times(200\\,\\text{k}\\parallel 100\\,\\text{k}\\parallel 10\\,\\text{M}) = 0.707\\,\\text{m}\\times 66.2\\,\\text{k} = 46.83', hl: [T([250, 270, 220, 60, C.volt])],
+        try: { parts: [
+          { q: 'First: $r_{O1}$ (NMOS, 50 µA)?', answer: T5V.rO1, unit: 'Ω', tol: 0.02, hint: '$r_{O} = \\dfrac{1}{\\lambda I_D}$ with $\\lambda_n = 0.1$ V⁻¹', how: ['$$r_{O1} = \\frac{1}{0.1\\times 50\\,\\mu} = 200\\,\\text{k}\\Omega$$'] },
+          { q: 'Next: $r_{O3}$ (PMOS, 50 µA)?', answer: T5V.rO3, unit: 'Ω', tol: 0.02, hint: '$r_{O} = \\dfrac{1}{\\lambda I_D}$ with $\\lambda_p = 0.2$ V⁻¹', how: ['$$r_{O3} = \\frac{1}{0.2\\times 50\\,\\mu} = 100\\,\\text{k}\\Omega$$'] },
+          { q: 'The resistance each output sees in DM: $r_{O1}\\parallel r_{O3}\\parallel R$?', answer: T5V.par, unit: 'Ω', tol: 0.02, hint: 'The R midpoint is AC ground in DM; add conductances.', how: ['$$200\\,\\text{k}\\parallel 100\\,\\text{k}\\parallel 10\\,\\text{M} = 66.2\\,\\text{k}\\Omega$$'] }],
+          q: 'Find the differential gain $A_d$ with the sensing resistors $R$ connected (no CMFB amplifier yet). Use $g_m$ and $r_O$ from the first step.', answer: ans('bank-t5q3', 'ad'), unit: 'V/V', tol: 0.02,
           hint: ['DM half circuit: the midpoint between the two R’s does not move, so it is AC ground. Each output then sees three resistances to ground.',
             '$A_d = g_{m1}\\,(r_{O1}\\parallel r_{O3}\\parallel R)$'],
           how: ['In DM one output rises as the other falls, so the R midpoint stays put: AC ground. Each output sees $r_{O1}$, $r_{O3}$ and one $R$.',
@@ -622,8 +662,11 @@ scene(L10, '2024 mid-sem Q1 (Tutorial 5 Q3), part 1: no CMFB', 80, (S) => {
           calc: [{ what: 'Gain with a 3-way parallel (x⁻¹ = [SHIFT] [^])', keys: '707.1µ × ( 200k [SHIFT] [^] + 100k [SHIFT] [^] + 10M [SHIFT] [^] ) [SHIFT] [^] [EXE]', shows: '46.83' }] },
         say: 'Lec 10’s cost of resistive sensing shows up here: $A_d = g_{m1}(r_{O1}\\parallel r_{O3}\\parallel R) = 46.8$.' },
       { t: 26, title: '**$A_{CM}$ from the CM half circuit.** In CM both outputs move together, so the R’s carry nothing. Each half sees the tail as $2r_{O5}$ in its source: a degenerated CS stage.',
-        tex: '|A_{CM}| = \\frac{r_{O3}}{1/g_{m1} + 2r_{O5}} = \\frac{100\\,\\text{k}}{1.41\\,\\text{k} + 200\\,\\text{k}} = 0.4965', hl: [T([300, 490, 140, 110, C.n])],
-        try: { q: 'Find the common-mode gain $|A_{CM}|$ without CMFB (the R’s still connected).', answer: ans('bank-t5q3', 'acm'), unit: 'V/V', tol: 0.02,
+        tex: '2r_{O5} = 2\\times 100\\,\\text{k} = 200\\,\\text{k}\\Omega,\\; \\frac{1}{g_{m1}} = \\frac{1}{0.707\\,\\text{mS}} = 1.41\\,\\text{k}\\Omega,\\; |A_{CM}| = \\frac{r_{O3}}{1/g_{m1} + 2r_{O5}} = \\frac{100\\,\\text{k}}{1.41\\,\\text{k} + 200\\,\\text{k}} = 0.4965', hl: [T([300, 490, 140, 110, C.n])],
+        try: { parts: [
+          { q: 'First: $r_{O5}$ of the tail (NMOS, 100 µA)?', answer: T5V.rO5, unit: 'Ω', tol: 0.02, hint: '$r_{O5} = \\dfrac{1}{\\lambda_n I_{D5}}$', how: ['$$r_{O5} = \\frac{1}{0.1\\times 100\\,\\mu} = 100\\,\\text{k}\\Omega$$'] },
+          { q: 'Next: $1/g_{m1}$?', answer: T5V.inv, unit: 'Ω', tol: 0.02, hint: '$g_{m1} = 0.707$ mS from the first part.', how: ['$$\\frac{1}{g_{m1}} = \\frac{1}{0.707\\,\\text{mS}} = 1.41\\,\\text{k}\\Omega$$'] }],
+          q: 'Find the common-mode gain $|A_{CM}|$ without CMFB (the R’s still connected).', answer: ans('bank-t5q3', 'acm'), unit: 'V/V', tol: 0.02,
           hint: ['CM half circuit: the R’s carry no current (both ends move together); split the tail into two halves of $2r_{O5}$ each. It is a CS stage with source degeneration.',
             '$|A_{CM}| = \\dfrac{r_{O3}}{1/g_{m1} + 2r_{O5}}$ ($r_{O1}$ ignored)'],
           how: ['In CM both outputs move together: no voltage across the R’s, no current. Drop them.',
@@ -632,17 +675,21 @@ scene(L10, '2024 mid-sem Q1 (Tutorial 5 Q3), part 1: no CMFB', 80, (S) => {
           why: 'In CM the tail counts as $2r_{O5}$ per half, so $|A_{CM}| \\approx r_{O3}/(2r_{O5})$.' },
         say: 'In CM both outputs move together, so the R’s carry nothing. Each half sees the tail as $2r_{O5}$: $|A_{CM}| = r_{O3}/(1/g_{m1} + 2r_{O5}) ≈ 0.5$.' },
       { t: 35, title: '**Optimum $V_{O,CM}$: the middle of the output range.** Floor: M5 and M1 saturated ($V_{ov5} + V_{ov1}$). Ceiling: M3 saturated ($V_{DD} - |V_{ov3}|$).',
-        tex: 'V_{O,min} = V_{ov5} + V_{ov1} = 0.2 + 0.1414 = 0.3414\\,\\text{V},\; V_{O,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.2 = 1.6\\,\\text{V},\; V_{O,CM} = \\frac{0.3414 + 1.6}{2} = 0.9707\\,\\text{V}', hl: [T([250, 150, 220, 330, C.volt])],
-        try: { q: 'Find the optimum output CM level $V_{O,CM}$: the level that allows the largest symmetric output swing.', answer: ans('bank-t5q3', 'vocm'), unit: 'V', tol: 0.01,
+        tex: 'V_{ov1} = \\sqrt{\\tfrac{2(50\\,\\mu)}{100\\,\\mu\\cdot 50}} = 0.1414\\,\\text{V},\\; V_{ov5} = \\sqrt{\\tfrac{2(100\\,\\mu)}{100\\,\\mu\\cdot 50}} = 0.2\\,\\text{V},\\; |V_{ov3}| = \\sqrt{\\tfrac{2(50\\,\\mu)}{50\\,\\mu\\cdot 50}} = 0.2\\,\\text{V},\\; V_{O,min} = V_{ov5} + V_{ov1} = 0.2 + 0.1414 = 0.3414\\,\\text{V},\\; V_{O,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.2 = 1.6\\,\\text{V},\\; V_{O,CM} = \\frac{0.3414 + 1.6}{2} = 0.9707\\,\\text{V}', hl: [T([250, 150, 220, 330, C.volt])],
+        try: { parts: [
+          { q: 'First: $V_{ov1}$ (M1: 50 µA)?', answer: T5V.vov1, unit: 'V', tol: 0.01, hint: '$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu C_{ox}(W/L)}}$', how: ['$$V_{ov1} = \\sqrt{\\frac{2(50\\,\\mu)}{100\\,\\mu\\times 50}} = 0.141\\,\\text{V}$$'] },
+          { q: 'Next: $V_{ov5}$ (tail M5: 100 µA)?', answer: T5V.vov5, unit: 'V', tol: 0.01, hint: 'Same formula, $I_D = 100\\,\\mu$A, $\\mu_nC_{ox}$', how: ['$$V_{ov5} = \\sqrt{\\frac{2(100\\,\\mu)}{100\\,\\mu\\times 50}} = 0.2\\,\\text{V}$$'] },
+          { q: 'Next: $|V_{ov3}|$ (PMOS M3: 50 µA)?', answer: T5V.vov3, unit: 'V', tol: 0.01, hint: 'Same formula with $\\mu_pC_{ox} = 50\\,\\mu$A/V²', how: ['$$|V_{ov3}| = \\sqrt{\\frac{2(50\\,\\mu)}{50\\,\\mu\\times 50}} = 0.2\\,\\text{V}$$'] }],
+          q: 'Find the optimum output CM level $V_{O,CM}$: the level that allows the largest symmetric output swing.', answer: ans('bank-t5q3', 'vocm'), unit: 'V', tol: 0.01,
           hint: ['Find each overdrive from its current, then the lowest and highest output that keep M5, M1 and M3 saturated; take the middle.',
-            '$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu C_{ox}(W/L)}}$, $\;V_{O,CM} = \\frac{(V_{ov5} + V_{ov1}) + (V_{DD} - |V_{ov3}|)}{2}$'],
+            '$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu C_{ox}(W/L)}}$, $\\;V_{O,CM} = \\frac{(V_{ov5} + V_{ov1}) + (V_{DD} - |V_{ov3}|)}{2}$'],
           how: ['Overdrives from the currents (W/L = 50): $$V_{ov1} = \\sqrt{\\frac{2(50\\,\\mu)}{100\\,\\mu\\times 50}} = 0.141\\,\\text{V},\\quad V_{ov5} = \\sqrt{\\frac{2(100\\,\\mu)}{100\\,\\mu\\times 50}} = 0.2\\,\\text{V},\\quad |V_{ov3}| = \\sqrt{\\frac{2(50\\,\\mu)}{50\\,\\mu\\times 50}} = 0.2\\,\\text{V}$$',
             'Lowest output (M5 and M1 saturated): $$V_{O,min} = V_{ov5} + V_{ov1} = 0.2 + 0.141 = 0.341\\,\\text{V}$$',
             'Highest output (M3 saturated): $$V_{O,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.2 = 1.6\\,\\text{V}$$',
             'The middle: $$V_{O,CM} = \\frac{0.341 + 1.6}{2} = 0.971\\,\\text{V}$$'],
           calc: [{ what: 'The whole middle in one line', keys: '( 0.2 + [√] ( 2 × 50µ ÷ ( 100µ × 50 ) ) + 1.8 − 0.2 ) ÷ 2 [EXE]', shows: '0.9707', note: 'Close the √ bracket before adding 1.8.' }] },
         say: 'Output floor: tail + M1 overdrives, 0.341 V. Ceiling: $1.8 - |V_{ov3}| = 1.6$ V. Middle: 0.971 V.' },
-      { t: 43, title: '**CMRR without CMFB** = the gain you want ÷ the gain you don’t.', tex: '\\text{CMRR} = \\frac{A_d}{|A_{CM}|} = \\frac{46.83}{0.4965} = 94.3\;(39.5\\,\\text{dB})',
+      { t: 43, title: '**CMRR without CMFB** = the gain you want ÷ the gain you don’t.', tex: '\\text{CMRR} = \\frac{A_d}{|A_{CM}|} = \\frac{46.83}{0.4965} = 94.3\\;(39.5\\,\\text{dB})',
         try: { q: 'Find the CMRR of the amplifier without CMFB (as a ratio), from the two gains above.', answer: ans('bank-t5q3', 'cmrr'), unit: '', tol: 0.02,
           hint: ['CMRR compares the differential gain with the common-mode gain.',
             '$\\text{CMRR} = \\dfrac{A_d}{|A_{CM}|}$'],
@@ -665,17 +712,33 @@ scene(L10, '2024 mid-sem Q1 (Tutorial 5 Q3), part 2: with CMFB', 84, (S) => {
     fig: (S2) => { const g = t5q3Fig(S2); g.setAttribute('transform', 'translate(0 100)'); },
     steps: [
       { t: 6, title: '**The ±1% target.** The output CM may move from −1% to +1% of $V_{O,CM}$ (a 2% window) while the input CM sweeps its whole range, from $V_{ov5} + V_{GS1}$ up to $V_{O,CM} + V_{thn}$.',
-        tex: 'V_{in,min} = V_{ov5} + V_{thn} + V_{ov1} = 0.2 + 0.4 + 0.141 = 0.741\\,\\text{V},\; V_{in,max} = V_{O,CM} + V_{thn} = 0.971 + 0.4 = 1.371\\,\\text{V},\; |A_{CM}|_{req} = \\frac{2(0.01)(0.971)}{1.371 - 0.741} = \\frac{0.0194}{0.629} = 0.0309',
-        try: { q: '$V_{O,CM}$ (part 1) may vary by ±1% while the input CM moves over its full range. What is the largest CM gain allowed?', answer: ans('bank-t5q3', 'target'), unit: 'V/V', tol: 0.03,
+        tex: 'V_{in,min} = V_{ov5} + V_{thn} + V_{ov1} = 0.2 + 0.4 + 0.141 = 0.741\\,\\text{V},\\; V_{in,max} = V_{O,CM} + V_{thn} = 0.971 + 0.4 = 1.371\\,\\text{V},\\; |A_{CM}|_{req} = \\frac{2(0.01)(0.971)}{1.371 - 0.741} = \\frac{0.0194}{0.629} = 0.0309',
+        try: { parts: [
+          { q: 'First: the lowest input CM $V_{in,min}$ (tail M5 just saturated)?', answer: T5V.vinmin, unit: 'V', tol: 0.01, hint: '$V_{in,min} = V_{ov5} + V_{thn} + V_{ov1}$ (overdrives from part 1)', how: ['$$V_{in,min} = 0.2 + 0.4 + 0.141 = 0.741\\,\\text{V}$$'] },
+          { q: 'Next: the highest input CM $V_{in,max}$ (M1 just saturated)?', answer: T5V.vinmax, unit: 'V', tol: 0.01, hint: '$V_{in,max} = V_{O,CM} + V_{thn}$', how: ['$$V_{in,max} = 0.971 + 0.4 = 1.371\\,\\text{V}$$'] },
+          { q: 'Next: the allowed output-CM change (±1% of $V_{O,CM}$)?', answer: T5V.dvo, unit: 'V', tol: 0.02, hint: 'A 2% window: $2(0.01)V_{O,CM}$', how: ['$$\\Delta V_{O,CM} = 2\\times 0.01\\times 0.971 = 0.0194\\,\\text{V}$$'] }],
+          q: '$V_{O,CM}$ (part 1) may vary by ±1% while the input CM moves over its full range. What is the largest CM gain allowed?', answer: ans('bank-t5q3', 'target'), unit: 'V/V', tol: 0.03,
           hint: ['Same method as Quiz 2 Q2: (allowed output-CM change) ÷ (input-CM range). First the input-CM range: a check at the tail plus a link up to M1’s gate, and the fence on M1.',
-            '$V_{in,min} = V_{ov5} + V_{GS1}$, $\;V_{in,max} = V_{O,CM} + V_{thn}$, $\;|A_{CM}|_{req} = \\dfrac{2(0.01)V_{O,CM}}{V_{in,max} - V_{in,min}}$'],
+            '$V_{in,min} = V_{ov5} + V_{GS1}$, $\\;V_{in,max} = V_{O,CM} + V_{thn}$, $\\;|A_{CM}|_{req} = \\dfrac{2(0.01)V_{O,CM}}{V_{in,max} - V_{in,min}}$'],
           how: ['Lowest input CM: the tail’s overdrive plus M1’s $V_{GS}$ (overdrives from part 1): $$V_{in,min} = 0.2 + (0.4 + 0.141) = 0.741\\,\\text{V}$$',
             'Highest input CM: M1’s gate at most $V_{thn}$ above its drain: $$V_{in,max} = 0.971 + 0.4 = 1.371\\,\\text{V}$$',
             'Allowed output change (a 2% window): $$\\Delta V_{O,CM} = 2\\times 0.01\\times 0.971 = 0.0194\\,\\text{V}$$',
             'The ratio: $$|A_{CM}|_{req} = \\frac{0.0194}{1.371 - 0.741} = \\frac{0.0194}{0.629} = 0.0309$$'],
           why: '±1% means a 2% window over the **whole** input-CM range.' },
         say: 'Same method as the quiz: allowed output-CM change ÷ input-CM range = 0.031.' },
-      { t: 15, title: '**CM loop gain: go once round the loop.** A CM change at the outputs enters M8; the pair passes $g_{m7}/2$ of it into diode M9 (≈ 971 Ω); M9 drives M5 ($g_{m5}$); M5’s change splits, half to each output, into $r_{O3}\\parallel R_{dn}$.', tex: stepTex('bank-t5q3', 6), hl: [T([560, 150, 340, 450, C.amb]), T([300, 490, 140, 110, C.n])],
+      { t: 15, title: '**CM loop gain: go once round the loop.** A CM change at the outputs enters M8; the pair passes $g_{m7}/2$ of it into diode M9 (≈ 971 Ω); M9 drives M5 ($g_{m5}$); M5’s change splits, half to each output, into $r_{O3}\\parallel R_{dn}$.', tex: 'g_{m7} = \\sqrt{2(50\\,\\mu)(50)(100\\,\\mu)} = 0.707\\,\\text{mS},\\; R_9 = \\tfrac{1}{g_{m9}}\\parallel r_{O9}\\parallel r_{O7} = 1\\,\\text{k}\\parallel 100\\,\\text{k}\\parallel 50\\,\\text{k} = 971\\,\\Omega,\\; g_{m5} = \\sqrt{2(100\\,\\mu)(50)(100\\,\\mu)} = 1\\,\\text{mS},\\; R_{dn} = r_{O1} + 2r_{O5}(1 + g_{m1}r_{O1}) = 200\\,\\text{k} + 200\\,\\text{k}(142.4) = 28.7\\,\\text{M}\\Omega,\\; T = \\tfrac{g_{m7}}{2}R_9\\,g_{m5}\\,\\tfrac{1}{2}(r_{O3}\\parallel R_{dn}) = (0.354\\,\\text{m})(971)(1\\,\\text{m})(49.8\\,\\text{k}) = 17.1', hl: [T([560, 150, 340, 450, C.amb]), T([300, 490, 140, 110, C.n])],
+        try: { parts: [
+          { q: 'Loop, block 1: $g_{m7}$ of the error-amp pair (PMOS, 100 µA each)?', answer: T5V.gm7, unit: 'S', tol: 0.02, hint: '$g_m = \\sqrt{2\\mu_pC_{ox}(W/L)I_D}$', how: ['$$g_{m7} = \\sqrt{2(50\\,\\mu)(50)(100\\,\\mu)} = 0.707\\,\\text{mS}$$'] },
+          { q: 'Block 2: the resistance at M9’s drain, $\\frac{1}{g_{m9}}\\parallel r_{O9}\\parallel r_{O7}$ (both 100 µA)?', answer: T5V.R9, unit: 'Ω', tol: 0.02, hint: '$g_{m9} = \\sqrt{2(100\\,\\mu)(50)(100\\,\\mu)} = 1$ mS, $r_{O9} = \\frac{1}{0.1\\cdot 100\\,\\mu}$, $r_{O7} = \\frac{1}{0.2\\cdot 100\\,\\mu}$', how: ['$$1\\,\\text{k}\\parallel 100\\,\\text{k}\\parallel 50\\,\\text{k} = 971\\,\\Omega$$'] },
+          { q: 'Block 3: $g_{m5}$ of the tail (NMOS, 100 µA)?', answer: T5V.gm5, unit: 'S', tol: 0.02, hint: '$g_m = \\sqrt{2\\mu_nC_{ox}(W/L)I_D}$', how: ['$$g_{m5} = \\sqrt{2(100\\,\\mu)(50)(100\\,\\mu)} = 1\\,\\text{mS}$$'] },
+          { q: 'Block 4: $R_{dn}$, the CM resistance looking down into M1 (degenerated by $2r_{O5}$)?', answer: T5V.Rdn, unit: 'Ω', tol: 0.02, hint: '$R_{dn} = r_{O1} + 2r_{O5}(1 + g_{m1}r_{O1})$', how: ['$$R_{dn} = 200\\,\\text{k} + 200\\,\\text{k}\\times(1 + 141.4) = 28.7\\,\\text{M}\\Omega$$'] }],
+          q: 'Find the CM loop gain $T$ of the CMFB loop (break it at the outputs and go once round: M8/M7 pair → diode M9 → tail M5 → back to the outputs).', answer: T5V.T, unit: '', tol: 0.03,
+          hint: ['Multiply the gain of every block met going once round the loop: the pair gives $g_{m7}/2$, diode M9 turns it into a voltage, M5 turns that into a current, which splits half to each output.',
+            '$T = \\frac{g_{m7}}{2}\\,R_9\\,g_{m5}\\,\\frac{1}{2}(r_{O3}\\parallel R_{dn})$'],
+          how: ['Block by block: $$g_{m7} = 0.707\\,\\text{mS},\\quad R_9 = 971\\,\\Omega,\\quad g_{m5} = 1\\,\\text{mS}$$',
+            'Each output sees $r_{O3}$ up and $R_{dn} = 28.7$ MΩ down: $$r_{O3}\\parallel R_{dn} = 100\\,\\text{k}\\parallel 28.7\\,\\text{M} = 99.7\\,\\text{k}\\Omega$$',
+            'Multiply round the loop: $$T = (0.354\\,\\text{m})(971)(1\\,\\text{m})(49.8\\,\\text{k}) = 17.1$$'],
+          why: 'Loop gain = product of every block once round the loop.' },
         say: 'Trace the loop once round: the output CM change enters M8, the pair passes half its $g_m$ into diode M9 (≈ 971 Ω), M9 drives M5, and M5’s current change splits into the two outputs. Product ≈ 17.' },
       { t: 25, title: '**Feedback divides the CM gain by (1 + T).** $A_d$ is untouched, because a differential signal does not move $V_{O,CM}$.', tex: stepTex('bank-t5q3', 7),
         try: { q: 'Using $|A_{CM}|$ without CMFB (part 1) and the loop gain $T$ just found, find the CM gain with the CMFB loop closed.', answer: ans('bank-t5q3', 'acmfb'), unit: 'V/V', tol: 0.03,
@@ -686,7 +749,7 @@ scene(L10, '2024 mid-sem Q1 (Tutorial 5 Q3), part 2: with CMFB', 84, (S) => {
             'Compare with the target from the first step: 0.0274 < 0.0309, so the ±1% spec is met.'],
           why: 'Closed-loop CM gain = open-loop CM gain ÷ (1 + T).' },
         say: 'Feedback divides the CM gain by $(1 + T)$: $0.497/18.1 = 0.027$. The DM gain is unchanged.' },
-      { t: 33, title: '**CMRR with CMFB:** the same $A_d$ over a much smaller CM gain.', tex: '\\text{CMRR} = \\frac{A_d}{|A_{CM}|_{fb}} = \\frac{46.83}{0.02743} = 1707\;(64.6\\,\\text{dB})',
+      { t: 33, title: '**CMRR with CMFB:** the same $A_d$ over a much smaller CM gain.', tex: '\\text{CMRR} = \\frac{A_d}{|A_{CM}|_{fb}} = \\frac{46.83}{0.02743} = 1707\\;(64.6\\,\\text{dB})',
         try: { q: 'Find the CMRR with the CMFB loop closed (as a ratio).', answer: ans('bank-t5q3', 'cmrrfb'), unit: '', tol: 0.03,
           hint: ['CMFB does not change $A_d$; only the CM gain changes.',
             '$\\text{CMRR} = \\dfrac{A_d}{|A_{CM}|_{fb}}$'],
@@ -753,6 +816,8 @@ scene(L10, 'Follow the current: folded cascode with CMFB on M3, M4', 56, (S) => 
   S.say(16, 'KCL at the left folding node: $I_P$ comes in, and leaves either through M1 or down the cascode branch.');
   S.stop(22, {
     src: 'Exam-style check',
+    parts: [{ q: 'First: how much current does the input transistor M1 carry?', answer: 1e-3 / 2, unit: 'A', tol: 0.02,
+      hint: 'Equal inputs: the tail splits evenly, $I_{D1} = I_{SS}/2$.', how: ['$$I_{D1} = \\frac{I_{SS}}{2} = \\frac{1\\,\\text{mA}}{2} = 0.5\\,\\text{mA}$$'] }],
     q: 'Example numbers (Tutorial 5 Q2 gives none): each top PMOS source gives $I_P = 1$ mA and the tail gives $I_{SS} = 1$ mA, with equal inputs. How much current flows down each cascode branch into M3 and M4?',
     hint: ['KCL at the folding node where M1’s drain joins: $I_P$ comes in, two currents leave.',
       '$I_P = \\frac{I_{SS}}{2} + I_{casc}$, so $I_{casc} = I_P - \\frac{I_{SS}}{2}$'],
