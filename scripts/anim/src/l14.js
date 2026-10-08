@@ -247,10 +247,33 @@ scene(L14, 'Problem Set 2 P1: telescopic slew rate', 44, (S) => {
     tests: 'KCL at each output while slewing: what is pushed in minus what is pulled out, into $C_L$.',
     fig: (S2) => { const g = teleFD(S2); g.setAttribute('transform', 'translate(-200 60)'); },
     steps: [
-      { t: 6, title: 'Left: M7 pushes 0.5 mA in, M1 pulls 1 mA out: −0.5 mA into $C_L$', tex: stepTex('bank-ps2-p1', 0), try: { q: 'Net −0.5 mA into 2 pF. |dV<sub>out1</sub>/dt| (V/µs)?', answer: ans('bank-ps2-p1', 'se'), unit: 'V/s (type 250M)', tol: 0.02, hint: '0.5 mA / 2 pF.' }, say: 'Left output: in 0.5 mA, out 1 mA. Net 0.5 mA out of 2 pF: falls at 250 V/µs.' },
-      { t: 14, title: 'Right: M8 pushes 0.5 mA in, nothing pulls: +0.5 mA', tex: '\\frac{dV_{out2}}{dt} = +\\frac{I_{SS}}{2C_L} = +250\\,\\mathrm{V/\\mu s}', say: 'Right output: rises at the same 250 V/µs.' },
-      { t: 20, title: 'The difference moves twice as fast', tex: stepTex('bank-ps2-p1', 2), try: { q: 'Differential slew rate (V/µs)?', answer: ans('bank-ps2-p1', 'diff'), unit: 'V/s (type 500M)', tol: 0.02, hint: 'Opposite slopes add.' }, say: 'Opposite slopes add: 500 V/µs = $I_{SS}/C_L$.' },
-      { t: 27, ans: true, title: '**Answers:** each output ±250 V/µs · differential 500 V/µs', say: 'Same answer as $I_{SS}/C_L$ — fully differential circuits don’t lose slew rate.' },
+      { t: 6, title: '**KCL at the left output.** M7 still pushes $I_{SS}/2$ in, but M1 (through M3) now pulls the whole $I_{SS}$ out. The shortfall must come out of $C_L$, so $V_{out1}$ **falls**.', tex: 'I_{C_L} = \\frac{I_{SS}}{2} - I_{SS} = 0.5\\,\\mathrm{mA} - 1\\,\\mathrm{mA} = -0.5\\,\\mathrm{mA},\\quad \\frac{dV_{out1}}{dt} = \\frac{I_{C_L}}{C_L} = \\frac{-0.5\\,\\mathrm{mA}}{2\\,\\mathrm{pF}} = -250\\,\\mathrm{V/\\mu s}',
+        try: {
+          q: 'M2 is off. How fast does the **left** output $V_{out1}$ move? Give the size of its slope.',
+          hint: ['Do KCL at the $V_{out1}$ node: the current pushed in by the top source, minus the current M1 now pulls out, is what flows into $C_L$.', 'Top source: $I_{SS}/2$ in. M1: all of $I_{SS}$ out. Then $i = C_L\\,dV/dt$, so $\\left|\\frac{dV_{out1}}{dt}\\right| = \\frac{|I_{C_L}|}{C_L}$.'],
+          how: [
+            'M2 is off, so all of the tail current $I_{SS}$ flows through M1 and is pulled out of the left output node. $$I_{out} = I_{SS} = 1\\,\\mathrm{mA}$$',
+            'The top source M7 is a fixed current source: it still pushes in only $I_{SS}/2$. $$I_{in} = \\frac{I_{SS}}{2} = 0.5\\,\\mathrm{mA}$$',
+            'KCL: whatever is not balanced must come from the capacitor. $$I_{C_L} = I_{in} - I_{out} = 0.5\\,\\mathrm{mA} - 1\\,\\mathrm{mA} = -0.5\\,\\mathrm{mA}$$',
+            'A capacitor obeys $i = C\\,dv/dt$, so divide by $C_L$. $$\\left|\\frac{dV_{out1}}{dt}\\right| = \\frac{I_{SS}}{2C_L} = \\frac{0.5\\times10^{-3}}{2\\times10^{-12}} = 2.5\\times10^{8}\\,\\mathrm{V/s} = 250\\,\\mathrm{V/\\mu s}$$',
+          ],
+          why: 'Slewing = KCL with fixed currents: (in − out) / C. Each single output of a fully differential pair slews at $I_{SS}/(2C_L)$.',
+          answer: ans('bank-ps2-p1', 'se'), unit: 'V/s', tol: 0.02,
+        }, say: 'Left output: in 0.5 mA, out 1 mA. Net 0.5 mA out of 2 pF: falls at 250 V/µs.' },
+      { t: 14, title: '**KCL at the right output.** M8 pushes $I_{SS}/2$ in and nothing pulls out (M2 is off), so all of it charges $C_L$: $V_{out2}$ **rises** at the same rate.', tex: '\\frac{dV_{out2}}{dt} = +\\frac{I_{SS}}{2C_L} = \\frac{0.5\\,\\mathrm{mA}}{2\\,\\mathrm{pF}} = +250\\,\\mathrm{V/\\mu s}', say: 'Right output: rises at the same 250 V/µs.' },
+      { t: 20, title: '**The signal is the difference.** One output falls while the other rises, so their slopes add: the differential output slews twice as fast.', tex: '\\frac{dV_{out,d}}{dt} = \\frac{I_{SS}}{2C_L} + \\frac{I_{SS}}{2C_L} = \\frac{I_{SS}}{C_L} = \\frac{1\\,\\mathrm{mA}}{2\\,\\mathrm{pF}} = 500\\,\\mathrm{V/\\mu s}',
+        try: {
+          q: 'Now the **differential** output $V_{out1} - V_{out2}$: how fast does it change while slewing?',
+          hint: ['The two outputs move in opposite directions. What happens to their difference?', '$\\frac{dV_{out,d}}{dt} = \\frac{dV_{out2}}{dt} - \\frac{dV_{out1}}{dt}$, with one slope $+I_{SS}/(2C_L)$ and the other $-I_{SS}/(2C_L)$.'],
+          how: [
+            'From part 1, $V_{out1}$ falls at $I_{SS}/(2C_L)$; the right side gets the same $I_{SS}/2$ the other way, so $V_{out2}$ rises at the same rate. $$\\frac{dV_{out1}}{dt} = -250\\,\\mathrm{V/\\mu s},\\quad \\frac{dV_{out2}}{dt} = +250\\,\\mathrm{V/\\mu s}$$',
+            'The differential output is the difference of the two, so the opposite slopes add up. $$\\left|\\frac{dV_{out,d}}{dt}\\right| = 250 + 250 = 500\\,\\mathrm{V/\\mu s}$$',
+            'Check with the formula: it is just $I_{SS}/C_L$. $$SR_d = \\frac{I_{SS}}{C_L} = \\frac{1\\times10^{-3}}{2\\times10^{-12}} = 5\\times10^{8}\\,\\mathrm{V/s}$$',
+          ],
+          why: 'Fully differential: each output $I_{SS}/(2C_L)$, differential $I_{SS}/C_L$ — the same as the 5-T OTA.',
+          answer: ans('bank-ps2-p1', 'diff'), unit: 'V/s', tol: 0.02,
+        }, say: 'Opposite slopes add: 500 V/µs = $I_{SS}/C_L$.' },
+      { t: 27, ans: true, title: '**Answers:** each output slews at ±250 V/µs (= $I_{SS}/2C_L$) · the differential output at 500 V/µs (= $I_{SS}/C_L$)', say: 'Same answer as $I_{SS}/C_L$ — fully differential circuits don’t lose slew rate.' },
     ],
   });
 }, { q: 'Problem Set 2 P1' });
@@ -277,17 +300,63 @@ function t6q3Fig(S) {
 }
 scene(L14, 'Tutorial 6 Q3: folded-cascode slew rate', 66, (S) => {
   pyqFrame(S, {
-    paper: 't6q3', tag: 'LEC 14 · QUESTION 2 OF 4', title: 'When I_P < I_SS, I_P sets the slew rate', src: 'Tutorial 6 Q3',
+    paper: 't6q3', tag: 'LEC 14 · QUESTION 2 OF 4', title: 'Folded-cascode slew rate, both directions', src: 'Tutorial 6 Q3',
     q: 'NMOS-input folded cascode, cascode-mirror bottom: $C_L = 4$ pF, $I_{SS} = 300\\,\\mu$A, each folding source $I_P = 200\\,\\mu$A, $V_{ov1,2} = 150$ mV. (a) SR+. (b) SR− and what limits it. (c) Condition on $I_P$ for symmetric SR = $I_{SS}/C_L$. (d) Step for full slewing.', qh: 270,
     tests: 'branch currents $I_P - I_D$ clipped at zero, the mirror copying the left branch, and $\\sqrt2V_{ov}$.',
     fig: (S2) => { const g = t6q3Fig(S2); g.setAttribute('transform', 'translate(-140 80)'); },
     steps: [
-      { t: 8, title: 'Output current = (right branch $I_P - I_{D2}$) − (mirror copy of left branch $I_P - I_{D1}$); a branch can’t go below 0', tex: stepTex('bank-t6q3', 0), say: 'Bookkeeping: the right branch delivers $I_P - I_{D2}$ to the output; the mirror sinks a copy of the left branch, $I_P - I_{D1}$. Neither can go negative.' },
-      { t: 16, title: '(a) $I_{D2} → 0$: right branch delivers $I_P$; left branch $I_P - I_{SS} < 0$ → off, mirror sinks 0', tex: stepTex('bank-t6q3', 1), try: { q: 'Right branch I<sub>P</sub> = 200 µA, mirror sinks nothing, C<sub>L</sub> = 4 pF. SR+ (V/µs)?', answer: ans('bank-t6q3', 'srp'), unit: 'V/s (type 50M)', tol: 0.02, hint: '200 µA / 4 pF.' }, say: 'Positive slewing: 200 µA into 4 pF = 50 V/µs.' },
-      { t: 25, title: '(b) $I_{D2} → I_{SS}$: right branch off, mirror sinks $I_P$', tex: stepTex('bank-t6q3', 2), try: { q: 'Right branch off; the mirror sinks a copy of the left branch, I<sub>P</sub> = 200 µA. SR− (V/µs)?', answer: ans('bank-t6q3', 'srm'), unit: 'V/s (type 50M)', tol: 0.02, hint: 'Same current, other direction.' }, say: 'Negative slewing: also 200 µA / 4 pF = 50 V/µs. Limited by $I_P$, not $I_{SS}$.' },
-      { t: 33, title: '(c) No branch may turn off', tex: stepTex('bank-t6q3', 3), try: { q: 'Minimum I<sub>P</sub> for SR = I<sub>SS</sub>/C<sub>L</sub> both ways (µA)?', answer: ans('bank-t6q3', 'ipmin'), unit: 'A (type 300u)', tol: 0.01, hint: 'IP − ISS ≥ 0.' }, say: '$I_P \\ge I_{SS} = 300\\,\\mu$A; then SR = 75 V/µs both ways.' },
-      { t: 41, title: '(d) Full steering at $\\sqrt2V_{ov}$', tex: stepTex('bank-t6q3', 4), try: { q: 'V<sub>ov</sub> at balance = 0.15 V. ΔV<sub>in,min</sub> = ?', answer: ans('bank-t6q3', 'dv'), unit: 'V', tol: 0.01, hint: '√2 × 0.15.' }, say: '$\\sqrt2\\times0.15 = 0.212$ V.' },
-      { t: 48, ans: true, title: '**Answers:** SR+ = SR− = 50 V/µs (limited by $I_P$) · need $I_P \\ge I_{SS}$ = 300 µA · ΔV = 0.212 V', say: 'Folded cascodes: always compare $I_P$ with $I_{SS}$ first.' },
+      { t: 8, title: '**Bookkeeping first.** The right cascode branch delivers $I_P - I_{D2}$ to the output; the bottom mirror sinks a copy of the left branch, $I_P - I_{D1}$. A branch **cannot carry negative current**: if the sum says negative, it is off (0).', tex: 'I_{C_L} = (I_P - I_{D2}) - (I_P - I_{D1}),\\quad \\text{each bracket} \\ge 0', say: 'Bookkeeping: the right branch delivers $I_P - I_{D2}$ to the output; the mirror sinks a copy of the left branch, $I_P - I_{D1}$. Neither can go negative.' },
+      { t: 16, title: '**(a) Rising output:** M2 off ($I_{D2} = 0$), M1 takes all of $I_{SS}$. The right branch delivers the full $I_P$; the left branch would need $I_P - I_{SS} < 0$, so it is off and the mirror sinks nothing.', tex: 'SR_+ = \\frac{I_P - 0}{C_L} = \\frac{200\\,\\mathrm{\\mu A}}{4\\,\\mathrm{pF}} = 50\\,\\mathrm{V/\\mu s}',
+        try: {
+          q: '**(a)** A large step turns M2 off. Find the positive slew rate $SR_+$ of $V_{out}$.',
+          hint: ['Find the current in each cascode branch with M2 off, remembering a branch cannot go below zero. Then KCL at $V_{out}$.', 'Right branch: $I_P - I_{D2}$. Left branch (copied by the mirror): $I_P - I_{D1}$, clipped at 0. $SR_+ = \\frac{I_{C_L}}{C_L}$.'],
+          how: [
+            'M2 is off, so $I_{D2} = 0$ and the right branch passes all of its folding current to the output. $$I_{right} = I_P - I_{D2} = 200 - 0 = 200\\,\\mathrm{\\mu A}$$',
+            'M1 now takes all of $I_{SS}$ from the left fold node. The left branch would carry $I_P - I_{SS}$, which is negative, so it turns **off**. $$I_{left} = I_P - I_{SS} = 200 - 300 = -100\\,\\mathrm{\\mu A} \\;\\Rightarrow\\; 0$$',
+            'The mirror copies the left branch, so it sinks nothing. KCL at the output: $$I_{C_L} = I_{right} - I_{left} = 200 - 0 = 200\\,\\mathrm{\\mu A}$$',
+            'Divide by $C_L$ ($i = C\\,dv/dt$). $$SR_+ = \\frac{I_P}{C_L} = \\frac{200\\times10^{-6}}{4\\times10^{-12}} = 5\\times10^{7}\\,\\mathrm{V/s} = 50\\,\\mathrm{V/\\mu s}$$',
+          ],
+          why: 'Not $I_{SS}/C_L$ (= 75 V/µs): with $I_P < I_{SS}$ the slewing current is $I_P$.',
+          calc: [{ what: 'Slew rate with prefixes (Engineer Symbol on)', keys: '200µ ÷ 4p', shows: '50M  (V/s = 50 V/µs)', note: 'Type µ and p with [CATALOG] ▸ Engineer Symbol.' }],
+          answer: ans('bank-t6q3', 'srp'), unit: 'V/s', tol: 0.02,
+        }, say: 'Positive slewing: 200 µA into 4 pF = 50 V/µs.' },
+      { t: 25, title: '**(b) Falling output:** now M1 is off and M2 takes all of $I_{SS}$. The right branch would need $I_P - I_{SS} < 0$, so it is off; the left branch carries the full $I_P$ and the mirror sinks a copy of it. **$I_P$ limits it, not $I_{SS}$.**', tex: 'SR_- = \\frac{0 - I_P}{C_L} = \\frac{-200\\,\\mathrm{\\mu A}}{4\\,\\mathrm{pF}} = -50\\,\\mathrm{V/\\mu s}',
+        try: {
+          q: '**(b)** Now the step goes the other way (M1 off). Find the size of the negative slew rate $SR_-$.',
+          hint: ['Same bookkeeping with the roles swapped: which branch now goes negative and turns off? What does the mirror copy?', 'Right branch: $I_P - I_{SS}$ (clip at 0). Left branch: $I_P - 0$, and the mirror sinks a copy of it. $|SR_-| = \\frac{|I_{C_L}|}{C_L}$.'],
+          how: [
+            'M1 is off, so the left branch carries all of $I_P$, and the bottom mirror sinks a copy of it from the output. $$I_{left} = I_P - 0 = 200\\,\\mathrm{\\mu A}$$',
+            'M2 takes all of $I_{SS}$; the right branch would carry $I_P - I_{SS} < 0$, so it is **off**. $$I_{right} = 200 - 300 \\;\\Rightarrow\\; 0$$',
+            'KCL at the output: only the mirror pulls, so $C_L$ discharges with $I_P$. $$I_{C_L} = I_{right} - I_{left} = 0 - 200 = -200\\,\\mathrm{\\mu A}$$',
+            'Divide by $C_L$. $$|SR_-| = \\frac{I_P}{C_L} = \\frac{200\\times10^{-6}}{4\\times10^{-12}} = 50\\,\\mathrm{V/\\mu s}$$',
+          ],
+          why: 'Both directions are set by $I_P$ because $I_P < I_{SS}$: a branch turns off and the rest of $I_{SS}$ is wasted.',
+          answer: ans('bank-t6q3', 'srm'), unit: 'V/s', tol: 0.02,
+        }, say: 'Negative slewing: also 200 µA / 4 pF = 50 V/µs. Limited by $I_P$, not $I_{SS}$.' },
+      { t: 33, title: '**(c) No branch may turn off.** The worst branch carries $I_P - I_{SS}$; keep it ≥ 0 and both slew rates become $I_{SS}/C_L$.', tex: 'I_P - I_{SS} \\ge 0 \\Rightarrow I_P \\ge I_{SS} = 300\\,\\mathrm{\\mu A},\\quad SR = \\frac{I_{SS}}{C_L} = \\frac{300\\,\\mathrm{\\mu A}}{4\\,\\mathrm{pF}} = 75\\,\\mathrm{V/\\mu s}',
+        try: {
+          q: '**(c)** What is the smallest $I_P$ for which the circuit slews at $I_{SS}/C_L$ in both directions?',
+          hint: ['In (a) and (b) the trouble was a branch that tried to carry negative current. What keeps it from turning off?', 'The worst branch carries $I_P - I_{SS}$. Require $I_P - I_{SS} \\ge 0$.'],
+          how: [
+            'During slewing one input device takes all of $I_{SS}$, so the branch on that side carries $I_P - I_{SS}$. $$I_{branch,min} = I_P - I_{SS}$$',
+            'For that branch to stay on (and the full $I_{SS}$ to reach the output), it must not go negative. $$I_P - I_{SS} \\ge 0 \\Rightarrow I_P \\ge I_{SS} = 300\\,\\mathrm{\\mu A}$$',
+            'Then the slewing current is $I_{SS}$ both ways. $$SR = \\frac{I_{SS}}{C_L} = \\frac{300\\,\\mathrm{\\mu A}}{4\\,\\mathrm{pF}} = 75\\,\\mathrm{V/\\mu s}$$',
+          ],
+          why: 'Folded cascode rule: make the folding current $I_P \\ge I_{SS}$.',
+          answer: ans('bank-t6q3', 'ipmin'), unit: 'A', tol: 0.01,
+        }, say: '$I_P \\ge I_{SS} = 300\\,\\mu$A; then SR = 75 V/µs both ways.' },
+      { t: 41, title: '**(d) How big a step forces slewing?** The pair is fully steered (one device takes all of $I_{SS}$) once the differential input reaches $\\sqrt2$ times the balanced overdrive.', tex: '\\Delta V_{in,min} = \\sqrt2\\,V_{ov1,2} = \\sqrt2\\times0.15\\,\\mathrm{V} = 0.212\\,\\mathrm{V}',
+        try: {
+          q: '**(d)** What is the smallest input step that makes the circuit slew (one input device takes all of $I_{SS}$)?',
+          hint: ['Full current steering in a differential pair: one side gets all of $I_{SS}$, the other turns off. Recall the input voltage at which that happens.', '$\\Delta V_{in,min} = \\sqrt2\\,V_{ov}$, with $V_{ov}$ the overdrive of M1, M2 at balance.'],
+          how: [
+            'A differential pair steers all of its tail current to one side when the differential input reaches $\\sqrt2$ times the overdrive at balance. $$\\Delta V_{in,min} = \\sqrt2\\,V_{ov1,2}$$',
+            'Put in the given overdrive. $$\\Delta V_{in,min} = \\sqrt2\\times0.15 = 1.414\\times0.15 = 0.212\\,\\mathrm{V}$$',
+          ],
+          why: 'Any step larger than $\\sqrt2V_{ov}$ turns one input device off: from then on the output slews.',
+          answer: ans('bank-t6q3', 'dv'), unit: 'V', tol: 0.01,
+        }, say: '$\\sqrt2\\times0.15 = 0.212$ V.' },
+      { t: 48, ans: true, title: '**Answers:** (a) SR+ = 50 V/µs · (b) SR− = 50 V/µs, limited by $I_P$ · (c) $I_P \\ge I_{SS}$ = 300 µA (then 75 V/µs) · (d) ΔV = 0.212 V', say: 'Folded cascodes: always compare $I_P$ with $I_{SS}$ first.' },
     ],
   });
 }, { q: 'Tutorial 6 Q3' });
@@ -299,10 +368,44 @@ scene(L14, 'Past tutorial: two poles closing in', 60, (S) => {
     tests: 'the closed-loop quadratic and its Q from the last theory scene.',
     fig: (S2) => { const g = S2.g(); const r = S2.into(g); eq(S2, 's^2 + (\\omega_{p1}+\\omega_{p2})s + (1+\\beta A_0)\\omega_{p1}\\omega_{p2} = 0', 470, 320, { size: 26, w: 860 }); eq(S2, 'Q^2 = \\frac{(1+\\beta A_0)\\,\\omega_{p1}\\omega_{p2}}{(\\omega_{p1}+\\omega_{p2})^2}', 470, 470, { size: 34, w: 860 }); eq(S2, '\\omega_{p1}\\omega_{p2} = 10^{10},\\;\\; \\omega_{p1}+\\omega_{p2} = 1.01\\times10^6', 470, 610, { size: 26, w: 860, color: C.muted }); r(); },
     steps: [
-      { t: 6, title: 'Coincident: Q = 0.5, i.e. $(1+\\beta A_0)\\omega_{p1}\\omega_{p2} = (\\omega_{p1}+\\omega_{p2})^2/4$', tex: stepTex('pyq-t24-ex2', 0), try: { q: '(1 + 100β)·10¹⁰ = (1.01·10⁶)²/4. β = ?', answer: ans('pyq-t24-ex2', 'b1'), unit: '', tol: 0.02, hint: '(1.01e6)²/(4e10) = 25.5.' }, say: '$(1.01\\times10^6)^2/(4\\times10^{10}) = 25.5 = 1 + 100\\beta$, so β = 0.245.' },
-      { t: 15, title: 'Maximally flat: Q = $1/\\sqrt2$, i.e. $Q^2 = 0.5$', tex: stepTex('pyq-t24-ex2', 1), try: { q: '(1 + 100β)·10¹⁰ = (1.01·10⁶)²/2. β = ?', answer: ans('pyq-t24-ex2', 'b2'), unit: '', tol: 0.02, hint: '1 + 100β = 51.0.' }, say: '$1 + 100\\beta = 51.0$, so β ≈ 0.50.' },
-      { t: 23, title: 'Closed-loop gain $A_0/(1+\\beta A_0)$', tex: stepTex('pyq-t24-ex2', 2), try: { q: 'A₀ = 100, β = 0.50005. Closed-loop gain?', answer: ans('pyq-t24-ex2', 'g'), unit: '', tol: 0.02, hint: '100/51.' }, say: '$100/51 = 1.96$.' },
-      { t: 30, ans: true, title: '**Answers:** coincident at β = 0.245 (Q = 0.5) · maximally flat at β ≈ 0.50 · gain ≈ 1.96', say: 'More feedback (bigger β) pushes Q up: from coincident to flat to ringing.' },
+      { t: 6, title: '**Coincident poles mean Q = 0.5** (the quadratic’s discriminant is zero). Set $Q^2 = 1/4$ and solve for $1 + \\beta A_0$, then β.', tex: '1 + \\beta A_0 = \\frac{(\\omega_{p1}+\\omega_{p2})^2}{4\\,\\omega_{p1}\\omega_{p2}} = \\frac{(1.01\\times10^6)^2}{4\\times10^{10}} = 25.5,\\quad \\beta = \\frac{25.5 - 1}{100} = 0.245',
+        try: {
+          q: 'For what β do the two closed-loop poles **coincide**?',
+          hint: ['Coincident poles = a double root of the closed-loop quadratic. In terms of Q that is Q = 0.5.', 'Use $Q^2 = \\frac{(1+\\beta A_0)\\,\\omega_{p1}\\omega_{p2}}{(\\omega_{p1}+\\omega_{p2})^2}$ with $Q^2 = \\frac14$, solve for $1 + \\beta A_0$, then β.'],
+          how: [
+            'The closed-loop poles solve $s^2 + (\\omega_{p1}+\\omega_{p2})s + (1+\\beta A_0)\\omega_{p1}\\omega_{p2} = 0$. They coincide when the discriminant is zero, which is the same as $Q = 0.5$. $$Q^2 = \\frac{(1+\\beta A_0)\\,\\omega_{p1}\\omega_{p2}}{(\\omega_{p1}+\\omega_{p2})^2} = \\frac14$$',
+            'Work out the two pole numbers. $$\\omega_{p1}\\omega_{p2} = 10^4\\times10^6 = 10^{10},\\quad \\omega_{p1}+\\omega_{p2} = 1.01\\times10^6$$',
+            'Solve for $1 + \\beta A_0$. $$1 + \\beta A_0 = \\frac{(1.01\\times10^6)^2}{4\\times10^{10}} = \\frac{1.0201\\times10^{12}}{4\\times10^{10}} = 25.5$$',
+            'With $A_0 = 100$: $$\\beta = \\frac{25.5 - 1}{100} = 0.245$$',
+          ],
+          why: 'Q = 0.5: coincident (fastest without overshoot). Q = 0.707: maximally flat.',
+          calc: [{ what: 'β in one line', keys: '( ( 1.01 × 10 [^] 6 ) [x²] ÷ ( 4 × 10 [^] 10 ) − 1 ) ÷ 100', shows: '0.245025', note: 'For the flat case, edit 4 to 2 with ◀ and [EXE] again.' }],
+          answer: ans('pyq-t24-ex2', 'b1'), unit: '', tol: 0.02,
+        }, say: '$(1.01\\times10^6)^2/(4\\times10^{10}) = 25.5 = 1 + 100\\beta$, so β = 0.245.' },
+      { t: 15, title: '**Maximally flat means Q = 1/√2**, i.e. $Q^2 = 1/2$: the same equation with 2 in place of 4.', tex: '1 + \\beta A_0 = \\frac{(\\omega_{p1}+\\omega_{p2})^2}{2\\,\\omega_{p1}\\omega_{p2}} = \\frac{(1.01\\times10^6)^2}{2\\times10^{10}} = 51.0,\\quad \\beta = \\frac{51.0 - 1}{100} = 0.500',
+        try: {
+          q: 'For what β is the closed-loop response **maximally flat**?',
+          hint: ['Maximally flat (Butterworth) means $Q = 1/\\sqrt2$.', 'Same $Q^2$ formula as before, now with $Q^2 = \\frac12$: $1 + \\beta A_0 = \\frac{(\\omega_{p1}+\\omega_{p2})^2}{2\\,\\omega_{p1}\\omega_{p2}}$.'],
+          how: [
+            'Maximally flat is $Q = 1/\\sqrt2$, so $Q^2 = 1/2$. $$\\frac{(1+\\beta A_0)\\,\\omega_{p1}\\omega_{p2}}{(\\omega_{p1}+\\omega_{p2})^2} = \\frac12$$',
+            'Solve for $1 + \\beta A_0$ (twice the coincident value). $$1 + \\beta A_0 = \\frac{(1.01\\times10^6)^2}{2\\times10^{10}} = \\frac{1.0201\\times10^{12}}{2\\times10^{10}} = 51.0$$',
+            'With $A_0 = 100$: $$\\beta = \\frac{51.0 - 1}{100} = 0.500$$',
+          ],
+          why: 'More feedback (bigger β) raises Q: coincident → flat → ringing.',
+          answer: ans('pyq-t24-ex2', 'b2'), unit: '', tol: 0.02,
+        }, say: '$1 + 100\\beta = 51.0$, so β ≈ 0.50.' },
+      { t: 23, title: '**Closed-loop gain** at low frequency: the usual $A_0/(1 + \\beta A_0)$, with $1 + \\beta A_0 = 51.0$ from the flat case.', tex: 'A_f = \\frac{A_0}{1+\\beta A_0} = \\frac{100}{51.0} = 1.96',
+        try: {
+          q: 'In the maximally flat case, what is the low-frequency closed-loop gain?',
+          hint: ['Closed-loop gain of a feedback amplifier at low frequency.', '$A_f = \\frac{A_0}{1 + \\beta A_0}$, and you already have $1 + \\beta A_0$ from the last part.'],
+          how: [
+            'At low frequency the poles do nothing, so the ordinary feedback formula applies. $$A_f = \\frac{A_0}{1+\\beta A_0}$$',
+            'Use $1 + \\beta A_0 = 51.0$ from the maximally flat part. $$A_f = \\frac{100}{51.0} = 1.96$$',
+          ],
+          why: 'Close to $1/\\beta = 2$, because the loop gain (50) is large.',
+          answer: ans('pyq-t24-ex2', 'g'), unit: '', tol: 0.02,
+        }, say: '$100/51 = 1.96$.' },
+      { t: 30, ans: true, title: '**Answers:** coincident poles at β = 0.245 (Q = 0.5) · maximally flat at β ≈ 0.50 (Q = 0.707) · closed-loop gain ≈ 1.96', say: 'More feedback (bigger β) pushes Q up: from coincident to flat to ringing.' },
     ],
   });
 }, { q: 'Past tutorial Ex 2' });
@@ -311,12 +414,37 @@ scene(L14, 'Exam-style check: loop phase and Barkhausen', 46, (S) => {
   pyqFrame(S, {
     tag: 'LEC 14 · QUESTION 4 OF 4 (EXAM-STYLE, FROM YOUR PAGE)', title: 'Evaluate βA(jω) with two poles', src: 'Exam-style · built from your Lec 14 page',
     q: '$\\beta A(s) = \\frac{\\beta A_M}{(1+s/\\omega_{p1})(1+s/\\omega_{p2})}$ with $\\omega_{p1} = 1$ Mrad/s, $\\omega_{p2} = 10$ Mrad/s. (a) Phase of βA at ω = 10 Mrad/s. (b) Can this loop satisfy Barkhausen?', qh: 220,
-    tests: 'adding the pole angles, and why two poles alone never reach −180° with $|\\beta A| = 1$.',
+    tests: 'adding the pole angles, and whether two poles alone can ever meet Barkhausen’s criteria.',
     fig: (S2) => { const g = S2.g(); const r = S2.into(g); eq(S2, '\\angle\\beta A = -\\tan^{-1}\\frac{\\omega}{\\omega_{p1}} - \\tan^{-1}\\frac{\\omega}{\\omega_{p2}}', 470, 380, { size: 32, w: 860 }); r(); },
     steps: [
-      { t: 6, title: '(a) Angles add: $-\\tan^{-1}(10) - \\tan^{-1}(1)$', tex: '-84.3^\\circ - 45^\\circ = -129.3^\\circ', try: { q: 'Phase of βA at ω = 10 Mrad/s (degrees, negative)?', answer: -129.3, unit: '°', tol: 0.01, hint: '−atan(10) − atan(1) in degrees.' }, say: 'First pole: $\\tan^{-1}(10) = 84.3°$; second: $\\tan^{-1}(1) = 45°$. Total −129.3°.' },
-      { t: 14, title: '(b) Each pole gives < 90°: −180° only as ω → ∞, where |βA| → 0', tex: '\\text{two poles: never } \\beta A = -1', try: { q: 'Can a loop gain with exactly two poles meet Barkhausen?', choices: ['No — −180° is reached only at ω → ∞, where |βA| has fallen to 0', 'Yes — whenever βA_M > 1'], answer: 0, hint: 'Each pole contributes strictly less than 90°.' }, say: 'No: the phase only approaches −180° as the frequency goes to infinity, and there the size is zero. Two poles can ring, but need a third pole (or delay) to oscillate.' },
-      { t: 22, ans: true, title: '**Answers:** (a) −129.3° · (b) no (but it can ring with little phase margin — Lec 15–16)', say: 'This “angles add” evaluation is exactly what phase-margin questions use next.' },
+      { t: 6, title: '**(a) Angles add.** Each pole factor $1 + j\\omega/\\omega_p$ is an arrow at $\\tan^{-1}(\\omega/\\omega_p)$; dividing by it subtracts that angle.', tex: '\\angle\\beta A = -\\tan^{-1}\\frac{10}{1} - \\tan^{-1}\\frac{10}{10} = -84.3^\\circ - 45^\\circ = -129.3^\\circ',
+        try: {
+          q: '**(a)** What is the phase of $\\beta A(j\\omega)$ at $\\omega = 10$ Mrad/s? (Give it with its sign, in degrees.)',
+          hint: ['β is a plain number, so only the two pole factors give phase. Each one subtracts its own angle.', '$\\angle\\beta A = -\\tan^{-1}\\frac{\\omega}{\\omega_{p1}} - \\tan^{-1}\\frac{\\omega}{\\omega_{p2}}$ (calculator in degree mode).'],
+          how: [
+            'Put $s = j\\omega$. Each pole factor $1 + j\\omega/\\omega_p$ is an arrow with angle $\\tan^{-1}(\\omega/\\omega_p)$; dividing by it subtracts that angle, and the angles of the two poles add. $$\\angle\\beta A = -\\tan^{-1}\\frac{\\omega}{\\omega_{p1}} - \\tan^{-1}\\frac{\\omega}{\\omega_{p2}}$$',
+            'First pole: ω is ten times $\\omega_{p1}$. $$\\tan^{-1}\\frac{10\\,\\mathrm{M}}{1\\,\\mathrm{M}} = \\tan^{-1}10 = 84.3^\\circ$$',
+            'Second pole: ω sits right on $\\omega_{p2}$. $$\\tan^{-1}\\frac{10\\,\\mathrm{M}}{10\\,\\mathrm{M}} = \\tan^{-1}1 = 45^\\circ$$',
+            'Add the lags. $$\\angle\\beta A = -84.3^\\circ - 45^\\circ = -129.3^\\circ$$',
+          ],
+          why: 'At a pole: 45°. A decade above it: about 84°. Never more than 90° per pole.',
+          calc: [{ what: 'Both lags in one line (degree mode)', keys: '[SHIFT] [−] [SHIFT] [tan] 10 ) − [SHIFT] [tan] 1 )', shows: '−129.29' }],
+          answer: -129.3, unit: '°', tol: 0.01,
+        }, say: 'First pole: $\\tan^{-1}(10) = 84.3°$; second: $\\tan^{-1}(1) = 45°$. Total −129.3°.' },
+      { t: 14, title: '**(b) Barkhausen needs −180° at |βA| = 1.** Each pole gives strictly less than 90°, so two poles reach −180° only as ω → ∞, where |βA| has already fallen to 0.', tex: '\\angle\\beta A > -90^\\circ - 90^\\circ = -180^\\circ \\;\\text{for every finite}\\;\\omega \\;\\Rightarrow\\; \\beta A \\ne -1',
+        try: {
+          q: '**(b)** Can a loop gain with exactly these two poles ever satisfy Barkhausen’s criteria, whatever $\\beta A_M$ is?',
+          choices: ['No — −180° is reached only at ω → ∞, where |βA| has fallen to 0', 'Yes — whenever βA_M > 1'], answer: 0,
+          hint: ['Barkhausen needs size 1 **and** phase −180° at the same frequency. What is the most phase one pole can give?', 'Each pole gives $\\tan^{-1}(\\omega/\\omega_p) < 90°$ for any finite ω.'],
+          how: [
+            'Barkhausen needs both at one frequency: $|\\beta A| = 1$ and $\\angle\\beta A = -180°$. $$\\beta A(j\\omega_1) = -1$$',
+            'Each pole’s lag $\\tan^{-1}(\\omega/\\omega_p)$ is always below 90°, so two poles together stay above −180° at every finite frequency. $$\\angle\\beta A > -90^\\circ - 90^\\circ = -180^\\circ$$',
+            'They only reach −180° as ω → ∞, and there $|\\beta A| \\to 0$, not 1. So the answer is **No**.',
+            '“Yes, whenever $\\beta A_M > 1$” is the tempting trap: a big loop gain gives a size of 1 somewhere, but never together with −180°.',
+          ],
+          why: 'Two poles can ring (small phase margin) but cannot oscillate; that needs a third pole or a delay.',
+        }, say: 'No: the phase only approaches −180° as the frequency goes to infinity, and there the size is zero. Two poles can ring, but need a third pole (or delay) to oscillate.' },
+      { t: 22, ans: true, title: '**Answers:** (a) ∠βA = −129.3° · (b) no — two poles alone never meet Barkhausen (but they can ring with little phase margin: Lec 15–16)', say: 'This “angles add” evaluation is exactly what phase-margin questions use next.' },
     ],
   });
 }, { q: 'Exam-style (Lec 14)' });

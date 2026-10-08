@@ -203,10 +203,46 @@ scene(L16, 'Your Lec 16 example: 5°, 45°, 60°', 44, (S) => {
     tests: 'writing βA as $\\cos\\theta + j\\sin\\theta$ at the crossover, and the size of $1 + \\beta A$.',
     fig: eqFig([['\\beta A(\\omega_{GX}) = 1\\angle(PM - 180^\\circ)', 300, 32], ['|A_f|\\,\\beta = \\frac{1}{|1 + \\cos\\theta + j\\sin\\theta|}', 430, 32, '#ffd38a']]),
     steps: [
-      { t: 6, title: 'PM = 5°: θ = −175°', tex: stepTex('bank-lec16', 0), try: { q: 'PM = 5°. |A_f|·β = 1/|1 + cos(−175°) + j sin(−175°)|?', answer: ans('bank-lec16', 'a'), unit: '×', tol: 0.02, hint: '1 + cos175° = 0.0038, sin175° = 0.0872.' }, say: '$1/0.0873 = 11.5$.' },
-      { t: 14, title: 'PM = 45°: θ = −135°', tex: stepTex('bank-lec16', 1), try: { q: 'PM = 45°. |A_f|·β?', answer: ans('bank-lec16', 'b'), unit: '×', tol: 0.02, hint: '|0.293 − j0.707|.' }, say: '$1/0.765 = 1.31$.' },
-      { t: 21, title: 'PM = 60°: θ = −120°', tex: stepTex('bank-lec16', 2), try: { q: 'PM = 60°. |A_f|·β?', answer: ans('bank-lec16', 'c'), unit: '×', tol: 0.01, hint: '|0.5 − j0.866|.' }, say: 'Exactly 1.' },
-      { t: 28, ans: true, title: '**Answers:** 11.5 · 1.31 · 1 (shortcut $1/(2\\sin(PM/2))$)', say: 'In the exam use the shortcut, but know where it comes from.' },
+      { t: 6, title: '**PM = 5°:** the loop gain is a unit arrow at θ = −175°, almost pointing back at −1. Add 1 and take the size: nearly zero, so a huge peak.', tex: '|1 + \\beta A| = |1 + \\cos175^\\circ - j\\sin175^\\circ| = |0.0038 - j0.0872| = 0.0873,\\quad |A_f|\\,\\beta = \\frac{1}{0.0873} = 11.5',
+        try: {
+          q: 'PM = 5°: what is $|A_f(\\omega_{GX})|$ as a multiple of $1/\\beta$?',
+          hint: ['At the crossover βA is an arrow of length 1 at angle θ = PM − 180°. Write $1 + \\beta A$ in real and imaginary parts, then take its size.', '$|A_f|\\,\\beta = \\frac{1}{|1 + \\cos\\theta + j\\sin\\theta|}$ with θ = −175°.'],
+          how: [
+            'At $\\omega_{GX}$, $|A| = 1/\\beta$, so $|A_f| = \\frac{|A|}{|1+\\beta A|} = \\frac{1}{\\beta}\\cdot\\frac{1}{|1+\\beta A|}$. The loop gain is a unit arrow at $\\theta = PM - 180^\\circ$. $$\\theta = 5^\\circ - 180^\\circ = -175^\\circ$$',
+            'Write $1 + \\beta A$ in parts. $$1 + \\cos(-175^\\circ) + j\\sin(-175^\\circ) = 1 - 0.9962 - j0.0872 = 0.0038 - j0.0872$$',
+            'Its size (Pythagoras). $$|1 + \\beta A| = \\sqrt{0.0038^2 + 0.0872^2} = 0.0873$$',
+            'Divide. $$|A_f|\\,\\beta = \\frac{1}{0.0873} = 11.5$$',
+          ],
+          why: 'Shortcut: $\\frac{1}{2\\sin(PM/2)} = \\frac{1}{2\\sin2.5^\\circ} = 11.5$.',
+          calc: [{ what: 'Size of 1 + βA in one line (degree mode)', keys: '1 ÷ √( ( 1 + cos( 175 ) ) [x²] + sin( 175 ) [x²] )', shows: '11.46' }],
+          answer: ans('bank-lec16', 'a'), unit: '×', tol: 0.02,
+        }, say: '$1/0.0873 = 11.5$.' },
+      { t: 14, title: '**PM = 45°:** θ = −135°. The arrows open wider, $1 + \\beta A$ is longer, and the peak is much smaller.', tex: '|1 + \\cos135^\\circ - j\\sin135^\\circ| = |0.293 - j0.707| = 0.765,\\quad |A_f|\\,\\beta = \\frac{1}{0.765} = 1.31',
+        try: {
+          q: 'PM = 45°: what is $|A_f(\\omega_{GX})|$ as a multiple of $1/\\beta$?',
+          hint: ['Same recipe: θ = PM − 180°, then the size of $1 + \\cos\\theta + j\\sin\\theta$.', 'θ = −135°: $\\cos135^\\circ = -0.707$, $\\sin135^\\circ = 0.707$.'],
+          how: [
+            'The loop gain’s angle at the crossover. $$\\theta = 45^\\circ - 180^\\circ = -135^\\circ$$',
+            'Write $1 + \\beta A$ in parts. $$1 + \\cos(-135^\\circ) + j\\sin(-135^\\circ) = 1 - 0.707 - j0.707 = 0.293 - j0.707$$',
+            'Its size. $$\\sqrt{0.293^2 + 0.707^2} = 0.765$$',
+            'Divide. $$|A_f|\\,\\beta = \\frac{1}{0.765} = 1.31$$',
+          ],
+          why: '45° → about a 30 % peak.',
+          answer: ans('bank-lec16', 'b'), unit: '×', tol: 0.02,
+        }, say: '$1/0.765 = 1.31$.' },
+      { t: 21, title: '**PM = 60°:** θ = −120°. Now $1 + \\beta A$ has size exactly 1: the gain at the crossover is exactly $1/\\beta$, no peak.', tex: '|1 + \\cos120^\\circ - j\\sin120^\\circ| = |0.5 - j0.866| = \\sqrt{0.25 + 0.75} = 1,\\quad |A_f|\\,\\beta = 1',
+        try: {
+          q: 'PM = 60°: what is $|A_f(\\omega_{GX})|$ as a multiple of $1/\\beta$?',
+          hint: ['Same recipe with θ = −120°.', '$\\cos120^\\circ = -0.5$, $\\sin120^\\circ = 0.866$.'],
+          how: [
+            'The loop gain’s angle at the crossover. $$\\theta = 60^\\circ - 180^\\circ = -120^\\circ$$',
+            'Write $1 + \\beta A$ in parts. $$1 + \\cos(-120^\\circ) + j\\sin(-120^\\circ) = 1 - 0.5 - j0.866 = 0.5 - j0.866$$',
+            'Its size: $0.5^2 + 0.866^2 = 0.25 + 0.75 = 1$. $$|1 + \\beta A| = 1 \\Rightarrow |A_f|\\,\\beta = 1$$',
+          ],
+          why: '60° gives exactly $1/\\beta$ at the crossover: no peak. That is why 60° is the usual target.',
+          answer: ans('bank-lec16', 'c'), unit: '×', tol: 0.01,
+        }, say: 'Exactly 1.' },
+      { t: 28, ans: true, title: '**Answers:** PM 5° → 11.5 · 45° → 1.31 · 60° → 1 (times $1/\\beta$). Shortcut: $1/(2\\sin(PM/2))$', say: 'In the exam use the shortcut, but know where it comes from.' },
     ],
   });
 }, { q: 'Lec 16 example' });
@@ -216,12 +252,45 @@ scene(L16, 'Past tutorial Ex 4: 30°, 60°, 90°', 40, (S) => {
     tag: 'LEC 16 · QUESTION 2 OF 3', title: 'Closed-loop gain at ω1 for three margins', src: 'Past tutorial 2024-25 T2 Ex 4',
     q: 'Find the closed-loop gain at $\\omega_1$ (where $|A\\beta| = 1$) relative to the low-frequency gain, for phase margins of 30°, 60° and 90°.', qh: 170,
     tests: 'the peak formula, including the 90° case that gives the usual −3 dB.',
-    fig: eqFig([['K = \\frac{1}{2\\sin(PM/2)}', 380, 40, '#ffd38a']]),
+    fig: eqFig([['A\\beta(\\omega_1) = 1\\angle(PM - 180^\\circ),\\quad \\text{low-frequency gain} \\approx 1/\\beta', 380, 28, '#ffd38a']]),
     steps: [
-      { t: 6, title: 'PM 30°', tex: stepTex('pyq-t24-ex4', 0), try: { q: 'PM = 30°: K = 1/(2 sin 15°)?', answer: ans('pyq-t24-ex4', 'k30'), unit: '×', tol: 0.01, hint: 'sin 15° = 0.259.' }, say: '1.93: almost double the gain at the crossover.' },
-      { t: 13, title: 'PM 60°', tex: stepTex('pyq-t24-ex4', 1), try: { q: 'PM = 60°: K?', answer: ans('pyq-t24-ex4', 'k60'), unit: '×', tol: 0.01, hint: 'sin 30° = 0.5.' }, say: 'Exactly 1.' },
-      { t: 19, title: 'PM 90°', tex: stepTex('pyq-t24-ex4', 2), try: { q: 'PM = 90°: K?', answer: ans('pyq-t24-ex4', 'k90'), unit: '×', tol: 0.01, hint: 'sin 45° = 0.707.' }, say: '0.707: the −3 dB point of a one-pole response.' },
-      { t: 25, ans: true, title: '**Answers:** 1.93 · 1 · 0.707', say: 'Three margins, three shapes: peaking, flat, rolled off.' },
+      { t: 6, title: '**PM = 30°.** At $\\omega_1$ the two unit arrows (1 and $A\\beta$) have angle PM between them, so $|1 + A\\beta| = 2\\sin(PM/2)$ and the gain ratio is its inverse.', tex: 'K = \\frac{1}{2\\sin(PM/2)} = \\frac{1}{2\\sin15^\\circ} = \\frac{1}{2\\times0.259} = 1.93',
+        try: {
+          q: 'PM = 30°: the closed-loop gain at $\\omega_1$ is how many times the low-frequency gain?',
+          hint: ['At $\\omega_1$, $|A| = 1/\\beta$ and $A\\beta$ is a unit arrow at PM − 180°. The ratio is $1/|1 + A\\beta|$.', 'Two unit arrows with angle PM between them: $|1 + A\\beta| = 2\\sin(PM/2)$, so $K = \\frac{1}{2\\sin(PM/2)}$.'],
+          how: [
+            'At $\\omega_1$: $|A| = 1/\\beta$ (the low-frequency closed-loop gain), so the ratio is set by $|1 + A\\beta|$ alone. $$K = \\frac{|A_f(\\omega_1)|}{1/\\beta} = \\frac{1}{|1 + A\\beta|}$$',
+            '$A\\beta$ is a unit arrow at PM − 180°; adding 1 gives $2\\sin(PM/2)$. $$|1 + A\\beta| = 2\\sin\\frac{PM}{2} = 2\\sin15^\\circ = 0.518$$',
+            'Invert. $$K = \\frac{1}{0.518} = 1.93$$',
+          ],
+          why: 'Small margin, big peak: 30° nearly doubles the gain at $\\omega_1$.',
+          calc: [{ what: 'Peak factor (degree mode)', keys: '1 ÷ ( 2 sin( 30 ÷ 2 ) )', shows: '1.932', note: 'Edit 30 to 60 or 90 with ◀ and [EXE] again for the other parts.' }],
+          answer: ans('pyq-t24-ex4', 'k30'), unit: '×', tol: 0.01,
+        }, say: '1.93: almost double the gain at the crossover.' },
+      { t: 13, title: '**PM = 60°:** $\\sin30^\\circ = 0.5$, so $|1 + A\\beta| = 1$ exactly: no peak.', tex: 'K = \\frac{1}{2\\sin30^\\circ} = \\frac{1}{2\\times0.5} = 1',
+        try: {
+          q: 'PM = 60°: the closed-loop gain at $\\omega_1$ is how many times the low-frequency gain?',
+          hint: ['Same formula as for 30°.', '$K = \\frac{1}{2\\sin(PM/2)}$ with PM/2 = 30°.'],
+          how: [
+            'Use the peak formula. $$K = \\frac{1}{2\\sin(PM/2)} = \\frac{1}{2\\sin30^\\circ}$$',
+            '$\\sin30^\\circ = 0.5$. $$K = \\frac{1}{2\\times0.5} = 1$$',
+          ],
+          why: '60°: flat at $\\omega_1$ — the usual design target.',
+          answer: ans('pyq-t24-ex4', 'k60'), unit: '×', tol: 0.01,
+        }, say: 'Exactly 1.' },
+      { t: 19, title: '**PM = 90°:** $\\sin45^\\circ = 0.707$, so K = 0.707: the ordinary −3 dB point of a one-pole response.', tex: 'K = \\frac{1}{2\\sin45^\\circ} = \\frac{1}{2\\times0.707} = 0.707\;(-3\\,\\mathrm{dB})',
+        try: {
+          q: 'PM = 90°: the closed-loop gain at $\\omega_1$ is how many times the low-frequency gain?',
+          hint: ['Same formula again.', '$K = \\frac{1}{2\\sin(PM/2)}$ with PM/2 = 45°.'],
+          how: [
+            'Use the peak formula. $$K = \\frac{1}{2\\sin45^\\circ}$$',
+            '$\\sin45^\\circ = 0.707$. $$K = \\frac{1}{2\\times0.707} = 0.707$$',
+            'That is $20\\log0.707 = -3$ dB: a one-pole loop is 3 dB down at the crossover, no peak at all.',
+          ],
+          why: 'Remember the ladder: 30° → 1.93, 45° → 1.31, 60° → 1, 90° → 0.707.',
+          answer: ans('pyq-t24-ex4', 'k90'), unit: '×', tol: 0.01,
+        }, say: '0.707: the −3 dB point of a one-pole response.' },
+      { t: 25, ans: true, title: '**Answers:** PM 30° → 1.93 · 60° → 1 · 90° → 0.707 (times the low-frequency gain)', say: 'Three margins, three shapes: peaking, flat, rolled off.' },
     ],
   });
 }, { q: 'Past tutorial Ex 4' });
@@ -231,10 +300,22 @@ scene(L16, 'Razavi 10.4: what PM gives a 50 % peak?', 34, (S) => {
     tag: 'LEC 16 · QUESTION 3 OF 3', title: 'Read the margin from the peak', src: 'Razavi Problem 10.4',
     q: 'A unity-gain feedback amplifier peaks by 50 % near the gain crossover. What is its phase margin?', qh: 150,
     tests: 'the peak formula backwards (it is also part (b) of the 2025 mid-sem Q5).',
-    fig: eqFig([['\\frac{1}{2\\sin(PM/2)} = 1.5 \\Rightarrow \\sin\\frac{PM}{2} = \\frac13', 380, 34, '#ffd38a']]),
+    fig: eqFig([['\\frac{|A_f(\\omega_{GX})|}{1/\\beta} = \\frac{1}{2\\sin(PM/2)}', 380, 34, '#ffd38a']]),
     steps: [
-      { t: 6, title: 'Set the peak to 1.5', tex: stepTex('bank-r10-4', 1), try: { q: 'PM = 2·asin(1/3) in degrees?', answer: ans('bank-r10-4', 'pm'), unit: '°', tol: 0.01, hint: 'asin(1/3) = 19.47°.' }, say: '$2\\times19.47° = 38.9°$.' },
-      { t: 14, title: 'Check against the numbers you know', tex: '45^\\circ \\to 1.3,\\; 60^\\circ \\to 1 \\;\\Rightarrow\\; 1.5 \\text{ must be below } 45^\\circ' },
+      { t: 6, title: '**Set the peak to 1.5 and solve backwards.** A 50 % peak means the gain at the crossover is 1.5 times the low-frequency gain.', tex: '\\frac{1}{2\\sin(PM/2)} = 1.5 \\Rightarrow \\sin\\frac{PM}{2} = \\frac{1}{3} \\Rightarrow PM = 2\\sin^{-1}\\frac13 = 2\\times19.47^\\circ = 38.9^\\circ',
+        try: {
+          q: 'What phase margin gives a 50 % peak at the gain crossover?',
+          hint: ['A 50 % peak means the closed-loop gain there is 1.5 times its low-frequency value. Use Lecture 16’s peak formula backwards.', '$\\frac{1}{2\\sin(PM/2)} = 1.5$. Solve for $\\sin(PM/2)$, then use $\\sin^{-1}$.'],
+          how: [
+            'At the crossover, $|A_f|$ relative to its low-frequency value $1/\\beta$ is $1/(2\\sin(PM/2))$. Set it to 1.5. $$\\frac{1}{2\\sin(PM/2)} = 1.5$$',
+            'Rearrange. $$\\sin\\frac{PM}{2} = \\frac{1}{2\\times1.5} = \\frac13$$',
+            'Inverse sine (degree mode), then double. $$PM = 2\\sin^{-1}\\frac13 = 2\\times19.47^\\circ = 38.9^\\circ$$',
+          ],
+          why: 'Sanity check: 45° gives 1.3×, so a bigger 1.5× peak must have less than 45°.',
+          calc: [{ what: 'PM from the peak (degree mode)', keys: '2 [SHIFT] [sin] ( 1 ÷ ( 2 × 1.5 ) )', shows: '38.94' }],
+          answer: ans('bank-r10-4', 'pm'), unit: '°', tol: 0.01,
+        }, say: '$2\\times19.47° = 38.9°$.' },
+      { t: 14, title: '**Check against the numbers you know:** 45° gives 1.3×, 60° gives 1×. A larger 1.5× peak must mean a smaller margin, below 45°. ✓', tex: '45^\\circ \\to 1.3,\; 60^\\circ \\to 1 \;\\Rightarrow\; 1.5 \\text{ must be below } 45^\\circ' },
       { t: 20, ans: true, title: '**Answer:** PM ≈ 38.9°', say: 'A sanity check you can always do: more peak, less margin.' },
     ],
   });
