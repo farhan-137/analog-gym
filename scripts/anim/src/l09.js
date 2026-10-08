@@ -54,6 +54,49 @@ scene(L9, 'The booster is just another amplifier', 50, (S) => {
   S.say(33, '<span class="why">Exam method:</span> main $G_m$, then the booster’s $G_{m,aux}R_{out,aux}$, then multiply the cascode’s resistance by $(1 + A_{aux})$.');
 });
 
+/* ── Follow the current: the scenes below trace every DC current of a circuit before it is used ── */
+/* everything drawn after fcStart goes into one group that fades before the closing "remember" card */
+function fcStart(S) { const all = S.g(); const back = S.into(all); return (t) => { back(); S.out(all, t, 0.5); }; }
+const fcTex = (S, tex, x, y, t, o = {}) => eqAt(S, tex, x, y, t, { size: 28, w: 700, ...o });
+
+scene(L9, 'Follow the current: boosted differential pair', 58, (S) => {
+  header(S, 'LEC 9 · FOLLOW THE CURRENT', 'Boosted pair: the tail sets the current, the halves share it');
+  const end = fcStart(S);
+  const a = pairBoost(S, 'two'); a.setAttribute('transform', 'translate(60 140)'); S.draw(a, 0.3, 2);
+  S.say(0.3, 'Before boosting anything, follow the DC current. Only one thing sets it here: the tail source at the bottom, which pulls $I_{SS}$ down into ground.');
+  current(S, [[400, 612], [400, 698]], 2.6, null, 'I_SS', { at: [492, 712] });
+  current(S, [[260, 318], [260, 610], [392, 610]], 7, 37, 'I_SS/2', { color: C.volt, at: [172, 650] });
+  S.say(7, 'That current has to come down through the two halves. On the left it flows from the output node down through the cascode M3, then the input device M1. Both are NMOS: current goes in at the drain and out at the source, downwards.');
+  current(S, [[540, 318], [540, 610], [408, 610]], 13, 37, 'I_SS/2', { color: C.pink, at: [628, 650] });
+  S.say(13, 'The right half does the same through M4 and M2. With equal inputs the two halves are identical, so each carries half: $I_{SS}/2$.');
+  fcTex(S, 'I_{SS} = I_{D1} + I_{D2} = \\tfrac{I_{SS}}{2} + \\tfrac{I_{SS}}{2}', 1170, 200, 18);
+  S.say(18, 'KCL at the tail node: what leaves through the sink equals what arrives from the two halves.');
+  S.ring(260, 470, 15, C.amb, 23, 36);
+  S.say(23, 'Now the boosters. $A_1$ senses the node between M3 and M1 and drives M3’s gate. Does it change the current in the branch?');
+  S.stop(28, { secs: 60, q: 'Compare the DC current in the cascode M3 with the current in the input device M1 below it.',
+    choices: ['They are equal: $A_1$ only senses a node and drives a gate, so no DC current enters or leaves the branch', 'M3 carries less: part of M1’s current comes from $A_1$', 'M3 carries more: $A_1$ adds its own bias current'], answer: 0,
+    hint: ['What does $A_1$ connect to? Its input is a node of the branch, its output is M3’s gate. How much DC current does a MOS gate draw?', 'KCL at the node between M3 and M1: $I_{D3} = I_{D1} + I_{into\\,A_1}$, and $I_{into\\,A_1} = 0$'],
+    how: ['$A_1$’s input is a MOS gate inside the amplifier, and its output drives M3’s gate: gates draw no DC current.', 'KCL at the node between M3 and M1: $$I_{D3} = I_{D1} + 0 = \\tfrac{I_{SS}}{2}$$', 'The booster runs on its own bias current inside its triangle; that current never enters this branch. So "less" and "more" are both wrong.'],
+    why: 'A booster changes voltages (it fixes the node), never the DC current of the branch.' });
+  S.say(28.4, 'They are equal. Gates draw no DC current, so the booster neither adds nor takes current: one branch, one current, from the output node down to the tail.');
+  current(S, [[260, 318], [260, 610], [392, 610]], 37, null, 'I_SS/2 + ΔI', { color: C.volt, at: [160, 650] });
+  current(S, [[540, 318], [540, 610], [408, 610]], 37, null, 'I_SS/2 − ΔI', { color: C.pink, at: [640, 650] });
+  fcTex(S, '\\left(\\tfrac{I_{SS}}{2} + \\Delta I\\right) + \\left(\\tfrac{I_{SS}}{2} - \\Delta I\\right) = I_{SS}', 1170, 290, 37);
+  S.say(37, 'Now a small differential input: $V_{in1}$ up, $V_{in2}$ down. The left half takes $\\Delta I$ more and the right half $\\Delta I$ less. The tail still sinks exactly $I_{SS}$.');
+  S.stop(44, { secs: 60, q: 'Take $I_{SS} = 1$ mA. A small differential input adds 20 µA to the left half. How much DC current now flows through the right cascode M4?', answer: 480e-6, unit: 'A', tol: 0.01,
+    hint: ['The tail fixes the total: whatever the left half gains, the right half loses. M4 is in series with M2.', '$I_{D4} = I_{D2} = I_{SS} - I_{D1}$'],
+    how: ['At rest each half carries half the tail: $$\\tfrac{I_{SS}}{2} = \\tfrac{1\\,\\text{mA}}{2} = 500\\,\\mu\\text{A}$$', 'The left half gains 20 µA: $$I_{D1} = 500 + 20 = 520\\,\\mu\\text{A}$$', 'KCL at the tail: the total stays $I_{SS}$: $$I_{D2} = I_{SS} - I_{D1} = 1000 - 520 = 480\\,\\mu\\text{A}$$', 'M4 is in series with M2 (the booster takes no current): $$I_{D4} = I_{D2} = 480\\,\\mu\\text{A}$$'] });
+  S.say(44.4, '480 µA. In a pair, the two halves always change by the same amount in opposite directions.');
+  end(49.4);
+  remember(S, [
+    'The tail sink sets the total: $I_{SS}$ leaves the pair through it.',
+    'Each half (cascode + input device, in series) carries $I_{SS}/2$ at rest. NMOS: drain → source, downwards.',
+    'A booster senses a node and drives a gate: no DC current enters or leaves the branch.',
+    'Differential input: $I_{SS}/2 + \\Delta I$ and $I_{SS}/2 - \\Delta I$; the total stays $I_{SS}$.',
+  ], 50, 'Follow the current · boosted pair');
+  S.say(50, 'Remember: the tail sets the total, the halves share it, a booster only drives gates, and a differential input moves current from one side to the other.');
+});
+
 scene(L9, 'Boosting a differential pair: one booster for both sides', 58, (S) => {
   header(S, 'LEC 9 · DIFFERENTIAL BOOSTING', 'Two boosters (A₁ = A₂) ⇔ one differential booster');
   const a = pairBoost(S, 'two'); a.setAttribute('transform', 'translate(60 140)'); S.draw(a, 0.3, 2);
@@ -96,6 +139,48 @@ function diffCsBoost(S) {
   r();
   return g;
 }
+
+scene(L9, 'Follow the current: differential CS booster', 62, (S) => {
+  header(S, 'LEC 9 · FOLLOW THE CURRENT', 'Two circuits, two currents: the main pair and the booster');
+  const end = fcStart(S);
+  const g = diffCsBoost(S); S.draw(g, 0.3, 2.4);
+  S.say(0.3, 'This picture holds two circuits, and each has its own current. Start with the main pair: its tail source pulls $I_{SS}$ out of the bottom node.');
+  current(S, [[560, 560], [560, 640]], 2.6, null, 'I_SS', { at: [488, 615] });
+  current(S, [[420, 254], [420, 558], [552, 558]], 6, null, 'I_SS/2', { color: C.volt, at: [330, 615] });
+  current(S, [[700, 254], [700, 558], [568, 558]], 8, null, 'I_SS/2', { color: C.volt, at: [792, 615] });
+  fcTex(S, 'I_{SS} = I_{D1} + I_{D2}', 1290, 200, 8, { w: 520 });
+  S.say(6, 'It comes down the two halves: M3 then M1 on the left, M4 then M2 on the right. $I_{SS}/2$ each, flowing down through each NMOS from drain to source.');
+  current(S, [[250, 143], [250, 700], [552, 700]], 13, 38, 'I_1', { color: C.amb, at: [180, 600] });
+  S.say(13, 'Now the booster. On the left, the source $I_1$ hangs from $V_{DD}$ and pushes its current down into M5’s drain, straight through M5 and on to the booster’s own tail.');
+  current(S, [[870, 143], [870, 700], [568, 700]], 18, 38, 'I_2', { color: C.amb, at: [940, 600] });
+  current(S, [[560, 702], [560, 782]], 18, null, 'I_SS1', { color: C.pink, at: [482, 760] });
+  S.say(18, 'M6 and $I_2$ do the same on the right, and both land in the booster’s tail $I_{SS1}$.');
+  fcTex(S, 'I_{SS1} = I_{D5} + I_{D6}', 1290, 270, 22, { w: 520 });
+  S.say(22, 'KCL at the booster’s tail: $I_{SS1} = I_{D5} + I_{D6}$. So what must the load $I_1$ be?');
+  S.stop(27, { secs: 60, q: 'The booster’s tail is $I_{SS1} = 40\\,\\mu$A and its two halves are identical. What current must the load source $I_1$ supply?', answer: 20e-6, unit: 'A', tol: 0.01,
+    hint: ['At M5’s drain node only two currents meet: $I_1$ coming in from above and M5’s drain current going out below. M3’s gate is also on that node but draws nothing.', '$I_1 = I_{D5}$,\\; $I_{D5} = \\tfrac{I_{SS1}}{2}$'],
+    how: ['Identical halves share the booster’s tail equally: $$I_{D5} = I_{D6} = \\frac{I_{SS1}}{2} = \\frac{40\\,\\mu\\text{A}}{2} = 20\\,\\mu\\text{A}$$', 'KCL at M5’s drain node (M3’s gate takes no current): $$I_1 = I_{D5} = 20\\,\\mu\\text{A}$$'],
+    why: 'Load and tail must agree: $I_1 = I_2 = I_{SS1}/2$.' });
+  fcTex(S, 'I_1 = I_{D5} = \\tfrac{I_{SS1}}{2}', 1290, 340, 27.4, { w: 520, color: '#ffd38a' });
+  S.say(27.4, '20 µA: half the booster’s tail. At M5’s drain node $I_1$ comes in and M5 takes it out; M3’s gate takes nothing.');
+  S.say(33, 'Now let X rise a little (a signal at the main pair). M5’s gate is X, so M5 tries to carry more.');
+  S.stop(38, { secs: 45, q: 'X rises a little, so M5 carries a little more current, $\\Delta I$. What happens to the current in M6?',
+    choices: ['It falls by the same $\\Delta I$: the booster’s tail $I_{SS1}$ is fixed', 'It stays at $I_{SS1}/2$', 'It rises by $\\Delta I$ too'], answer: 0,
+    hint: ['M5 and M6 share one tail. Can the total change?', '$I_{D6} = I_{SS1} - I_{D5}$'],
+    how: ['M5 and M6 share the booster’s tail, which is fixed: $$I_{D5} + I_{D6} = I_{SS1}$$', 'If M5 gains $\\Delta I$, then $$I_{D6} = I_{SS1} - \\left(\\tfrac{I_{SS1}}{2} + \\Delta I\\right) = \\tfrac{I_{SS1}}{2} - \\Delta I$$', '"Stays" and "rises" would both break KCL at the tail.'] });
+  current(S, [[250, 143], [250, 700], [552, 700]], 38.4, null, 'I_SS1/2 + ΔI', { color: C.amb, at: [160, 600] });
+  current(S, [[870, 143], [870, 700], [568, 700]], 38.4, null, 'I_SS1/2 − ΔI', { color: C.amb, at: [960, 600] });
+  S.say(38.4, 'M6 loses the $\\Delta I$ that M5 gains. And M5 now wants more than $I_1$ supplies, so it pulls M3’s gate node down: the booster fights the rise of X. That is the boost.');
+  S.say(46, 'Notice: no booster current ever enters the main branch. The two circuits touch only at gates, M5’s gate on X and M3’s gate on M5’s drain, and gates draw no DC current.');
+  end(51.4);
+  remember(S, [
+    'Two separate currents: the main pair ($I_{SS}$, $I_{SS}/2$ per side) and the booster ($I_{SS1}$, $I_{SS1}/2$ per side).',
+    'Booster loads must match its tail: $I_1 = I_2 = I_{SS1}/2$ (KCL at M5’s drain; M3’s gate takes nothing).',
+    'Signal: M5 gains $\\Delta I$, M6 loses $\\Delta I$; the tail total never changes.',
+    'Booster and main pair connect only through gates: no DC current passes between them.',
+  ], 52, 'Follow the current · differential CS booster');
+  S.say(52, 'Remember: two circuits, two currents. The booster’s loads equal half its tail, a signal moves current from M6 to M5, and the booster only touches the main pair through gates.');
+});
 
 scene(L9, 'Differential booster with M5, M6: the headroom bill', 64, (S) => {
   header(S, 'LEC 9 · YOUR PAGE, RED CIRCLE', 'A differential CS booster: V_out,min = V_ISS1 + V_GS5 + V_ov3');
@@ -143,6 +228,43 @@ function foldedAuxFull(S) {
   r();
   return g;
 }
+
+scene(L9, 'Follow the current: folded-cascode booster', 58, (S) => {
+  header(S, 'LEC 9 · FOLLOW THE CURRENT', 'Folded booster: two currents in at F, one out');
+  const end = fcStart(S);
+  const g = foldedAuxFull(S); g.setAttribute('transform', 'translate(-300 40)'); S.draw(g, 0.3, 2.4);
+  S.say(0.3, 'The folded-cascode booster has three currents to follow. First the input: the source $I_T$ hangs from $V_{DD}$ and pushes its current through the PMOS input M5 — PMOS current flows from source to drain, downwards — and then folds over into node F.');
+  current(S, [[400, 450], [400, 650], [280, 650], [280, 550], [205, 550]], 3, 40, 'I_D5', { color: C.p, at: [340, 690] });
+  current(S, [[200, 203], [200, 548]], 9, 40, 'I_D7', { color: C.n, at: [300, 300] });
+  S.say(9, 'Second, the cascode branch: from $V_{DD}$ down through the PMOS load M13 and M11, then the NMOS cascode M7, into the same node F.');
+  current(S, [[200, 552], [200, 668]], 14, null, 'I_D9', { color: C.cur, at: [120, 705] });
+  S.say(14, 'Third, the sink M9 under F. Its current is fixed by its gate bias $V_{b2}$. Everything that arrives at F leaves through M9.');
+  fcTex(S, 'I_{D9} = I_{D5} + I_{D7}', 1150, 200, 18, { w: 600 });
+  S.say(18, 'KCL at the fold node: $I_{D9} = I_{D5} + I_{D7}$. Two currents in, one out — the folded-cascode signature.');
+  current(S, [[620, 265], [620, 618]], 22, null, 'I_D1', { color: C.volt, at: [555, 320] });
+  S.say(22, 'The main cascode M3 over M1 carries its own current from the load above. The booster touches it only at gates: M5’s gate on X, and M3’s gate driven from the booster’s output. Gates draw no DC current.');
+  S.stop(29, { secs: 60, q: 'Take the 2024 mid-sem numbers: the input device M5 carries 10 µA and the cascode branch M13–M11–M7 carries 10 µA. How much must the sink M9 carry?', answer: 20e-6, unit: 'A', tol: 0.01,
+    hint: ['Which currents meet at node F, and which device is the only way out?', '$I_{D9} = I_{D5} + I_{D7}$'],
+    how: ['Two branches arrive at F: the folded input current and the cascode current: $$I_{D5} = 10\\,\\mu\\text{A},\\quad I_{D7} = 10\\,\\mu\\text{A}$$', 'M9 is the only path from F to ground, so KCL at F: $$I_{D9} = I_{D5} + I_{D7} = 10 + 10 = 20\\,\\mu\\text{A}$$'],
+    why: 'In a folded cascode the bottom source carries the sum: size it for both branches.' });
+  S.say(29.4, '20 µA: 10 from each branch. In the mid-sem paper the same sink is called M3, and the input is called M7.');
+  S.say(35, 'Now a signal: X rises. M5 is PMOS, so a higher gate means a smaller $|V_{GS}|$: M5 loses a little current, $\\Delta I$.');
+  S.stop(40, { secs: 45, q: 'X rises, so the PMOS input M5 carries $\\Delta I$ less. M9 is fixed by $V_{b2}$. What happens to the current in the cascode M7?',
+    choices: ['It gains the same $\\Delta I$: $I_{D7} = I_{D9} - I_{D5}$', 'It loses $\\Delta I$ too', 'Nothing: M7’s gate is fixed at $V_{b1}$'], answer: 0,
+    hint: ['Use KCL at F with $I_{D9}$ fixed.', '$I_{D7} = I_{D9} - I_{D5}$'],
+    how: ['M9’s current cannot change (fixed gate bias): $$I_{D9} = I_{D5} + I_{D7} = \\text{const}$$', 'So if $I_{D5}$ falls by $\\Delta I$: $$I_{D7} = I_{D9} - (I_{D5} - \\Delta I) = I_{D7,0} + \\Delta I$$', 'M7’s fixed gate does not fix its current: its source F moves slightly to let the extra $\\Delta I$ through.'] });
+  current(S, [[400, 450], [400, 650], [280, 650], [280, 550], [205, 550]], 40.4, null, 'I_D5 − ΔI', { color: C.p, at: [340, 690] });
+  current(S, [[200, 203], [200, 548]], 40.4, null, 'I_D7 + ΔI', { color: C.n, at: [318, 300] });
+  S.say(40.4, 'M7 gains exactly the $\\Delta I$ that M5 lost. The PMOS load above supplies a fixed current, so the extra pull drags the booster’s output down, and that output is M3’s gate. X rose, M3’s gate falls: the booster pushes back.');
+  end(49.4);
+  remember(S, [
+    'Input branch: $I_T$ → PMOS M5 (source → drain, downwards) → fold node F.',
+    'Cascode branch: $V_{DD}$ → M13, M11 (PMOS) → M7 (NMOS, drain → source) → F.',
+    'KCL at F: $I_{D9} = I_{D5} + I_{D7}$. M9 is fixed, so what M5 loses, M7 gains.',
+    'Booster and main cascode meet only at gates: no DC current between them.',
+  ], 50, 'Follow the current · folded-cascode booster');
+  S.say(50, 'Remember: two currents fold into F and M9 sinks their sum; when the input loses current, the cascode branch gains it.');
+});
 
 scene(L9, 'A whole folded cascode as the booster', 62, (S) => {
   header(S, 'LEC 9 · YOUR PAGE, MIDDLE', 'Folded-cascode booster: look up, look down, multiply');
@@ -194,6 +316,40 @@ function teleBoosted(S) {
   return g;
 }
 
+scene(L9, 'Follow the current: fully boosted telescopic', 48, (S) => {
+  header(S, 'LEC 9 · FOLLOW THE CURRENT', 'Telescopic: one current runs the whole stack on each side');
+  const end = fcStart(S);
+  const g = teleBoosted(S); g.setAttribute('transform', 'translate(-300 40)'); S.draw(g, 0.3, 2.6);
+  S.say(0.3, 'The fully boosted telescopic is one tall stack per side, so its current story is short. The tail at the bottom pulls $I_{SS}$ out of the pair.');
+  current(S, [[400, 732], [400, 808]], 2.6, null, 'I_SS', { at: [322, 790] });
+  S.stop(6, { secs: 45, q: 'Current comes down from $V_{DD}$ through the PMOS cascode M5. Which way does it flow inside M5?',
+    choices: ['From its source (top, towards $V_{DD}$) to its drain (bottom): downwards', 'From its drain up to its source', 'It depends on the input signal'], answer: 0,
+    hint: ['Where is a PMOS’s source: on the high side or the low side?', 'PMOS: source is the higher terminal, current flows source → drain. NMOS: drain → source.'],
+    how: ['A PMOS’s source is its terminal nearest $V_{DD}$ (the arrow on the symbol sits there).', 'Conventional current in a PMOS flows source → drain, so in M5 it goes **downwards**, towards the output node.', 'An NMOS (M3, M1) flows drain → source: also downwards. In a stack, everything flows down from $V_{DD}$ to ground.'] });
+  current(S, [[260, 193], [260, 730], [392, 730]], 6.4, null, null, { color: C.volt });
+  S.say(6.4, 'Downwards. One current runs the whole left stack: from $V_{DD}$ through the PMOS source M7, the PMOS cascode M5, the output node, the NMOS cascode M3 and the input device M1, into the tail.');
+  S.stop(13, { secs: 45, q: 'Take $I_{SS} = 1$ mA with equal inputs. How much current flows through the PMOS cascode M5?', answer: 0.5e-3, unit: 'A', tol: 0.01,
+    hint: ['M5 is in series with M1 (the boosters draw no current from the stack). How much of the tail current does each side carry?', '$I_{D5} = I_{D3} = I_{D1} = \\tfrac{I_{SS}}{2}$'],
+    how: ['Equal inputs: the tail splits equally: $$I_{D1} = I_{D2} = \\frac{I_{SS}}{2} = \\frac{1\\,\\text{mA}}{2} = 0.5\\,\\text{mA}$$', 'M7, M5, M3 and M1 are in series (the boosters only touch gates), so they all carry it: $$I_{D5} = I_{D1} = 0.5\\,\\text{mA}$$'] });
+  current(S, [[540, 193], [540, 730], [408, 730]], 13.4, null, null, { color: C.pink });
+  [[150, 590, C.volt], [650, 590, C.pink]].forEach(([x, y, col]) => { const c = chip(S, x, y, 'I_SS/2', { color: col, size: 17 }); c.style.opacity = 0; S.fade(c, 13.4, 0.5); });
+  S.say(13.4, 'Half a milliamp. The right stack, M8, M6, M4 and M2, carries the other half.');
+  fcTex(S, 'I_{SS} = I_{D1} + I_{D2}', 1200, 200, 18, { w: 640 });
+  fcTex(S, 'I_{D7} = I_{D5} = I_{D3} = I_{D1} = \\tfrac{I_{SS}}{2}', 1200, 270, 18, { w: 640 });
+  S.say(18, 'KCL at the tail, and series devices share one current: each side carries $I_{SS}/2$ from top to bottom.');
+  S.halo(330, 280, 140, 120, C.p, 23, 38); S.halo(330, 500, 140, 120, C.n, 23, 38);
+  S.say(23, 'The boosters $A_1$ and $A_2$ are separate amplifiers with their own bias currents. They sense sources and drive gates, so they add nothing to these stacks and take nothing from them.');
+  S.say(31, 'One warning for later: on each side two things try to set the same current, M7 from the top and the tail from the bottom. They never agree exactly. Hold that thought: it is the reason for CMFB at the end of this lecture.');
+  end(37.4);
+  remember(S, [
+    'One current per side runs the whole stack: M7 → M5 → output → M3 → M1 → tail.',
+    'PMOS: source → drain, downwards from $V_{DD}$. NMOS: drain → source, downwards to ground.',
+    'Each side carries $I_{SS}/2$; KCL at the tail: $I_{SS} = I_{D1} + I_{D2}$.',
+    'The boosters run on their own bias currents and only touch gates.',
+  ], 38, 'Follow the current · boosted telescopic');
+  S.say(38, 'Remember: in a telescopic, current flows straight down each stack, half the tail per side, and the boosters never join the main path.');
+});
+
 scene(L9, 'Boost both cascodes: which input type for each booster?', 66, (S) => {
   header(S, 'LEC 9 · YOUR PAGE, BOTTOM', 'A₁ uses PMOS inputs, A₂ uses NMOS inputs — because of levels');
   const g = teleBoosted(S); g.setAttribute('transform', 'translate(-300 40)');
@@ -217,6 +373,56 @@ scene(L9, 'Boost both cascodes: which input type for each booster?', 66, (S) => 
   S.say(46, 'Your page ends with the same idea applied to a folded-cascode main amplifier (input pair M1, M2 folded into the boosted cascodes). Same reasoning, same choice of booster inputs.');
 });
 
+/* the current-source-loaded pair of the CMFB scene (M3, M4 PMOS loads on V_b; M1, M2; I_SS) */
+function cmLoadPair(S) {
+  const b = S.g(); const r2 = S.into(b);
+  rail(S, 590, 910, 170);
+  pmos(S, 660, 230, { name: 'M3', right: true, gl: 30, nameSide: 'l' }); pmos(S, 840, 230, { name: 'M4', gl: 30 });
+  wire(S, [[720, 230], [780, 230]]); txt(S, 750, 220, 'V_b', { size: 18, color: C.muted, anchor: 'middle' });
+  wire(S, [[660, 170], [660, 180]]); wire(S, [[840, 170], [840, 180]]);
+  nmos(S, 660, 330, { name: 'M1', gate: 'V_in1' }); nmos(S, 840, 330, { name: 'M2', gate: 'V_in2', right: true });
+  wire(S, [[660, 380], [660, 400], [840, 400], [840, 380]]); isrc(S, 750, 440, { label: 'I_SS', len: 40 }); gnd(S, 750, 480);
+  r2();
+  return b;
+}
+
+scene(L9, 'Follow the current: current-source loads', 48, (S) => {
+  header(S, 'LEC 9 · FOLLOW THE CURRENT', 'Current-source loads: one current pushed in, one pulled out');
+  const end = fcStart(S);
+  const b = cmLoadPair(S); b.setAttribute('transform', 'translate(-560 -20) scale(1.5)'); S.draw(b, 0.3, 1.8);
+  [[430, 400, 418, 'end'], [700, 400, 712, 'start']].forEach(([x, y, tx, an], i) => { dot(S, x, y); txt(S, tx, y + 12, i ? 'V_out2' : 'V_out1', { size: 19, color: C.volt, weight: 700, anchor: an }); });
+  S.say(0.3, 'Replace the resistor loads by PMOS current sources and follow the current again. This time two different things try to set it.');
+  current(S, [[565, 582], [565, 698]], 3, null, 'I_SS', { at: [472, 665] });
+  current(S, [[430, 404], [430, 580], [557, 580]], 3, null, 'I_N', { color: C.n, at: [372, 530] });
+  current(S, [[700, 404], [700, 580], [573, 580]], 3, null, 'I_N', { color: C.n, at: [768, 530] });
+  S.say(3, 'From the bottom: the tail pulls $I_{SS}$ out of the pair, so M1 and M2 each pull $I_N = I_{SS}/2$ out of their output node.');
+  current(S, [[430, 238], [430, 396]], 10, null, 'I_P', { color: C.p, at: [362, 280] });
+  current(S, [[700, 238], [700, 396]], 10, null, 'I_P', { color: C.p, at: [772, 280] });
+  S.say(10, 'From the top: M3 and M4 are current sources set by $V_b$. Each pushes its own $I_P$ down into an output node, PMOS source to drain.');
+  fcTex(S, 'I_P = I_N + I_X', 1200, 200, 16, { w: 600 });
+  S.say(16, 'KCL at each output node: what M3 pushes in should equal what M1 pulls out. Any difference, $I_X$, has to go somewhere.');
+  S.stop(22, { secs: 60, q: 'Take $I_{SS} = 1$ mA, and suppose M3 is biased to push $I_P = 502\\,\\mu$A (a 0.4% mismatch). How much current $I_X$ is left over at that output node?', answer: 2e-6, unit: 'A', tol: 0.01,
+    hint: ['M1 takes half the tail current out of the node; M3 puts $I_P$ in. The leftover is the difference.', '$I_X = I_P - I_N$,\\; $I_N = \\tfrac{I_{SS}}{2}$'],
+    how: ['M1 pulls half the tail out of the node: $$I_N = \\frac{I_{SS}}{2} = \\frac{1\\,\\text{mA}}{2} = 500\\,\\mu\\text{A}$$', 'KCL at the output node: $$I_X = I_P - I_N = 502 - 500 = 2\\,\\mu\\text{A}$$'] });
+  fcTex(S, 'I_X = I_P - I_N', 1200, 270, 22.4, { w: 600, color: '#ffd38a' });
+  S.say(22.4, 'Only 2 µA — a mismatch no process can avoid. So where does it go?');
+  S.stop(27, { secs: 45, q: 'At the output node, M3 pushes 502 µA in and M1 pulls 500 µA out. What happens?',
+    choices: ['The output voltage moves until the transistors’ output resistances absorb the 2 µA: the output level drifts, possibly to a rail', 'M3 wins: M1 is forced to carry 502 µA and nothing else changes', 'M1 wins: M3 is forced down to 500 µA and nothing else changes'], answer: 0,
+    hint: ['Two current sources in series: each insists on its own current. The only thing left free is the node voltage.', '$\\Delta V_{out} = I_X\\,(R_P\\parallel R_N)$'],
+    how: ['Neither source simply gives in: a current source keeps its current over a wide voltage range.', 'The node voltage moves until the small changes through their output resistances cancel the mismatch: $$\\Delta V_{out} = I_X(R_P\\parallel R_N)$$', 'With $R_P\\parallel R_N$ in the hundreds of kΩ, 2 µA moves the output by about a volt: it drifts towards a rail. Nothing in the circuit sets the output common-mode level.'],
+    why: 'Two current sources in series do not set a voltage: that is why CMFB exists.' });
+  label(S, 300, 412, 'drifts!', 27.4, { size: 22, color: C.bad, weight: 800, anchor: 'end' });
+  label(S, 795, 412, 'drifts!', 27.4, { size: 22, color: C.bad, weight: 800 });
+  S.say(27.4, 'Neither source can win. The output voltages move until the devices’ output resistances soak up the mismatch, and with resistances that large a few µA moves the outputs by volts. Next scene: why that forces CMFB.');
+  end(35.4);
+  remember(S, [
+    'Current-source loads: $I_P$ pushed in from the top (PMOS, source → drain), $I_N = I_{SS}/2$ pulled out at the bottom.',
+    'KCL at each output: $I_P = I_N + I_X$; the leftover $I_X$ flows into $R_P\\parallel R_N$.',
+    'Two current sources in series never agree exactly → the output CM drifts → CMFB must adjust one of them.',
+  ], 36, 'Follow the current · current-source loads');
+  S.say(36, 'Remember: the PMOS loads push, the pair pulls, and since the two never match exactly, the output level is undefined until CMFB adjusts one of them.');
+});
+
 /* why CMFB: RD loads vs current-source loads, and the I_P / I_N model */
 scene(L9, 'Why a fully differential op amp needs CMFB', 74, (S) => {
   header(S, 'LEC 9 · COMMON-MODE FEEDBACK', 'Two current sources in series do not set a voltage');
@@ -230,14 +436,7 @@ scene(L9, 'Why a fully differential op amp needs CMFB', 74, (S) => {
   S.draw(a, 0.3, 1.6);
   eqAt(S, 'V_{out,CM} = V_{DD} - R_D\\tfrac{I_{SS}}{2}', 250, 560, 3, { size: 28, w: 460 });
   S.say(0.3, 'With <b>resistor</b> loads the output DC level is automatic: each $R_D$ drops $R_DI_{SS}/2$, so $V_{out,CM} = V_{DD} - R_DI_{SS}/2$. Nothing to worry about.');
-  const b = S.g(); const r2 = S.into(b);
-  rail(S, 590, 910, 170);
-  pmos(S, 660, 230, { name: 'M3', right: true, gl: 30, nameSide: 'l' }); pmos(S, 840, 230, { name: 'M4', gl: 30 });
-  wire(S, [[720, 230], [780, 230]]); txt(S, 750, 220, 'V_b', { size: 18, color: C.muted, anchor: 'middle' });
-  wire(S, [[660, 170], [660, 180]]); wire(S, [[840, 170], [840, 180]]);
-  nmos(S, 660, 330, { name: 'M1', gate: 'V_in1' }); nmos(S, 840, 330, { name: 'M2', gate: 'V_in2', right: true });
-  wire(S, [[660, 380], [660, 400], [840, 400], [840, 380]]); isrc(S, 750, 440, { label: 'I_SS', len: 40 }); gnd(S, 750, 480);
-  r2();
+  const b = cmLoadPair(S);
   S.draw(b, 8, 1.6);
   const qm = label(S, 750, 560, 'V_out,CM = ?', 10, { size: 30, color: C.bad, weight: 800, anchor: 'middle' });
   S.say(8, 'Replace the resistors by PMOS current sources (for gain). Now each output sits between a PMOS source pushing $I_P$ down and the pair + tail pulling $I_N$ out.');
@@ -317,41 +516,125 @@ function t4q3Fig(S) {
   return g;
 }
 
+scene(L9, 'Follow the current: Tutorial 4 Q3 circuit', 52, (S) => {
+  header(S, 'LEC 9 · FOLLOW THE CURRENT', 'Tutorial 4 Q3: four paths from V_DD to ground');
+  const end = fcStart(S);
+  const g = t4q3Fig(S); g.setAttribute('transform', 'translate(0 150)'); S.draw(g, 0.3, 2.4);
+  S.say(0.3, 'Before solving Tutorial 4 Q3, trace its currents. That is always step one of a design question. There are four separate paths from $V_{DD}$ to ground.');
+  current(S, [[140, 302], [140, 684]], 3, null, 'I_8', { color: C.amb, at: [250, 390] });
+  S.say(3, 'Path one, the bias string on the left: M8, then $R_1$ and $R_2$, then M7. One current runs through all four, so $I_8 = I_7$.');
+  current(S, [[760, 302], [760, 684]], 9, null, 'I_6', { color: C.volt, at: [830, 470] });
+  S.say(9, 'Path two, the main amplifier on the right: M6 pushes down from $V_{DD}$ through the cascode M2 and the input M1. Series again: $I_6 = I_2 = I_1$.');
+  current(S, [[520, 302], [520, 568]], 15, null, 'I_5', { color: C.p, at: [585, 470] });
+  S.say(15, 'Path three: M5 pushes its current down through the booster’s cascode M4 into node F. So $I_4 = I_5$.');
+  current(S, [[330, 302], [330, 570], [512, 570]], 20, null, 'I_3', { color: C.pink, at: [270, 540] });
+  S.say(20, 'Path four: the booster’s input M3 hangs from $V_{DD}$ through $R_3$, and its drain also lands on F.');
+  current(S, [[520, 572], [520, 684]], 25, null, 'I_9', { color: C.cur, at: [612, 605] });
+  fcTex(S, 'I_9 = I_4 + I_3', 1250, 200, 25, { w: 560 });
+  fcTex(S, 'I_8 = I_7,\\quad I_6 = I_2 = I_1', 1250, 270, 25, { w: 560 });
+  S.say(25, 'F has two currents coming in and one way out, the sink M9. KCL: $I_9 = I_4 + I_3$.');
+  S.stop(31, { secs: 45, q: 'M5, M6 and M8 have their gates on the same node $V_{bp}$ and their sources on $V_{DD}$. How do their currents compare?',
+    choices: ['In proportion to their W/L', 'All equal, whatever their sizes', 'Set by $R_1$ and $R_2$ only'], answer: 0,
+    hint: ['Same gate, same source: what is the same for all three?', '$I_D = \\tfrac12\\mu_pC_{ox}\\tfrac{W}{L}(|V_{GS}| - |V_{thp}|)^2$ with one shared $|V_{GS}|$'],
+    how: ['Gates on one node and sources on $V_{DD}$: all three have the same $|V_{GS}|$.', 'In the square law everything except W/L is then shared: $$I_D \\propto \\frac{W}{L}$$', 'So with $(W/L)_5 = (W/L)_8 = 0.4(W/L)_6$, M5 and M8 each carry 0.4 of M6’s current. $R_1$, $R_2$ only set voltages along the string.'] });
+  S.say(31.4, 'Same $|V_{GS}|$ means current scales with W/L. That is how the paper hands you every current from the power budget.');
+  S.stop(37, { secs: 45, q: 'Of the booster devices M3, M4, M5 and M9, which carries the largest current?',
+    choices: ['M9', 'M5', 'M3'], answer: 0,
+    hint: ['Which device collects current from more than one path?', '$I_9 = I_4 + I_3$'],
+    how: ['M5 and M4 are one path, M3 is another; both end at F.', 'M9 is the only way from F to ground, so it carries their sum: $$I_9 = I_4 + I_3 > I_4,\\; I_3$$'] });
+  S.say(37.4, 'M9: it carries the sum. Now the numbers, part by part, in the next scene.');
+  end(41.4);
+  remember(S, [
+    'Four paths: bias string ($I_8 = I_7$), main amplifier ($I_6 = I_2 = I_1$), booster cascode ($I_5 = I_4$), booster input ($I_3$ through $R_3$).',
+    'KCL at F: $I_9 = I_4 + I_3$.',
+    'Shared $V_{bp}$: the currents of M5, M6 and M8 scale with their W/L.',
+    'Supply current = power ÷ $V_{DD}$ = $I_8 + I_5 + I_3 + I_6$.',
+  ], 42, 'Follow the current · Tutorial 4 Q3');
+  S.say(42, 'Remember: list every path from the supply, use KCL where paths join, and use W/L ratios where gates are shared. The power budget then gives every number.');
+});
+
 scene(L9, 'Tutorial 4 Q3: folded booster, every part', 96, (S) => {
   const T = tfm(1, 0, 150);
-  pyqFrame(S, {
+  const off = pyqFrame(S, {
     paper: 't4q3', tag: 'LEC 9 · PAST PAPER 1 OF 3', title: 'Folded-cascode booster, designed from a power budget', src: 'Tutorial 4 Q3',
-    q: '$V_{DD} = 3$ V, 3 mW. $M_{1,2} = 200$ at 500 µA. $(W/L)_5 = (W/L)_8 = 0.4(W/L)_6$, $(W/L)_3 = 0.5(W/L)_6$, $(W/L)_{4,9} = (W/L)_1$. (a) $(W/L)_6$ for a 2.5 V swing. (b) $R_3$ with $V_P = V_{ov1}$. (c) $V_{DS9} = 1.15V_{ov9}$: is M4 saturated? (d) $(W/L)_7$, $R_1$, $R_2$. (e) Gain.',
+    q: '$V_{DD} = 3$ V, 3 mW in total. $(W/L)_{1,2} = 200$ (100/0.5), each carrying 500 µA. $(W/L)_5 = (W/L)_8 = 0.4(W/L)_6$, $(W/L)_3 = 0.5(W/L)_6$, $(W/L)_{4,9} = (W/L)_1$. (a) $(W/L)_6$ for a 2.5 V swing. (b) $R_3$ with $V_P = V_{ov1}$. (c) $V_{DS9} = 1.15V_{ov9}$: is M4 saturated? (d) $(W/L)_7$, $R_1$, $R_2$. (e) Gain.',
     giv: '$\\mu_nC_{ox} = 200\\,\\mu$, $\\mu_pC_{ox} = 100\\,\\mu$A/V², $\\lambda_n = 0.1$, $\\lambda_p = 0.2$, $V_{thn} = 0.7$, $|V_{thp}| = 0.8$ V', qh: 300,
     tests: 'a full design of Lec 8’s implementation 3: **currents from power** (equal $|V_{GS}|$ → currents ∝ W/L), **swing → sizes**, **links to walk a bias string**, a **saturation check**, and the **load trap**.',
     fig: (S2) => { const g = t4q3Fig(S2); g.setAttribute('transform', 'translate(0 150)'); },
     steps: [
-      { t: 8, title: '**Currents first:** 3 mW / 3 V = 1 mA. M5, M8 share M6’s $|V_{GS}|$, so their currents scale with W/L (0.4 × 500 µA); M3 gets the rest; M9 sinks M4’s + M3’s', tex: stepTex('bank-t4q3', 0), hl: [T([60, 150, 820, 120, C.cur])],
-        try: { q: 'Total current 1 mA. M6 takes 500 µA, M5 and M8 take 0.4 × 500 µA each. How much is left for M3 (µA)?', answer: 100e-6, unit: 'A (type 100u)', tol: 0.02, hint: '1 mA − 0.5 − 0.2 − 0.2.' },
+      { t: 8, title: '**Currents first.** Total current = power ÷ supply. M5 and M8 share M6’s $|V_{GS}|$ (same gate node $V_{bp}$, sources on $V_{DD}$), so their currents scale with W/L. **M3 gets what is left**, and M9 sinks M4’s + M3’s current', tex: 'I_{tot} = \\frac{3\\,\\mathrm{mW}}{3\\,\\mathrm{V}} = 1\\,\\mathrm{mA},\\; I_5 = I_8 = 0.4\\times500\\,\\mu = 200\\,\\mathrm{\\mu A},\\; I_3 = 1000 - 500 - 200 - 200 = 100\\,\\mathrm{\\mu A},\\; I_9 = 200 + 100 = 300\\,\\mathrm{\\mu A}', hl: [T([60, 150, 820, 120, C.cur])],
+        try: { q: 'Start with the power budget. How much current flows in the booster’s input device M3?', answer: 100e-6, unit: 'A', tol: 0.02,
+          hint: ['Total current = power ÷ $V_{DD}$. M6 carries M1’s current. M5 and M8 have the same $|V_{GS}|$ as M6 (same gate node), so their currents scale with their W/L. M3 gets what is left.', '$I_{tot} = P/V_{DD}$,\\; $I_5 = I_8 = 0.4\\,I_6$,\\; $I_3 = I_{tot} - I_6 - I_5 - I_8$'],
+          how: ['Total current from the supply: $$I_{tot} = \\frac{P}{V_{DD}} = \\frac{3\\,\\text{mW}}{3\\,\\text{V}} = 1\\,\\text{mA}$$',
+            'M6 sits in series with M2 and M1, so it carries M1’s current (given): $$I_6 = I_1 = 500\\,\\mu\\text{A}$$',
+            'M5 and M8 have M6’s $|V_{GS}|$ and 0.4 of its W/L, so 0.4 of its current: $$I_5 = I_8 = 0.4\\times500\\,\\mu\\text{A} = 200\\,\\mu\\text{A}$$',
+            'M3 gets what is left of the 1 mA: $$I_3 = 1000 - 500 - 200 - 200 = 100\\,\\mu\\text{A}$$',
+            'Also note for later: M9 sinks M4’s and M3’s currents together: $$I_9 = 200 + 100 = 300\\,\\mu\\text{A}$$'],
+          why: 'Design questions always start with currents: power ÷ $V_{DD}$, then W/L ratios at equal $|V_{GS}|$, then KCL.' },
         say: 'Always start with currents. Same gate voltage (all tied to $V_{bp}$) means currents scale with W/L: M5, M8 carry 200 µA; M3 gets 100 µA; M9 carries 300 µA.' },
-      { t: 17, title: '**(a)** $V_{out}$ runs from $2V_{ov1}$ (M1, M2 identical) to $V_{DD} - |V_{ov6}|$; solve for $|V_{ov6}|$, then W/L', tex: stepTex('bank-t4q3', 1), hl: [T([690, 150, 160, 290, C.p])],
-        try: { q: 'V<sub>ov1</sub> = 0.1581 V. Swing 2.5 V from 2V<sub>ov1</sub> up to 3 − |V<sub>ov6</sub>|. What is (W/L)<sub>6</sub> (500 µA, µpCox = 100 µA/V²)?', answer: ans('bank-t4q3', 'wl6'), unit: '', tol: 0.02, hint: '|Vov6| = 3 − 2.5 − 2(0.1581); W/L = 2ID/(µpCox·Vov²).' },
+      { t: 17, title: '**(a) Swing → overdrive → size.** $V_{out}$ can fall to $2V_{ov1}$ (M1 and M2 each keep one overdrive) and rise to $V_{DD} - |V_{ov6}|$. The 2.5 V gap fixes $|V_{ov6}|$; the 500 µA then fixes the W/L', tex: stepTex('bank-t4q3', 1), hl: [T([690, 150, 160, 290, C.p])],
+        try: { q: '(a) The output must swing 2.5 V. Find $(W/L)_6$.', answer: ans('bank-t4q3', 'wl6'), unit: '', tol: 0.02,
+          hint: ['Floor of the output: M1 and M2 (identical, 500 µA each) each keep one overdrive, so $2V_{ov1}$. Ceiling: M6 keeps its $|V_{ov6}|$ below $V_{DD}$. The swing is the gap between them.', '$V_{ov1} = \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)_1}}$,\\; $|V_{ov6}| = V_{DD} - 2.5 - 2V_{ov1}$,\\; $(W/L)_6 = \\frac{2I_D}{\\mu_pC_{ox}|V_{ov6}|^2}$'],
+          how: ['Overdrive of M1 (and M2, identical): $$V_{ov1} = \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)_1}} = \\sqrt{\\frac{2(500\\,\\mu)}{200\\,\\mu\\times200}} = 0.1581\\,\\text{V}$$',
+            'Floor of the output: two overdrives stacked: $$V_{out,min} = 2V_{ov1} = 0.3162\\,\\text{V}$$',
+            'The ceiling is $V_{DD} - |V_{ov6}|$ and the gap must be 2.5 V: $$|V_{ov6}| = 3 - 2.5 - 0.3162 = 0.1838\\,\\text{V}$$',
+            'Size M6 to carry 500 µA at that overdrive: $$(W/L)_6 = \\frac{2I_D}{\\mu_pC_{ox}|V_{ov6}|^2} = \\frac{2(500\\,\\mu)}{100\\,\\mu\\times0.1838^2} = 296$$'],
+          why: 'Swing → overdrives → sizes. The swing fixes the PMOS overdrive; the current then fixes its W/L.',
+          calc: [{ what: 'V_ov1 first', keys: '[√] ( 2 × 500µ ÷ ( 200µ × 200 ) ) [EXE]', shows: '0.1581', note: 'Type µ with [CATALOG] ▸ Engineer Symbol ▸ micro.' },
+            { what: '|V_ov6| and (W/L)_6 in one line, reusing Ans', keys: '2 × 500µ ÷ ( 100µ × ( 0.5 − 2 [Ans] ) [x²] ) [EXE]', shows: '296.1', note: '0.5 = 3 − 2.5.' }] },
         say: 'Floor: two NMOS overdrives (M1, M2). Ceiling: $V_{DD} - |V_{ov6}|$. With 2.5 V between them, $|V_{ov6}| = 0.184$ V and $(W/L)_6 = 296$.' },
-      { t: 26, title: '**(b)** M3’s gate is $V_P = V_{ov1}$; its source sits $|V_{GS3}|$ higher (a link); $R_3$ drops the rest at 100 µA', tex: stepTex('bank-t4q3', 2), hl: [T([260, 150, 140, 180, C.amb])],
-        try: { q: 'V<sub>S3</sub> = 0.1581 + 0.8 + 0.1162 = 1.074 V; M3 carries 100 µA. What is R<sub>3</sub> (kΩ)?', answer: ans('bank-t4q3', 'r3'), unit: 'Ω (type 19.3k)', tol: 0.02, hint: 'R3 = (3 − VS3)/100 µA.' },
+      { t: 26, title: '**(b) Walk up from M3’s gate.** The gate is at $V_P = V_{ov1}$; the PMOS source sits one $|V_{GS3}|$ higher (a link); $R_3$ drops the rest of $V_{DD}$ while carrying M3’s 100 µA', tex: stepTex('bank-t4q3', 2), hl: [T([260, 150, 140, 180, C.amb])],
+        try: { q: '(b) M3’s gate is tied to $V_P$, and $V_P = V_{ov1}$. Find $R_3$.', answer: ans('bank-t4q3', 'r3'), unit: 'Ω', tol: 0.02,
+          hint: ['Walk up from M3’s gate: its source is one $|V_{GS3}|$ higher (a link). $R_3$ sits between $V_{DD}$ and that source and carries M3’s 100 µA (from the first step).', '$|V_{ov3}| = \\sqrt{\\frac{2I_3}{\\mu_pC_{ox}(W/L)_3}}$,\\; $V_{S3} = V_P + |V_{thp}| + |V_{ov3}|$,\\; $R_3 = \\frac{V_{DD} - V_{S3}}{I_3}$'],
+          how: ['M3 is half the size of M6 (from (a)): $$(W/L)_3 = 0.5\\times296.1 = 148$$',
+            'Its overdrive at 100 µA: $$|V_{ov3}| = \\sqrt{\\frac{2(100\\,\\mu)}{100\\,\\mu\\times148}} = 0.1162\\,\\text{V}$$',
+            'Source = gate + one $|V_{GS3}|$ (a link), with the gate at $V_P = V_{ov1} = 0.1581$ V: $$V_{S3} = 0.1581 + 0.8 + 0.1162 = 1.074\\,\\text{V}$$',
+            '$R_3$ drops the rest of the supply at 100 µA: $$R_3 = \\frac{3 - 1.074}{100\\,\\mu\\text{A}} = 19.3\\,\\text{k}\\Omega$$'],
+          calc: [{ what: 'R_3 in one line', keys: '( 3 − ( 0.1581 + 0.8 + [√] ( 2 × 100µ ÷ ( 100µ × 148.05 ) ) ) ) ÷ 100µ [EXE]', shows: '19.26k', note: 'Engineer Symbol display on: [SETTINGS] ▸ Calc Settings ▸ Engineer Symbol ▸ On.' }] },
         say: 'Walk the levels: M3’s gate is $V_P$; its source is one $|V_{GS3}|$ above; $R_3 = (3 - 1.074)/100\\,\\mu$A ≈ 19.3 kΩ.' },
-      { t: 35, title: '**(c)** F = $1.15V_{ov9}$; M4’s gate = F + $V_{GS4}$; M4’s drain = M2’s gate = $V_P + V_{GS2}$. NMOS fence', tex: stepTex('bank-t4q3', 3), hl: [T([450, 300, 140, 160, C.n])],
-        try: { q: 'M4’s drain sits at 1.016 V; its gate − V<sub>th</sub> is 0.241 V. Is M4 saturated?', choices: ['Yes — drain ≥ gate − Vth', 'No — triode'], answer: 0, hint: 'NMOS saturated while drain ≥ gate − Vth.' },
+      { t: 35, title: '**(c) Three levels, one fence.** F = $1.15V_{ov9}$; M4’s gate is one $V_{GS4}$ above F; M4’s drain is M2’s gate, one $V_{GS2}$ above $V_P$. Then the NMOS fence: saturated while $V_D \\ge V_G - V_{th}$', tex: stepTex('bank-t4q3', 3), hl: [T([450, 300, 140, 160, C.n])],
+        try: { q: '(c) Given $V_{DS9} = 1.15\\,V_{ov9}$: is M4 in saturation?', choices: ['Yes, M4 is saturated', 'No, M4 is in triode'], answer: 0,
+          hint: ['You need three voltages: F (M4’s source, = $V_{DS9}$), M4’s gate (one $V_{GS4}$ above F), and M4’s drain, which is M2’s gate (one $V_{GS2}$ above $V_P$).', 'NMOS saturated while $V_{D4} \\ge V_{G4} - V_{thn}$, with $V_{G4} = V_F + V_{GS4}$ and $V_{D4} = V_P + V_{GS2}$'],
+          how: ['M9 carries 300 µA with W/L = 200: $$V_{ov9} = \\sqrt{\\frac{2(300\\,\\mu)}{200\\,\\mu\\times200}} = 0.1225\\,\\text{V},\\quad V_F = 1.15\\times0.1225 = 0.1408\\,\\text{V}$$',
+            'M4 carries 200 µA with W/L = 200, so $V_{ov4} = 0.1$ V; its gate is one link above F: $$V_{G4} = 0.1408 + 0.7 + 0.1 = 0.9408\\,\\text{V}$$',
+            'M4’s drain is M2’s gate, one link above $V_P = 0.1581$ V (M2: 500 µA, $V_{ov2} = 0.1581$ V): $$V_{D4} = 0.1581 + 0.7 + 0.1581 = 1.016\\,\\text{V}$$',
+            'NMOS fence: $$V_{G4} - V_{thn} = 0.9408 - 0.7 = 0.2408\\,\\text{V} \\le 1.016\\,\\text{V}$$ so **M4 is saturated**, with about 0.78 V to spare.'],
+          why: 'Saturation checks are always: find the gate and the drain by links, then one fence.' },
         say: 'Check: M4’s drain (M2’s gate) is at 1.016 V, far above its gate minus $V_{th}$ (0.241 V). Saturated.' },
-      { t: 43, title: '**(d)** M7 mirrors M9 (same gate): sizes scale with current', tex: stepTex('bank-t4q3', 4), hl: [T([80, 430, 140, 110, C.n])],
-        try: { q: 'M9: W/L = 200 at 300 µA. M7 has the same V<sub>GS</sub> and carries 200 µA. (W/L)<sub>7</sub>?', answer: ans('bank-t4q3', 'wl7'), unit: '', tol: 0.02, hint: '200 × 200/300.' },
+      { t: 43, title: '**(d) M7 mirrors M9** (same $V_{GS}$), so W/L scales with current: M7 carries the bias-string current $I_8 = 200$ µA, M9 carries 300 µA', tex: stepTex('bank-t4q3', 4), hl: [T([80, 430, 140, 110, C.n])],
+        try: { q: '(d) M7 has its gate on the same node as M9. Find $(W/L)_7$.', answer: ans('bank-t4q3', 'wl7'), unit: '', tol: 0.02,
+          hint: ['Same $V_{GS}$ (a mirror) means currents scale with W/L. M7 is at the bottom of the bias string, which is one series path from M8.', '$\\frac{(W/L)_7}{(W/L)_9} = \\frac{I_7}{I_9}$'],
+          how: ['The bias string M8 → $R_1$ → $R_2$ → M7 is one series path, so M7 carries M8’s current (first step): $$I_7 = I_8 = 200\\,\\mu\\text{A}$$',
+            'M9 carries 300 µA (first step) with $(W/L)_9 = (W/L)_1 = 200$.',
+            'Same $V_{GS}$, so W/L in proportion to current: $$(W/L)_7 = 200\\times\\frac{200\\,\\mu}{300\\,\\mu} = 133.3$$'] },
         say: 'Same $V_{GS}$, so W/L ∝ current: $(W/L)_7 = 200\\times200/300 = 133$.' },
-      { t: 51, title: 'Walk the bias string: $R_2$ from $V_{GS7}$ up to $V_{G4}$, $R_1$ from $V_{G4}$ up to M8’s drain', tex: stepTex('bank-t4q3', 5), hl: [T([80, 260, 120, 190, C.amb])],
-        try: { q: 'R<sub>2</sub> carries 200 µA between V<sub>GS7</sub> = 0.8225 V and V<sub>G4</sub> = 0.9408 V. R<sub>2</sub> (Ω)?', answer: ans('bank-t4q3', 'r2'), unit: 'Ω', tol: 0.02, hint: 'R = ΔV / I.' },
+      { t: 51, title: '**Walk the bias string.** Each resistor = (voltage across it) ÷ 200 µA: $R_2$ from M7’s drain ($V_{GS7}$) up to $V_{G4}$, $R_1$ from $V_{G4}$ up to M8’s drain ($V_{DD} - |V_{GS8}|$)', tex: stepTex('bank-t4q3', 5), hl: [T([80, 260, 120, 190, C.amb])],
+        try: { q: '(d, continued) Walk the bias string: find $R_2$, the resistor between M7’s drain and the node that feeds M4’s gate.', answer: ans('bank-t4q3', 'r2'), unit: 'Ω', tol: 0.02,
+          hint: ['$R_2$ sits between two levels you already have: M7’s drain (diode-connected, so $V_{GS7}$ above ground) and $V_{G4}$ from part (c). It carries the string current, 200 µA.', '$R_2 = \\frac{V_{G4} - V_{GS7}}{I_8}$'],
+          how: ['M7 has the same $V_{GS}$ as M9 (a mirror), so the same overdrive 0.1225 V: $$V_{GS7} = 0.7 + 0.1225 = 0.8225\\,\\text{V}$$',
+            'The node between $R_1$ and $R_2$ is M4’s gate, from part (c): $$V_{G4} = 0.9408\\,\\text{V}$$',
+            'Ohm’s law with the string current: $$R_2 = \\frac{0.9408 - 0.8225}{200\\,\\mu\\text{A}} = 592\\,\\Omega$$',
+            'Same walk for $R_1$, up to M8’s drain at $V_{DD} - |V_{GS8}| = 3 - (0.8 + 0.1838) = 2.016$ V: $$R_1 = \\frac{2.016 - 0.9408}{200\\,\\mu\\text{A}} = 5.38\\,\\text{k}\\Omega$$'] },
         say: 'Bias string: each resistor is (voltage across it)/200 µA. $R_2 ≈ 592$ Ω, $R_1 ≈ 5.38$ kΩ.' },
-      { t: 59, title: '**(e)** Booster gain: M3 degenerated by $R_3$, into $r_{O5}\\parallel$(M4 cascoded over $r_{O9}$)', tex: stepTex('bank-t4q3', 7), hl: [T([260, 150, 400, 400, C.amb])],
+      { t: 59, title: '**(e) The booster’s gain.** M3 has $R_3$ in its source, so its $G_m = g_{m3}/(1 + g_{m3}R_3)$ is small; it drives $r_{O5}\\parallel$(M4 cascoded over $r_{O9}$)', tex: stepTex('bank-t4q3', 7), hl: [T([260, 150, 400, 400, C.amb])],
         say: 'The booster’s input device has $R_3$ in its source, so its $G_m$ is only $g_{m3}/(1 + g_{m3}R_3)$ — a weak booster here, $A_{aux} ≈ 1.26$.' },
-      { t: 67, title: 'Boosted $R_{down}$ is MΩ, but M6 is a plain PMOS source: **the load trap**', tex: stepTex('bank-t4q3', 8), hl: [T([690, 150, 160, 120, C.bad])],
-        try: { q: 'g<sub>m1</sub> = 6.325 mS, R<sub>boost</sub> = 5.75 MΩ, r<sub>O6</sub> = 10 kΩ. |A<sub>v</sub>|?', answer: ans('bank-t4q3', 'av'), unit: 'V/V', tol: 0.03, hint: 'gm1 × (5.75 M ∥ 10 k).' },
+      { t: 67, title: '**The load trap.** The boost makes $R_{down}$ several MΩ, but M6 above is a plain PMOS source ($r_{O6} = 10$ kΩ). In parallel, **the smaller one wins**', tex: stepTex('bank-t4q3', 8), hl: [T([690, 150, 160, 120, C.bad])],
+        try: { q: '(e) Find the overall gain $|A_v|$. Use $A_{aux} ≈ 1.26$ from the step above.', answer: ans('bank-t4q3', 'av'), unit: 'V/V', tol: 0.03,
+          hint: ['Looking down from the output, the boosted cascode gives $(1 + A_{aux})g_{m2}r_{O2}r_{O1}$, which is huge. Looking up, M6 is a plain PMOS source: only $r_{O6}$. The output sees both in parallel.', '$|A_v| = g_{m1}\\,(R_{down}\\parallel r_{O6})$,\\; $g_m = \\frac{2I_D}{V_{ov}}$,\\; $r_O = \\frac{1}{\\lambda I_D}$'],
+          how: ['M1 and M2 at 500 µA, $V_{ov} = 0.1581$ V, $\\lambda_n = 0.1$: $$g_{m1} = g_{m2} = \\frac{2(500\\,\\mu)}{0.1581} = 6.325\\,\\text{mS},\\quad r_{O1} = r_{O2} = \\frac{1}{0.1\\times500\\,\\mu} = 20\\,\\text{k}\\Omega$$',
+            'Boosted resistance looking down ($g_{m2}r_{O2}r_{O1} = 2.53$ MΩ): $$R_{down} = (1 + A_{aux})g_{m2}r_{O2}r_{O1} + r_{O2} + r_{O1} = 2.256\\times2.53\\,\\text{M} + 40\\,\\text{k} ≈ 5.75\\,\\text{M}\\Omega$$',
+            'Looking up: M6 is a plain PMOS source at 500 µA, $\\lambda_p = 0.2$: $$r_{O6} = \\frac{1}{0.2\\times500\\,\\mu} = 10\\,\\text{k}\\Omega$$',
+            'The smaller one wins: $$|A_v| = g_{m1}(R_{down}\\parallel r_{O6}) = 6.325\\,\\text{m}\\times9.98\\,\\text{k} ≈ 63.1$$'],
+          why: 'The load trap: boosting one side is wasted when the other side is a plain $r_O$.',
+          calc: [{ what: 'parallel and gain in one line', keys: '6.325m × ( 5.75M [SHIFT][^] + 10k [SHIFT][^] ) [SHIFT][^] [EXE]', shows: '63.14', note: '[SHIFT][^] is x⁻¹: (a⁻¹ + b⁻¹)⁻¹ is a ∥ b.' }] },
         say: 'And the load trap again: M6’s 10 kΩ in parallel with 5.75 MΩ — gain ≈ 63.' },
       { t: 75, ans: true, title: `**Answers:** $(W/L)_6 = ${fx(ans('bank-t4q3', 'wl6'), 4)}$ · $R_3 = ${fx(ans('bank-t4q3', 'r3') / 1e3, 3)}$ kΩ · M4 saturated · $(W/L)_7 = ${fx(ans('bank-t4q3', 'wl7'), 4)}$ · $R_1 = ${fx(ans('bank-t4q3', 'r1') / 1e3, 3)}$ kΩ · $R_2 = ${fx(ans('bank-t4q3', 'r2'), 3)}$ Ω · $|A_v| ≈ ${fx(ans('bank-t4q3', 'av'), 3)}$`, say: 'Design questions always go: currents, then overdrives from the swing, then sizes, then walk every bias node with links, then check saturation, then gain.' },
     ],
   });
+  // step 1 window: the five branch currents with their values (after the stop, gone before part (a))
+  [[[[140, 302], [140, 684]], '200 µA', C.amb, [250, 390]], [[[760, 302], [760, 684]], '500 µA', C.volt, [834, 470]],
+    [[[520, 302], [520, 568]], '200 µA', C.p, [585, 470]], [[[330, 302], [330, 570], [512, 570]], '100 µA', C.pink, [262, 540]],
+    [[[520, 572], [520, 684]], '300 µA', C.cur, [612, 605]]].forEach(([pts, lab, col, at]) => current(S, pts, off + 8.2, off + 16.4, lab, { color: col, at }));
 }, { q: 'Tutorial 4 Q3' });
 
 /* 2024 mid-sem Q4, as printed: booster M6/M5 (PMOS), M4 (Vb2), M3 (Vb1), PMOS input M7 from VDD; main M2 over M1 */
@@ -380,31 +663,60 @@ function m24q4Fig(S) {
 
 scene(L9, '2024 mid-sem Q4: R_out of a folded-boosted cascode', 72, (S) => {
   const T = tfm(1, 0, 110);
-  pyqFrame(S, {
+  const off = pyqFrame(S, {
     paper: 'm24q4', tag: 'LEC 9 · PAST PAPER 2 OF 3', title: 'How big is R_out with a folded-cascode booster?', src: 'Mid-sem 2024-25 Q4 · 7 marks',
     q: 'All NMOS $V_{ov} = 0.1$ V, all PMOS $|V_{ov}| = 0.2$ V, $I_{D2} = I_{D4} = I_{D7} = 10\\,\\mu$A. Find $R_{out}$ and the minimum and maximum $V_{b2}$.',
     giv: '$V_{DD} = 1.8$ V, $\\lambda_p = 0.2$, $\\lambda_n = 0.1$ V⁻¹, $V_{th0,n} = 0.4$, $|V_{th0,p}| = 0.5$ V', qh: 230,
     tests: 'the Lec 9 folded-cascode booster: **currents by KCL at the fold node**, **booster gain = $g_{m}$ × (look up ∥ look down)**, the **(1 + A)** multiplication, and one **fence** for $V_{b2}$.',
     fig: (S2) => { const g = m24q4Fig(S2); g.setAttribute('transform', 'translate(0 110)'); },
     steps: [
-      { t: 8, title: '**Currents by KCL at F:** M3 carries M4’s and M7’s 10 µA each = 20 µA. Then $g_m = 2I_D/V_{ov}$, $r_O = 1/(\\lambda I_D)$', tex: stepTex('pyq-m24-q4', 0), hl: [T([230, 470, 280, 160, C.cur])],
-        try: { q: 'M7 is PMOS at 10 µA with |V<sub>ov</sub>| = 0.2 V. What is g<sub>m7</sub> (mS)?', answer: 1e-4, unit: 'S (type 0.1m)', tol: 0.02, hint: 'gm = 2ID/|Vov|.' },
+      { t: 8, title: '**Currents by KCL at F.** M4 and M7 each bring 10 µA into F, so M3 sinks 20 µA. Then for **every** device: $g_m = 2I_D/V_{ov}$ and $r_O = 1/(\\lambda I_D)$', tex: stepTex('pyq-m24-q4', 0), hl: [T([230, 470, 280, 160, C.cur])],
+        try: { q: 'Start with the small-signal numbers. Find $g_{m7}$, the transconductance of the booster’s input device M7.', answer: 1e-4, unit: 'S', tol: 0.02,
+          hint: ['M7’s current is given (10 µA) and it is a PMOS, so $|V_{ov}| = 0.2$ V. In saturation, $g_m$ needs only these two.', '$g_m = \\frac{2I_D}{|V_{ov}|}$'],
+          how: ['M7’s current is given: $$I_{D7} = 10\\,\\mu\\text{A},\\quad |V_{ov7}| = 0.2\\,\\text{V (every PMOS)}$$',
+            'Square law in saturation: $$g_{m7} = \\frac{2I_{D7}}{|V_{ov7}|} = \\frac{2(10\\,\\mu)}{0.2} = 0.1\\,\\text{mS}$$',
+            'Same habit for the rest. KCL at F gives M3 = 10 + 10 = 20 µA; then $$g_{m4} = \\frac{2(10\\,\\mu)}{0.1} = 0.2\\,\\text{mS},\\quad r_{O4} = \\frac{1}{0.1\\times10\\,\\mu} = 1\\,\\text{M}\\Omega,\\quad r_{O3} = \\frac{1}{0.1\\times20\\,\\mu} = 500\\,\\text{k}\\Omega$$'],
+          why: 'First KCL for every current, then $g_m$ and $r_O$ for every device, and only then the formulas.' },
         say: 'KCL at the fold node F: M4 and M7 each bring 10 µA, so M3 sinks 20 µA. Then every $g_m = 2I_D/V_{ov}$ and $r_O = 1/(\\lambda I_D)$.' },
-      { t: 17, title: '**Booster gain:** $g_{m7}\\,(R_{up,aux}\\parallel R_{down,aux})$: PMOS cascode M5 on M6 up; NMOS cascode M4 on $r_{O3}\\parallel r_{O7}$ down', tex: stepTex('pyq-m24-q4', 1), hl: [T([230, 150, 300, 480, C.amb])],
-        try: { q: 'R<sub>up,aux</sub> = 25 MΩ, R<sub>down,aux</sub> = 50 MΩ, g<sub>m7</sub> = 0.1 mS. What is A<sub>aux</sub>?', answer: ans('pyq-m24-q4', 'aux'), unit: '', tol: 0.02, hint: '0.1m × (25M ∥ 50M).' },
+      { t: 17, title: '**Booster gain = $g_{m7}$ × (look up ∥ look down) at node G.** Up: the PMOS cascode M5 on M6. Down: the NMOS cascode M4 sitting on the fold node, which carries **two** resistances, $r_{O3}\\parallel r_{O7}$', tex: stepTex('pyq-m24-q4', 1), hl: [T([230, 150, 300, 480, C.amb])],
+        try: { q: 'Find the booster’s gain $A_{aux}$ (from X, M7’s gate, to G, M2’s gate).', answer: ans('pyq-m24-q4', 'aux'), unit: '', tol: 0.02,
+          hint: ['The booster is the input device M7 driving node G: gain = $g_{m7}$ × (resistance at G). Look up from G: PMOS cascode M5 on M6. Look down: M4 cascoded over the fold node F, where $r_{O3}$ and $r_{O7}$ meet in parallel.', '$A_{aux} = g_{m7}\\,(R_{up}\\parallel R_{down})$,\\; $R_{up} = g_{m5}r_{O5}r_{O6}$,\\; $R_{down} = g_{m4}r_{O4}(r_{O3}\\parallel r_{O7})$'],
+          how: ['PMOS devices at 10 µA ($\\lambda_p = 0.2$): $$g_{m5} = \\frac{2(10\\,\\mu)}{0.2} = 0.1\\,\\text{mS},\\quad r_{O5} = r_{O6} = r_{O7} = \\frac{1}{0.2\\times10\\,\\mu} = 500\\,\\text{k}\\Omega$$',
+            'Look up from G (PMOS cascode): $$R_{up} = g_{m5}r_{O5}r_{O6} = 0.1\\,\\text{m}\\times500\\,\\text{k}\\times500\\,\\text{k} = 25\\,\\text{M}\\Omega$$',
+            'Look down from G: M4 on the fold node, $r_{O3}\\parallel r_{O7} = 500\\,\\text{k}\\parallel500\\,\\text{k} = 250$ kΩ: $$R_{down} = g_{m4}r_{O4}(r_{O3}\\parallel r_{O7}) = 0.2\\,\\text{m}\\times1\\,\\text{M}\\times250\\,\\text{k} = 50\\,\\text{M}\\Omega$$',
+            'Input $g_m$ times the parallel of the two: $$A_{aux} = 0.1\\,\\text{m}\\times(25\\,\\text{M}\\parallel50\\,\\text{M}) = 0.1\\,\\text{m}\\times16.7\\,\\text{M} ≈ 1667$$'],
+          why: 'Folded cascode: the fold node carries two $r_O$ in parallel. Don’t forget the input device’s own $r_{O7}$.',
+          calc: [{ what: 'parallel and gain in one line', keys: '0.1m × ( 25M [SHIFT][^] + 50M [SHIFT][^] ) [SHIFT][^] [EXE]', shows: '1666.67', note: '[SHIFT][^] is x⁻¹. Type M with [CATALOG] ▸ Engineer Symbol ▸ Mega.' }] },
         say: 'Look up from G: the PMOS cascode, 25 MΩ. Look down: M4 cascoded over $r_{O3}\\parallel r_{O7}$ (two r_O on the fold node), 50 MΩ. $A_{aux} = 0.1\\,\\text{mS}\\times16.7\\,\\text{M} ≈ 1667$.' },
-      { t: 26, title: '**$R_{out}$:** the main cascode multiplied by $(1 + A_{aux})$', tex: stepTex('pyq-m24-q4', 2), hl: [T([570, 230, 160, 380, C.n])],
-        try: { q: 'A<sub>aux</sub> = 1667, g<sub>m2</sub> = 0.2 mS, r<sub>O2</sub> = r<sub>O1</sub> = 1 MΩ. R<sub>out</sub> ≈ (1 + A)g<sub>m2</sub>r<sub>O2</sub>r<sub>O1</sub> in GΩ?', answer: ans('pyq-m24-q4', 'rout'), unit: 'Ω (type 333G)', tol: 0.03, hint: '1668 × 0.2m × 1M × 1M.' },
+      { t: 26, title: '**$R_{out}$:** the main cascode’s own $g_{m2}r_{O2}r_{O1}$, multiplied by $(1 + A_{aux})$', tex: stepTex('pyq-m24-q4', 2), hl: [T([570, 230, 160, 380, C.n])],
+        try: { q: 'Now find $R_{out}$, looking down into M2’s drain.', answer: ans('pyq-m24-q4', 'rout'), unit: 'Ω', tol: 0.03,
+          hint: ['A boosted cascode is a plain cascode multiplied by $(1 + A_{aux})$. M2 and M1 both carry $I_{D2} = 10$ µA, NMOS $V_{ov} = 0.1$ V.', '$R_{out} ≈ (1 + A_{aux})\\,g_{m2}r_{O2}r_{O1}$'],
+          how: ['Main devices at 10 µA ($\\lambda_n = 0.1$): $$g_{m2} = \\frac{2(10\\,\\mu)}{0.1} = 0.2\\,\\text{mS},\\quad r_{O2} = r_{O1} = \\frac{1}{0.1\\times10\\,\\mu} = 1\\,\\text{M}\\Omega$$',
+            'The plain cascode: $$g_{m2}r_{O2}r_{O1} = 0.2\\,\\text{m}\\times1\\,\\text{M}\\times1\\,\\text{M} = 200\\,\\text{M}\\Omega$$',
+            'Multiply by $(1 + A_{aux})$, with $A_{aux} = 1667$ from the last step: $$R_{out} ≈ 1668\\times200\\,\\text{M}\\Omega ≈ 333\\,\\text{G}\\Omega$$'],
+          why: 'The boost multiplies the cascode by $(1 + A_{aux})$: three orders of magnitude here.' },
         say: '$R_{out} ≈ A_{aux}g_{m2}r_{O2}r_{O1} = 1667\\times0.2\\,\\text{mS}\\times1\\,\\text{M}\\times1\\,\\text{M} ≈ 333$ GΩ.' },
-      { t: 35, title: '**$V_{b2,min}$:** M3 must stay saturated under M4’s source: $V_{b2} - V_{GS4} \\ge V_{ov3}$', tex: stepTex('pyq-m24-q4', 3), hl: [T([230, 400, 140, 230, C.bad])],
-        try: { q: 'V<sub>GS4</sub> = 0.4 + 0.1 V and V<sub>ov3</sub> = 0.1 V. What is the smallest V<sub>b2</sub>?', answer: ans('pyq-m24-q4', 'vb2min'), unit: 'V', tol: 0.01, hint: 'F = Vb2 − VGS4 (a link) must be ≥ Vov3 (a check).' },
+      { t: 35, title: '**$V_{b2,min}$:** F sits one $V_{GS4}$ below $V_{b2}$ (a link), and M3 under F needs at least its $V_{ov3}$ (a check)', tex: stepTex('pyq-m24-q4', 3), hl: [T([230, 400, 140, 230, C.bad])],
+        try: { q: 'Find the smallest $V_{b2}$ that keeps every device in saturation.', answer: ans('pyq-m24-q4', 'vb2min'), unit: 'V', tol: 0.01,
+          hint: ['Lowering $V_{b2}$ pulls F down, because F sits one $V_{GS4}$ below M4’s gate. The device under F, M3, must keep at least its $V_{ov}$.', '$V_F = V_{b2} - V_{GS4} \\ge V_{ov3}$'],
+          how: ['M4’s gate-source drop (NMOS, $V_{thn} = 0.4$ V, $V_{ov} = 0.1$ V): $$V_{GS4} = 0.4 + 0.1 = 0.5\\,\\text{V}$$',
+            'F is one link below $V_{b2}$ and must stay at or above M3’s overdrive: $$V_{b2} - 0.5 \\ge 0.1$$',
+            'So $$V_{b2,min} = 0.1 + 0.5 = 0.6\\,\\text{V}$$'] },
         say: 'F is one link below $V_{b2}$; M3 needs F ≥ $V_{ov3}$. So $V_{b2,min} = 0.1 + 0.5 = 0.6$ V.' },
-      { t: 43, title: '**$V_{b2,max}$:** M4 must stay saturated. Its drain G is M2’s gate, one link above X: $G = V_X + V_{GS2}$, with X at its lowest, $V_{ov1}$', tex: 'V_{b2} - V_{th4} \\le V_{ov1} + V_{GS2} \\Rightarrow V_{b2,max} = 0.1 + 0.5 + 0.4 = 1.0\\,\\mathrm{V}', hl: [T([230, 330, 140, 160, C.n]), T([570, 320, 160, 160, C.n])],
-        try: { q: 'G = V<sub>X</sub> + V<sub>GS2</sub> with V<sub>X</sub> = V<sub>ov1</sub> = 0.1 V and V<sub>GS2</sub> = 0.5 V. NMOS fence on M4 (V<sub>th</sub> = 0.4 V): largest V<sub>b2</sub>?', answer: 1.0, unit: 'V', tol: 0.01, hint: 'M4 saturated: drain G ≥ gate Vb2 − Vth4.' },
+      { t: 43, title: '**$V_{b2,max}$:** M4 must stay saturated. Its drain G is M2’s gate, one link above X; X is lowest at $V_{ov1}$. So $V_{b2} \\le G + V_{th4}$', tex: 'V_{b2} - V_{th4} \\le V_{ov1} + V_{GS2} \\Rightarrow V_{b2,max} = 0.1 + 0.5 + 0.4 = 1.0\\,\\mathrm{V}', hl: [T([230, 330, 140, 160, C.n]), T([570, 320, 160, 160, C.n])],
+        try: { q: 'And the largest $V_{b2}$?', answer: 1.0, unit: 'V', tol: 0.01,
+          hint: ['Raising $V_{b2}$ lifts M4’s gate towards its drain G. G is M2’s gate: one $V_{GS2}$ above X, and X can sit as low as $V_{ov1}$ (M1 just saturated).', 'M4 saturated: $V_{b2} - V_{thn} \\le V_G = V_{ov1} + V_{GS2}$'],
+          how: ['G is M2’s gate, one link above X; take X at its lowest, $V_{ov1} = 0.1$ V: $$V_G = V_X + V_{GS2} = 0.1 + (0.4 + 0.1) = 0.6\\,\\text{V}$$',
+            'NMOS fence on M4: its gate may sit at most one $V_{thn}$ above its drain: $$V_{b2} \\le V_G + V_{thn} = 0.6 + 0.4 = 1.0\\,\\text{V}$$',
+            'M7’s fence allows up to 1.1 V, so M4 sets the limit: $$V_{b2,max} = 1.0\\,\\text{V}$$'],
+          why: 'Bias limits: a check from below (the device under the node), a fence from above (the device itself).' },
         say: 'Raise $V_{b2}$ and M4’s gate climbs towards its drain G. G is M2’s gate: X + $V_{GS2}$ = 0.6 V at the lowest X. M4 stays saturated while $V_{b2} \\le G + V_{th4} = 1.0$ V — the key’s value. (M7’s fence gives 1.1 V, so M4 binds.)' },
       { t: 51, ans: true, title: `**Answers:** $A_{aux} ≈ 1667$ · $R_{out} ≈ 333$ GΩ · $V_{b2,min} = 0.6$ V · $V_{b2,max} = 1$ V (key)`, say: 'Pattern: KCL for currents, $g_m$ and $r_O$ for every device, booster gain by two looks, multiply the cascode by $(1 + A_{aux})$, then fences for the bias limits.' },
     ],
   });
+  // step 1 window: KCL at F with the given currents
+  [[[[300, 262], [300, 618]], '10 µA', C.n, [400, 360]], [[[460, 508], [460, 640], [380, 640], [380, 620], [305, 620]], '10 µA', C.p, [420, 680]],
+    [[[300, 622], [300, 738]], '20 µA', C.cur, [228, 760]], [[[640, 345], [640, 688]], '10 µA', C.volt, [722, 520]]].forEach(([pts, lab, col, at]) => current(S, pts, off + 8.2, off + 16.4, lab, { color: col, at }));
 }, { q: 'Mid-sem 2024 Q4' });
 
 scene(L9, 'Exam-style check: the booster’s headroom and input type', 42, (S) => {
@@ -415,11 +727,22 @@ scene(L9, 'Exam-style check: the booster’s headroom and input type', 42, (S) =
     qh: 230, tests: 'the two Lec 9 ideas the tutorials lean on: **booster headroom by walking up from ground**, and **input type from the level of the node it watches**.',
     fig: (S2) => { const g = diffCsBoost(S2); g.setAttribute('transform', 'translate(40 220) scale(0.8)'); },
     steps: [
-      { t: 8, title: '**(a)** Walk up: tail check, then the link to M5’s gate (= X), then M3’s check', tex: 'V_{out,min} = V_{ISS1} + V_{GS5} + V_{ov3} = 0.2 + 0.7 + 0.2', hl: [T([180, 300, 820, 520, C.amb])],
-        try: { q: 'V<sub>ISS1</sub> = 0.2 V, V<sub>GS5</sub> = 0.7 V, V<sub>ov3</sub> = 0.2 V. Lowest V<sub>out</sub>?', answer: 1.1, unit: 'V', tol: 0.01, hint: 'Check + link + check.' },
+      { t: 8, title: '**(a) Walk up from ground** on the left: the booster’s tail (a check), then the link to M5’s gate, which is X, then M3’s overdrive above X (a check)', tex: 'V_{out,min} = V_{ISS1} + V_{GS5} + V_{ov3} = 0.2 + 0.7 + 0.2 = 1.1\\,\\mathrm{V}', hl: [T([180, 300, 820, 520, C.amb])],
+        try: { q: '(a) With this booster in place, what is the lowest output voltage $V_{out,min}$?', answer: 1.1, unit: 'V', tol: 0.01,
+          hint: ['Walk up from ground on the left: the booster’s tail source, then M5 (its gate is node X), then the cascode M3 above X.', '$V_{out,min} = V_{ISS1} + V_{GS5} + V_{ov3}$'],
+          how: ['The booster’s tail needs its headroom (a check): $$V_{ISS1} = 0.2\\,\\text{V}$$',
+            'M5’s gate is X, a whole $V_{GS5}$ above M5’s source (a link): $$V_X = 0.2 + 0.7 = 0.9\\,\\text{V}$$',
+            'M3 needs its overdrive above X (a check): $$V_{out,min} = 0.9 + 0.2 = 1.1\\,\\text{V}$$'],
+          why: 'Without a booster the floor is only about 0.4 V: the CS booster costs a whole $V_{GS}$.' },
         say: 'Tail 0.2 (check) + $V_{GS5}$ 0.7 (link: X is M5’s gate) + $V_{ov3}$ 0.2 (check) = 1.1 V.' },
-      { t: 16, title: '**(b)** The NMOS cascode sources sit low (≈ 0.2–0.4 V): use a booster whose input works near ground', tex: '\\text{folded-cascode booster with PMOS inputs}',
-        try: { q: 'The booster for the NMOS cascodes (sources ≈ 0.3 V) should use…', choices: ['A folded-cascode amplifier with PMOS input devices', 'A folded-cascode amplifier with NMOS input devices'], answer: 0, hint: 'Which input pair’s CM range reaches ground? (Lec 6)', why: 'A folded PMOS pair’s CM floor is Vov − |Vthp|, below ground.' },
+      { t: 16, title: '**(b)** The NMOS cascodes’ sources sit low (≈ 0.2–0.4 V), so the booster must accept inputs **near ground**: a folded cascode with **PMOS** inputs', tex: '\\text{folded-cascode booster with PMOS inputs}',
+        try: { q: '(b) In a telescopic, the NMOS cascodes’ sources sit near 0.3 V. Which booster should watch them?', choices: ['A folded-cascode amplifier with PMOS input devices', 'A folded-cascode amplifier with NMOS input devices'], answer: 0,
+          hint: ['The booster’s inputs sit on those sources, almost at ground. Which input pair still works there? (Lec 6)', 'Input CM range: NMOS pair needs $V_{in} \\ge V_{GS} + V_{ov,tail}$; folded PMOS pair works down to $V_{in} ≈ V_{ov} - |V_{thp}|$'],
+          how: ['The booster’s inputs connect to the cascode sources, so they sit at ≈ 0.3 V, almost at ground.',
+            'An NMOS input pair needs its inputs at least $V_{GS} + V_{ov,tail}$, near 1 V: at 0.3 V it would be off. That is why the NMOS choice is wrong.',
+            'A folded PMOS pair works down to $V_{ov} - |V_{thp}|$, which is below ground: so the booster for the NMOS cascodes uses **PMOS inputs**.',
+            'Mirror rule: the PMOS cascodes’ sources sit near $V_{DD}$, so their booster uses NMOS inputs.'],
+          why: 'A folded PMOS pair’s CM floor is $V_{ov} - |V_{thp}|$, below ground.' },
         say: 'Low sources need a PMOS input (its CM floor passes ground); the PMOS cascodes’ high sources need NMOS inputs.' },
       { t: 24, ans: true, title: '**Answers:** (a) 1.1 V (vs 0.4 V unboosted) · (b) PMOS-input folded cascode', say: 'Both answers come from the same habit: before using any amplifier, ask where its inputs and outputs must sit.' },
     ],
