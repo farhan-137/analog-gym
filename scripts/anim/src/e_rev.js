@@ -202,7 +202,12 @@ scene(E13, 'Rapid fire: toolkit and Lec 1–3', 66, (S) => {
           calc: [{ what: 'V_ov in one line', keys: '[√] 2 × 50µ ÷ ( 100µ × 10 ) [EXE]', shows: fx(RF.vov, 3), note: PFX_E }] },
         say: `${fx(RF.vov, 3)} volts.` },
       { t: 10, title: '**Intrinsic gain**: $g_m$ from current and overdrive, $r_O$ from λ.', tex: `g_m = \\frac{2I_D}{V_{ov}} = ${fx(RF.gm * 1e3, 3)}\\,\\mathrm{mS},\\; r_O = \\frac{1}{\\lambda I_D} = 200\\,\\mathrm{k\\Omega},\\; g_mr_O = ${fx(RF.gmro, 3)}`,
-        try: { q: `Intrinsic gain $g_mr_O$ of the same transistor (with your $V_{ov} = ${fx(RF.vov, 3)}$ V)?`, answer: RF.gmro, unit: '', tol: 0.02, secs: 45,
+        try: {
+          parts: [
+            { q: '$g_m$ of this transistor?', answer: RF.gm, unit: 'S', tol: 0.02, hint: ['Fastest form: current over overdrive.', '$g_m = \\frac{2I_D}{V_{ov}}$'], how: [`$$\\frac{2(50\\,\\mu)}{${fx(RF.vov, 3)}}$$`] },
+            { q: '$r_O$ of this transistor?', answer: RF.ro, unit: 'Ω', tol: 0.02, hint: ['From λ and the current.', '$r_O = \\frac{1}{\\lambda I_D}$'], how: ['$$\\frac{1}{0.1\\times50\\,\\mu}$$'] },
+          ],
+          q: `Intrinsic gain $g_mr_O$ of the same transistor (with your $V_{ov} = ${fx(RF.vov, 3)}$ V)?`, answer: RF.gmro, unit: '', tol: 0.02, secs: 45,
           hint: ['The fastest $g_m$ uses the current and the overdrive you just found; $r_O$ comes from λ.', '$g_m = \\frac{2I_D}{V_{ov}}$, $r_O = \\frac{1}{\\lambda I_D}$'],
           how: [`$$g_m = \\frac{2I_D}{V_{ov}} = \\frac{2(50\\,\\mu)}{${fx(RF.vov, 3)}} = ${fx(RF.gm * 1e3, 3)}\\,\\text{mS}$$`, '$$r_O = \\frac{1}{\\lambda I_D} = \\frac{1}{0.1\\times50\\,\\mu} = 200\\,\\text{k}\\Omega$$', `$$g_mr_O = ${fx(RF.gm * 1e3, 3)}\\,\\text{mS}\\times200\\,\\text{k}\\Omega = ${fx(RF.gmro, 3)}$$`] },
         say: `$g_m$ = ${fx(RF.gm * 1e3, 3)} millisiemens, $r_O$ = 200 kilo-ohms: $g_mr_O$ = ${fx(RF.gmro, 3)}.` },
