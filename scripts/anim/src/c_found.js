@@ -245,7 +245,9 @@ scene(CF, 'The cascode: pump, shield, and the headroom it costs', 70, (S) => {
   wire(S, [[350, 430], [350, 450]]); nmos(S, 350, 500, { name: 'M1', gate: 'V_in', gl: 30 }); gnd(S, 350, 550);
   r();
   S.draw(g, 0.3, 1.4);
-  S.halo(260, 455, 180, 100, C.n, 4, null, 'PUMP'); S.halo(260, 335, 180, 95, C.p, 8, null, 'SHIELD (bodyguard)');
+  S.halo(260, 455, 180, 100, C.n, 4, null); S.halo(260, 335, 180, 95, C.p, 8, null);
+  const hl1 = txt(S, 248, 470, 'PUMP', { size: 20, color: C.n, weight: 800, anchor: 'end' }), hl2 = txt(S, 248, 352, 'SHIELD', { size: 20, color: C.p, weight: 800, anchor: 'end' }), hl3 = txt(S, 248, 374, '(bodyguard)', { size: 16, color: C.p, weight: 700, anchor: 'end' });
+  [hl1, hl2, hl3].forEach((e, i) => { e.style.opacity = 0; S.fade(e, i ? 8 : 4, 0.5); });
   S.say(4, 'A cascode is two devices in one column. <b>M1 is the pump</b>: its gate takes $V_{in}$ and it turns it into a current $g_{m1}v_{in}$.');
   S.say(8, '<b>M2 is the shield</b>, M1’s bodyguard: its gate is held at a fixed $V_b$, so its source X barely moves. M1 is protected from the output swinging, and looking down from $V_{out}$ you see $r_{O1}$ multiplied by $g_{m2}r_{O2}$.');
   eqAt(S, 'G_m \\approx g_{m1},\\quad R_{down} = g_{m2}r_{O2}r_{O1},\\quad A_v \\approx (g_mr_O)^2', 1150, 230, 14, { size: 30, w: 780 });

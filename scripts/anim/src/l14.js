@@ -124,7 +124,7 @@ scene(L14, 'The concept of stability: the loop gain βA(s)', 66, (S) => {
   const pulse = S.el('circle', { r: 11, fill: C.cur, filter: 'url(#glow)' }); pulse.style.opacity = 0;
   const path = [[250, 340], [400, 340], [530, 340], [660, 340], [660, 500], [420, 500], [250, 500], [250, 370]];
   S.anim(28, 1e4, 'loop', (_p, t) => {
-    const u = ((t - 28) / 4) % 1, n = path.length - 1, k = Math.floor(u * n), f = u * n - k;
+    const u = ((Math.max(0, t - 28)) / 4) % 1, n = path.length - 1, k = Math.floor(u * n), f = u * n - k;
     const [a, b] = [path[k], path[k + 1]];
     pulse.setAttribute('cx', lerp(a[0], b[0], f)); pulse.setAttribute('cy', lerp(a[1], b[1], f)); pulse.style.opacity = t > 28 ? 1 : 0;
   }, E.lin);
@@ -262,7 +262,7 @@ function t6q3Fig(S) {
   const L = 560, R = 760;
   const row = (y, a, b, p) => { const A = fet(S, L, y, { p, name: a, right: true, gl: 26, nameSide: 'l' }); const B = fet(S, R, y, { p, name: b, gl: 26, nameSide: 'r' }); wire(S, [[A.gate[0], y], [B.gate[0], y]]); return [A, B]; };
   row(205, 'M9', 'M10', true); wire(S, [[L, 150], [L, 155]]); wire(S, [[R, 150], [R, 155]]);
-  txt(S, L - 12, 200, 'I_P', { size: 17, color: C.p, anchor: 'end', weight: 700 }); txt(S, R + 12, 186, 'I_P', { size: 17, color: C.p, weight: 700 });
+  txt(S, L - 12, 244, 'I_P', { size: 17, color: C.p, anchor: 'end', weight: 700 }); txt(S, R + 12, 244, 'I_P', { size: 17, color: C.p, weight: 700 });
   wire(S, [[L, 255], [L, 280]]); wire(S, [[R, 255], [R, 280]]); dot(S, L, 268); dot(S, R, 268);
   row(330, 'M3', 'M4', true);
   wire(S, [[L, 380], [L, 420]]); wire(S, [[R, 380], [R, 420]]); dot(S, R, 400);

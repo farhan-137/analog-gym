@@ -11,7 +11,7 @@ scene(L17, 'The problem: 100 dB and three poles', 62, (S) => {
   const mc = S.el('polyline', { points: bodePts(B, (f) => dB(LG.mag(f, A0, poles)), B.fyM), fill: 'none', stroke: C.volt, 'stroke-width': 3.6 });
   const pc = S.el('polyline', { points: bodePts(B, (f) => LG.ph(f, poles), B.fyP), fill: 'none', stroke: C.amb, 'stroke-width': 3.4 });
   [mc, pc].forEach((e) => { e.style.opacity = 0; S.fade(e, 8, 0.6); });
-  [[1e3, 'f_p1'], [1e6, 'f_p2'], [1e7, 'f_p3']].forEach(([f, s]) => { const e = txt(S, B.fxp(f), B.fyM(-30) + 26, s, { size: 17, color: C.muted, anchor: 'middle' }); e.style.opacity = 0; S.fade(e, 9, 0.5); });
+  [[1e3, 'f_p1'], [1e6, 'f_p2'], [1e7, 'f_p3']].forEach(([f, s]) => { const e = txt(S, B.fxp(f) + 6, B.fyM(-18), s, { size: 17, color: C.muted }); e.style.opacity = 0; S.fade(e, 9, 0.5); });
   const bl = S.el('line', { x1: B.x0, x2: B.x0 + B.w, stroke: C.bad, 'stroke-width': 3 }), bt = txt(S, B.x0 + 10, 0, '', { size: 18, color: C.bad, weight: 700 });
   const gd = S.el('circle', { r: 9 }), dl = S.el('line', { 'stroke-width': 2, 'stroke-dasharray': '6 5' }), pmb = S.el('line', { 'stroke-width': 7 });
   const rd = [txt(S, 980, 840, '', { size: 22, mono: true, weight: 800 })];
@@ -123,7 +123,7 @@ scene(L17, 'Before and after: P1′ ≈ 1/(R1A2Cc), and pole splitting', 66, (S)
   const ax = S.g();
   S.el('line', { x1: x0, x2: x0 + w, y1: y, y2: y, stroke: C.muted, 'stroke-width': 2 }, ax);
   for (let d = d0; d <= d1; d++) { S.el('line', { x1: fxp(10 ** d), x2: fxp(10 ** d), y1: y - 8, y2: y + 8, stroke: C.muted, 'stroke-width': 1.6 }, ax); txt(S, fxp(10 ** d), y + 34, fmtHz(10 ** d), { size: 17, color: C.muted, anchor: 'middle' }, ax); }
-  txt(S, x0, y - 40, 'pole frequencies (log axis)', { size: 19, color: C.muted }, ax);
+  txt(S, x0, y - 74, 'pole frequencies (log axis)', { size: 19, color: C.muted }, ax);
   ax.style.opacity = 0; S.fade(ax, 0.3, 0.6);
   const mk = (col, lab) => { const g = S.g(); S.el('line', { x1: -12, y1: -12, x2: 12, y2: 12, stroke: col, 'stroke-width': 5 }, g); S.el('line', { x1: -12, y1: 12, x2: 12, y2: -12, stroke: col, 'stroke-width': 5 }, g); const t = txt(S, 0, -26, lab, { size: 19, color: col, weight: 800, anchor: 'middle' }, g); return Object.assign(g, { t }); };
   const P1 = mk(C.p, 'P1'), P2 = mk(C.n, 'P2');

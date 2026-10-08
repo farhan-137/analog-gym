@@ -47,7 +47,7 @@ function cmfbGeneral(S) {
   txt(S, 970, 290, 'CM sensing', { size: 21, color: C.volt, weight: 700, anchor: 'middle' }); txt(S, 970, 318, 'circuit', { size: 21, color: C.volt, weight: 700, anchor: 'middle' });
   wire(S, [[360, 320], [360, 210], [820, 210], [820, 270], [860, 270]]); wire(S, [[600, 320], [790, 320], [790, 330], [860, 330]]);
   wire(S, [[970, 360], [970, 450], [940, 450]]); txt(S, 982, 420, 'V_out,CM', { size: 19, color: C.amb, weight: 700 });
-  const A = amp(S, 940, 470, { left: true, w: 120, h: 110, label: 'A_CMFB' });
+  const A = amp(S, 940, 470, { left: true, w: 120, h: 110, label: 'A_CMFB', lsize: 18 });
   wire(S, [[960, 498], [1040, 498]]); txt(S, 1048, 505, 'V_REF', { size: 20, color: C.muted });
   wire(S, [[820, 470], [700, 470], [700, 550], [501, 550]]);
   r();
@@ -91,7 +91,7 @@ function resSense(S) {
   wire(S, [[400, 280], [400, 380]]); wire(S, [[640, 280], [640, 380]]); dot(S, 400, 320); dot(S, 640, 320);
   resh(S, 400, 520, 320, { label: 'R_1' }); resh(S, 520, 640, 320, { label: 'R_2' }); dot(S, 520, 320);
   wire(S, [[520, 320], [520, 360]]); txt(S, 520, 384, 'V_out,CM', { size: 19, color: C.amb, weight: 700, anchor: 'middle' });
-  txt(S, 388, 314, 'V_out1', { size: 19, color: C.volt, weight: 700, anchor: 'end' }); txt(S, 652, 314, 'V_out2', { size: 19, color: C.volt, weight: 700 });
+  txt(S, 388, 314, 'V_out1', { size: 19, color: C.volt, weight: 700, anchor: 'end' }); txt(S, 652, 300, 'V_out2', { size: 19, color: C.volt, weight: 700 });
   nmos(S, 400, 430, { name: 'M1', gate: 'V_in1' }); nmos(S, 640, 430, { name: 'M2', gate: 'V_in2', right: true });
   wire(S, [[400, 480], [400, 500], [640, 500], [640, 480]]); isrc(S, 520, 545, { label: 'I_SS', len: 45 }); gnd(S, 520, 590);
   r();
@@ -330,7 +330,7 @@ function t5q2Fig(S) {
   wire(S, [[180, 530], [180, 550], [320, 550], [320, 530]]); isrc(S, 250, 590, { label: 'I_SS', len: 40 }); gnd(S, 250, 630);
   // error amp
   amp(S, 860, 600, { left: true, w: 110, h: 100 });
-  wire(S, [[580, 410], [580, 440], [900, 440], [900, 575], [860, 575]]); txt(S, 908, 470, 'V_out,CM', { size: 18, color: C.amb, weight: 700 });
+  wire(S, [[580, 410], [580, 440], [900, 440], [900, 575], [860, 575]]); txt(S, 908, 520, 'V_out,CM', { size: 18, color: C.amb, weight: 700 });
   wire(S, [[860, 625], [900, 625]]); txt(S, 908, 631, 'V_REF', { size: 18, color: C.muted });
   wire(S, [[750, 600], [750, 640], [R + 0, 640]]);
   r();
@@ -343,7 +343,7 @@ scene(L10, 'Tutorial 5 Q2: which pair for the CMFB amplifier, and its loop gain'
     paper: 't5q2', tag: 'LEC 10 · PAST PAPER 4 OF 4', title: 'Design the CMFB amplifier: PMOS or NMOS pair? Loop gain?', src: 'Tutorial 5 Q2 · Razavi 9.12',
     q: 'The amplifier sensing $V_{out,CM}$ is a differential pair with an active mirror load and drives M3, M4 through $V_E$. (a) PMOS or NMOS input pair? (b) The CMFB loop gain.',
     qh: 200, tests: 'Lec 9’s habit of **matching an amplifier to the levels around it**, and the **CM loop gain** read as sense → amplify → current → resistance.',
-    fig: (S2) => { const g = t5q2Fig(S2); g.setAttribute('transform', 'translate(0 90)'); },
+    fig: (S2) => { const g = t5q2Fig(S2); g.setAttribute('transform', 'translate(30 140) scale(0.88)'); },
     steps: [
       { t: 8, title: '**(a)** $V_E$ drives the gates of M3, M4 (NMOS, sources on ground): it must sit near $V_{GS3}$ — **low**. A 5-T OTA’s output sits one diode below its mirror’s rail', tex: stepTex('bank-t5q2', 0), hl: [T([400, 590, 360, 110, C.amb])],
         try: { q: 'V<sub>E</sub> must sit low (≈ V<sub>GS3</sub>). A 5-T OTA’s output sits near its mirror’s diode level. Which input pair puts its output low?', choices: ['PMOS input pair (with an NMOS mirror at the bottom)', 'NMOS input pair (with a PMOS mirror at the top)'], answer: 0, hint: 'The mirror sits on the opposite side of the input pair; its diode level is where the output rests.', why: 'NMOS mirror ⇒ output rests near VGS,n — exactly what M3, M4 need.' },

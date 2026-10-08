@@ -251,10 +251,10 @@ scene(L7, 'Telescopic first stage + CS second stage (circuit 2)', 70, (S) => {
   S.halo(1090, 300, 220, 420, C.green, 9, null, 'stage 2');
   S.say(6, 'Stage 1’s outputs X and Y drive the gates of <b>M9, M10</b>: PMOS common-source devices loaded by NMOS current sources M11, M12. That is stage 2.');
   // look up / look down at X
-  const up = arrow(S, 700, 380, 700, 250, { color: C.p }); S.fade(up, 14, 0.5); S.out(up, 30, 0.5);
-  const dn = arrow(S, 600, 400, 600, 610, { color: C.n }); S.fade(dn, 17, 0.5); S.out(dn, 30, 0.5);
-  label(S, 712, 300, 'g_m5 r_O5 r_O7', 14, { size: 20, color: C.p, weight: 700, out: 30 });
-  label(S, 470, 610, 'g_m3 r_O3 r_O1', 17, { size: 20, color: C.n, weight: 700, out: 30, anchor: 'end' });
+  const up = arrow(S, 588, 360, 588, 190, { color: C.p }); S.fade(up, 14, 0.5); S.out(up, 30, 0.5);
+  const dn = arrow(S, 588, 396, 588, 560, { color: C.n }); S.fade(dn, 17, 0.5); S.out(dn, 30, 0.5);
+  const cu = chip(S, 470, 752, '↑ look up from X: g_m5 r_O5 r_O7', { color: C.p, size: 19 }); cu.style.opacity = 0; S.pop(cu, 14); S.out(cu, 30, 0.5);
+  const cd = chip(S, 1130, 752, '↓ look down from X: g_m3 r_O3 r_O1', { color: C.n, size: 19 }); cd.style.opacity = 0; S.pop(cd, 17); S.out(cd, 30, 0.5);
   S.say(14, 'Gain of stage 1, the usual two looks from X: looking <b>up</b> you see the PMOS cascode, $g_{m5}r_{O5}r_{O7}$…');
   S.say(17, '…looking <b>down</b> you see the NMOS cascode, $g_{m3}r_{O3}r_{O1}$. The input current $g_{m1}v_{in}$ meets the two in parallel.');
   eqAt(S, 'A_1 = g_{m1}\\left[g_{m5}r_{O5}r_{O7}\\parallel g_{m3}r_{O3}r_{O1}\\right]', 800, 812, 21, { size: 32 });
@@ -265,7 +265,7 @@ scene(L7, 'Telescopic first stage + CS second stage (circuit 2)', 70, (S) => {
   wire(S, [[400, 175], [470, 175], [470, 375]], { color: C.volt, w: 2.6, dash: '7 6' }, lk);
   arrow(S, 470, 360, 470, 386, { color: C.volt, w: 2.6, head: 10 }, lk);
   S.fade(lk, 33, 0.6); S.out(lk, 58, 0.5);
-  const lb = chip(S, 470, 120, 'X = V_DD − |V_GS9|  (a link)', { color: C.volt, size: 20 }); lb.style.opacity = 0; S.pop(lb, 34); S.out(lb, 58, 0.5);
+  const lb = chip(S, 300, 120, 'X = V_DD − |V_GS9|  (a link)', { color: C.volt, size: 20 }); lb.style.opacity = 0; S.pop(lb, 34); S.out(lb, 58, 0.5);
   S.ring(660, 390, 18, C.volt, 33, 58);
   S.say(33, '<span class="why">A detail the tutorials ask (Tutorial 3 Q2, Q3):</span> what DC voltage sits at X? X is <b>M9’s gate</b>, and M9’s source is $V_{DD}$.');
   S.say(40, 'M9 carries a fixed current, so its $|V_{GS9}|$ is fixed. That is a <b>link</b>: $X = V_{DD} - |V_{GS9}|$. Stage 2 decides where stage 1’s output sits.');
@@ -310,7 +310,7 @@ scene(L7, 'One output: the mirror trick (circuit 3)', 50, (S) => {
   S.say(12, 'Follow a signal. The left CS device M9 carries $+i$ more; that current goes into the diode M11…');
   S.say(16, '…and M12 copies it, pulling $+i$ more <b>out</b> of the output. Meanwhile M10, driven the opposite way, pushes $i$ <b>less</b> in.');
   S.say(21, 'Both changes move $V_{out}$ the same way: the two halves <b>add</b>. One output, full differential gain — nothing wasted.');
-  whyBox(S, 1000, 140, 560, 130, 'Same idea as the 5-T OTA: the **diode turns a current into a gate voltage**, the mirror **copies it** to the other side.', 27);
+  whyBox(S, 900, 815, 660, 80, 'Same idea as the 5-T OTA: the **diode turns a current into a gate voltage**, the mirror **copies it** to the other side.', 27);
   S.say(27, 'Remember the mirror’s job in one line: the diode turns a current into a gate voltage, the mirror copies it to the other side, and the halves add.');
 });
 
@@ -340,7 +340,7 @@ scene(L7, 'Gain boosting: which factor can grow?', 56, (S) => {
   S.fade(tw, 26, 0.8);
   label(S, 1240, 640, 'each cascode =', 26, { size: 19, color: C.bad, anchor: 'end' }); label(S, 1240, 664, 'one more block', 26, { size: 19, color: C.bad, anchor: 'end' });
   S.say(26, 'But each stacked cascode adds another $V_{ov}$ block to the output column — the swing problem again.');
-  whyBox(S, 860, 650, 330, 190, '**Gain boosting:** get that ×50 multiplication **without stacking** another device.', 33);
+  whyBox(S, 560, 790, 640, 90, '**Gain boosting:** get that ×50 multiplication **without stacking** another device.', 33);
   S.say(33, '<span class="why">So Razavi asks:</span> can we get that multiplication of $R_{out}$ <b>without</b> stacking another device? That is <b>gain boosting</b>.');
   S.say(42, 'Your page tries two ways. The first fails — and seeing why it fails makes the second one obvious.');
 });
@@ -435,8 +435,8 @@ scene(L7, 'Attempt 2: the amplifier watches the source', 88, (S) => {
   const setBar = (b, v) => { b.setAttribute('y', v >= 0 ? gy - v : gy); b.setAttribute('height', Math.abs(v)); };
   S.anim(22, 3, 'gs', (p) => setBar(gS, 30 * p)); S.anim(26, 3, 'gg', (p) => setBar(gG, -120 * p)); S.anim(30, 3, 'gv', (p) => setBar(gV, -150 * p));
   label(S, gx + 25, gy - 175, '+I_{X}R_{S}', 22, { size: 19, color: C.volt, anchor: 'middle', weight: 700 });
-  label(S, gx + 125, gy + 150, '−A_{1}I_{X}R_{S}', 26, { size: 19, color: C.amb, anchor: 'middle', weight: 700 });
-  label(S, gx + 225, gy + 175, '−(1+A_{1})I_{X}R_{S}', 30, { size: 18, color: C.cur, anchor: 'middle', weight: 700 });
+  label(S, gx + 125, gy + 214, '−A_{1}I_{X}R_{S}', 26, { size: 19, color: C.amb, anchor: 'middle', weight: 700 });
+  label(S, gx + 225, gy + 246, '−(1+A_{1})I_{X}R_{S}', 30, { size: 18, color: C.cur, anchor: 'middle', weight: 700 });
   S.say(22, '$I_X$ through $R_S$ lifts the <b>source</b> by $I_XR_S$. A plain device’s $V_{GS}$ would shrink by just that much.');
   S.say(26, 'But the amplifier sees the source rise and drives the <b>gate down</b> by $A_1I_XR_S$ (your page: “$-A_1I_XR_S$”).');
   S.say(30, 'So $V_{GS}$ shrinks by $(1 + A_1)I_XR_S$: M2 fights back $(1 + A_1)$ times harder. The drain looks $(1 + A_1)$ times stiffer.');

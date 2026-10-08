@@ -796,6 +796,34 @@
   "text": "Quick check you can always do: the closed-loop pole is about beta F U. Here F U equals 10 to the 5 times 100 hertz equals 10 megahertz."
  },
  {
+  "k": "1g6stzc",
+  "text": "What it tests: gain equals G M R O, a pole 1 over (2 pi R O C L ), and GBW equals G M over (2 pi C L ): the cascode multiplies gain and divides bandwidth by the same factor."
+ },
+ {
+  "k": "lwdhhy",
+  "text": "0.2 millisiemens."
+ },
+ {
+  "k": "bjhqiy",
+  "text": "50."
+ },
+ {
+  "k": "1j4m60v",
+  "text": "About the square: 2500."
+ },
+ {
+  "k": "97z1dt",
+  "text": "637 kilohertz."
+ },
+ {
+  "k": "s1keyo",
+  "text": "31.8 megahertz for both: the cascode has 50 times the gain and a fiftieth of the bandwidth."
+ },
+ {
+  "k": "uzrd3k",
+  "text": "Gain-bandwidth is fixed by G M and C L; the output resistance only trades one for the other."
+ },
+ {
   "k": "2rgyhz",
   "text": "What it tests: GBW equals G M over (2 pi C L ) and converting dB back to a ratio."
  },
@@ -842,6 +870,82 @@
  {
   "k": "2xl53j",
   "text": "Notice the order: two specs fix the model (C from GBW, R from gain), then β, then the two feedback rules."
+ },
+ {
+  "k": "1t0h6p5",
+  "text": "Slew rate starts with one picture: a capacitor is a bucket. Current is water flowing in, the voltage is the water level, and the capacitance is how wide the bucket is."
+ },
+ {
+  "k": "1uvzwhp",
+  "text": "Pour in a fixed current, 100 microamps into 5 picofarads. The level rises in a perfectly straight line: every microsecond it gains the same amount, 20 volts."
+ },
+ {
+  "k": "xrqbwa",
+  "text": "That is i equals C dv over dt read backwards: dv over dt equals I over C. A fixed current gives a straight ramp, with slope I over C."
+ },
+ {
+  "k": "gxoikt",
+  "text": "Double the current: twice as fast, 40 volts per microsecond."
+ },
+ {
+  "k": "6mjw7k",
+  "text": "Go back to 100 microamps but make the bucket twice as wide, 10 picofarads: half as fast, 10 volts per microsecond."
+ },
+ {
+  "k": "1fi2g0s",
+  "text": "The unit trick that saves time in every question: microamps divided by picofarads comes out directly in volts per microsecond. 100 over 5 is 20 volts per microsecond, no powers of ten needed."
+ },
+ {
+  "k": "ju1j1",
+  "text": "Now an amplifier. The 5-transistor O T A’s input pair shares one fixed tail current, 40 microamps, between its two sides. The output capacitor gets the difference between the two sides."
+ },
+ {
+  "k": "wo3doe",
+  "text": "A small input step tilts the split a little: one side gets a bit more, the other a bit less, and the difference charges C L. The output follows the smooth exponential it is asked for, the dashed curve."
+ },
+ {
+  "k": "1ldri55",
+  "text": "A bigger step asks for a steeper start, so a bigger current. The split tilts further."
+ },
+ {
+  "k": "b62lie",
+  "text": "Keep going and one side runs empty: it switches off, and the other side carries all of I S S. That is the most current the pair can ever give."
+ },
+ {
+  "k": "uo16vk",
+  "text": "Now the output can only rise as fast as I S S fills C L: a straight ramp at I S S over C L, 20 volts per microsecond, instead of the steep start it wanted. That straight part is slewing, and I S S over C L is the slew rate."
+ },
+ {
+  "k": "1welive",
+  "text": "So every slew question is one comparison: the start slope the step wants, V 0 over tau, against the top speed, the maximum current over the capacitor. Bigger wanted slope: it slews. Once the remaining gap is small enough, it finishes with the normal exponential."
+ },
+ {
+  "k": "xx4273",
+  "text": "10 volts per microsecond."
+ },
+ {
+  "k": "17hir0v",
+  "text": "Time is distance over speed: 0.2 microseconds."
+ },
+ {
+  "k": "1jngmzo",
+  "text": "All of I S S into C L: 20 volts per microsecond."
+ },
+ {
+  "k": "alqrmw",
+  "text": "It wants 100 volts per microsecond and can do 20: it slews."
+ },
+ {
+  "k": "9535kz",
+  "text": "Set the wanted slope equal to the slew rate: 0.2 volts. Anything bigger slews."
+ },
+ {
+  "k": "ivfwmk",
+  "text": "It ramps until the remaining gap is small enough to finish linearly, 0.2 volts. So it ramps 0.8 volts at 20 volts per microsecond: 40 nanoseconds."
+ },
+ {
+  "k": "1xeq9gy",
+  "text": "Six steps, one idea. The tutorial questions after Lecture 13 are exactly these steps with real circuits around them."
  },
  {
   "k": "mqhm03",
@@ -1192,6 +1296,30 @@
   "text": "Keep bandwidth (uses R out ) and GBW (uses only G M ) apart, this quiz asks both."
  },
  {
+  "k": "dw326n",
+  "text": "What it tests: the closed-loop τ equals 1 over (βω_u) and 6.91τ for 0.1 percent, the buffer window that rules out a telescopic, and headroom shared by four overdrives."
+ },
+ {
+  "k": "1x4vqr",
+  "text": "Folded cascode."
+ },
+ {
+  "k": "8q6v6f",
+  "text": "0.69 millisiemens."
+ },
+ {
+  "k": "18syfll",
+  "text": "0.3 volts each."
+ },
+ {
+  "k": "1wmo7z2",
+  "text": "0.72 milliwatts, with a gain around 2300, comfortably above 500."
+ },
+ {
+  "k": "y39ggk",
+  "text": "Every spec turned into one number: settling into G M, swing into overdrives, overdrives and currents into power."
+ },
+ {
   "k": "16irihp",
   "text": "What it tests: Lecture 1 error, rise time 2.2τ, τ equals 1 over omega u for a buffer, and slew rate equals I over C for the capacitor the slewing current charges."
  },
@@ -1406,6 +1534,58 @@
  {
   "k": "1g8rvpk",
   "text": "Now the Lecture 14 questions: Problem Set 2 P 1, Tutorial 6 Q 3, the past tutorial on two poles, and a stability check built from your page."
+ },
+ {
+  "k": "1rg79er",
+  "text": "You have now seen slewing in four op amps. They all follow one sentence: the slew rate is the most current the circuit can deliver, divided by the capacitor that current has to fill."
+ },
+ {
+  "k": "16irvzy",
+  "text": "Five-transistor O T A: one side of the pair turns off and the whole tail current goes into C L."
+ },
+ {
+  "k": "1w9a3kt",
+  "text": "Fully differential telescopic: each output gets I S S over 2, because the top current sources keep pushing their half. The two outputs move in opposite directions, so the difference moves at I S S over C L."
+ },
+ {
+  "k": "1v87ezs",
+  "text": "Folded cascode: the folding current I P must be at least I S S, otherwise a branch runs dry and I P becomes the limit."
+ },
+ {
+  "k": "lsnm8n",
+  "text": "Two-stage Miller op amp, from Lecture 17: the tail current fills the compensation capacitor C C, unless the output stage, I 7 minus I 5, runs out filling C L first. The smaller one wins."
+ },
+ {
+  "k": "16zwmos",
+  "text": "Questions only change which current and which capacitor. Find those two and you are done."
+ },
+ {
+  "k": "2qy026",
+  "text": "Each output gets half the tail: 200 over 1, 200 volts per microsecond."
+ },
+ {
+  "k": "1l7oeg7",
+  "text": "Opposite slopes add: 400."
+ },
+ {
+  "k": "aaqv6e",
+  "text": "The folding current is the limit: 150 over 2, 75."
+ },
+ {
+  "k": "1sbpz6p",
+  "text": "Raise I P to 200 microamps and it is 100."
+ },
+ {
+  "k": "kk9viu",
+  "text": "The tail into C C: 20."
+ },
+ {
+  "k": "1y2g5yg",
+  "text": "The output stage has only 80 microamps left for 5 picofarads: 16. The smaller wins, so the op amp slews at 16, set by the output stage this time."
+ },
+ {
+  "k": "5ct9kl",
+  "text": "Now the real questions: Problem Set 2 P 1 and Tutorial 6 Q 3 next, and the two-stage mid sem questions in the Lecture 15 to 17 lesson."
  },
  {
   "k": "ov1pf",

@@ -12,7 +12,7 @@ scene(L16, 'Your page: reading PM off the two plots', 56, (S) => {
   const pc = S.el('polyline', { points: bodePts(B, (f) => LG.ph(f, poles), B.fyP), fill: 'none', stroke: C.amb, 'stroke-width': 3.6 });
   [mc, pc].forEach((e) => { e.style.opacity = 0; S.fade(e, 8, 0.6); });
   const lab = (x, y, s, col, t0) => { const e = txt(S, x, y, s, { size: 18, color: col, weight: 700 }); e.style.opacity = 0; S.fade(e, t0, 0.5); };
-  lab(B.fxp(2e5), B.fyM(55), '−20 dB/dec', C.volt, 9); lab(B.fxp(9e7), B.fyM(5), '−40 dB/dec', C.volt, 10);
+  lab(B.fxp(2e5), B.fyM(55), '−20 dB/dec', C.volt, 9); lab(B.fxp(1.6e8), B.fyM(-22), '−40 dB/dec', C.volt, 10);
   const gx = LG.gx(k, poles), ph = LG.ph(gx, poles), pm = 180 + ph;
   // step 1: a dot slides along the gain curve to 0 dB; step 2: drop to the phase; step 3: the gap
   const dt = S.el('circle', { r: 10, fill: C.ok }); dt.style.opacity = 0; S.fade(dt, 12, 0.4);
@@ -64,7 +64,7 @@ scene(L16, 'Why a small PM makes a big peak: two arrows', 76, (S) => {
     lBA.setAttribute('x', Math.max(ox + U + 20, (ox + U + bx) / 2 + 30)); lBA.setAttribute('y', Math.max(oy + 56, (oy + by) / 2 + 30));
     lSum.setAttribute('x', (ox + bx) / 2 - 90); lSum.setAttribute('y', (oy + by) / 2 + 28);
     const R = 50; arc.setAttribute('d', `M${ox + U + R} ${oy} A${R} ${R} 0 0 1 ${ox + U + R * Math.cos(th)} ${oy - R * Math.sin(th)}`);
-    lAng.setAttribute('x', ox + U + 56); lAng.setAttribute('y', oy + 64); lAng.textContent = `∠βA = ${fx(pm - 180, 3)}°`;
+    lAng.setAttribute('x', ox + U + 150); lAng.setAttribute('y', oy + 66); lAng.textContent = `∠βA = ${fx(pm - 180, 3)}°`;
     const mag = 2 * Math.sin(pm / 2 / DEG), K = 1 / mag;
     rd[0].textContent = `PM = ${fx(pm, 3)}°`; rd[1].textContent = `|1 + βA| = 2 sin(PM/2) = ${fx(mag, 3)}`; rd[2].textContent = `|Af|·β = ${fx(K, 3)}`;
     // closed loop of L(s) = ωu/(s(1+s/p2)) with that PM, ωu at the plot centre

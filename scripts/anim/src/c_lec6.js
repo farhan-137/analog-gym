@@ -53,7 +53,7 @@ function teleSE(S, o = {}) {
 /* the column the CM range lives in, with live node readouts */
 scene(C6, 'PMOS-input folded cascode: the input CM range', 96, (S) => {
   header(S, 'LEC 6 · YOUR PAGE, TOP LEFT', 'How low and how high can the input CM go?');
-  const g = foldP(S); g.setAttribute('transform', 'translate(-110 30) scale(0.62)');
+  const g = foldP(S); g.setAttribute('transform', 'translate(-60 30) scale(0.62)');
   S.fade(g, 0.2, 0.8);
   S.say(0.2, 'Your page’s first circuit: the PMOS-input folded cascode you just built. Question: what range of input CM keeps every transistor saturated?');
   S.say(6, 'Only one column matters for the input: <b>M11 → P → M1 → X → M9</b>. Let us lift it out.');
@@ -141,7 +141,7 @@ scene(C6, 'Rail-to-rail input: both pairs at once', 60, (S) => {
   txt(S, xv(0.25), y0 - 140, 'PMOS only', { size: 17, color: C.p, anchor: 'middle' }); txt(S, xv(0.9), y0 - 260, 'both: 2g_m', { size: 17, color: C.amb, anchor: 'middle' }); txt(S, xv(1.6), y0 - 140, 'NMOS only', { size: 17, color: C.n, anchor: 'middle' });
   const mk = S.el('circle', { r: 9, fill: '#fff' }); const mt = txt(S, 0, 0, '', { size: 18, color: C.text, mono: true, weight: 700 });
   mk.style.opacity = 0; mt.style.opacity = 0; S.fade(mk, 12, 0.4); S.fade(mt, 12, 0.4);
-  S.anim(0, 1e4, 'rr', (_p, t) => { const v = t < 12 ? -0.3 : t < 34 ? lerp(-0.3, 2.1, E.inout((t - 12) / 22)) : 2.1; mk.setAttribute('cx', xv(v)); mk.setAttribute('cy', y0 - 120 * curveG(v)); mt.setAttribute('x', xv(v) - 40); mt.setAttribute('y', y0 - 120 * curveG(v) - 20); mt.textContent = `${v.toFixed(2)} V`; }, E.lin);
+  S.anim(0, 1e4, 'rr', (_p, t) => { const v = t < 12 ? -0.3 : t < 34 ? lerp(-0.3, 2.1, E.inout((t - 12) / 22)) : 2.1; mk.setAttribute('cx', xv(v)); mk.setAttribute('cy', y0 - 120 * curveG(v)); mt.setAttribute('x', xv(v) - 40); mt.setAttribute('y', y0 - 120 * curveG(v) - 48); mt.textContent = `${v.toFixed(2)} V`; }, E.lin);
   S.say(12, 'Sweep the input CM from below ground to above $V_{DD}$. Near ground only the PMOS pair conducts; in the middle both do; near $V_{DD}$ only the NMOS pair. Some pair always works: <b>rail-to-rail</b>.');
   whyBox(S, 860, 620, 700, 170, '**Side effect:** where both pairs work their currents add, so $G_m$ (and the gain) roughly **doubles** in the middle. Keeping $G_m$ constant needs extra circuitry (not in the mid-sem).', 30);
   S.say(30, 'One exam-worthy side effect: $G_m$ is not constant — it roughly doubles where both pairs conduct.');

@@ -256,7 +256,7 @@ scene(L11, 'Problem Set 2 P5: sizing the replica', 58, (S) => {
     tag: 'LEC 11–12 · PAST PAPER 3 OF 3', title: 'Replica sizes, and what a wrong size does', src: 'Problem Set 2 P5 (Lec 12)',
     q: '$(W/L)_{11} = 40$, sensing devices $(W/L)_{12} = (W/L)_{13} = 12$, $V_{REF} = 1.5$ V, $V_{th} = 0.7$ V. (a) $(W/L)_{14}$, $(W/L)_{15}$ so that $V_{out,CM} = V_{REF}$. (b) With $(W/L)_{15} = 30$, where does the CM settle?',
     qh: 230, tests: 'the **replica rules**, and the balance condition as **matched conductances** — $\\tfrac WL(V_{GS}-V_{th})$ on both sides.',
-    fig: (S2) => { const g = replicaFig(S2); g.setAttribute('transform', 'translate(0 60)'); },
+    fig: (S2) => { const g = replicaFig(S2); g.setAttribute('transform', 'translate(40 120) scale(0.82)'); },
     steps: [
       { t: 6, title: '**(a)** M14 is M11’s twin', tex: stepTex('bank-ps2-p5', 0), hl: [T([190, 290, 160, 100, C.n]), T([700, 330, 160, 100, C.n])],
         try: { q: '(W/L)<sub>11</sub> = 40. (W/L)<sub>14</sub> = ?', answer: 40, unit: '', tol: 0.01, hint: 'Twin = same size.' },

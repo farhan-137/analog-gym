@@ -788,6 +788,78 @@
   "text": "Your page’s last circuit in exam form: one link for X, two fences for the bias window."
  },
  {
+  "k": "agghzq",
+  "text": "Tutorial 2 Q 2 times Razavi 9.2, exactly as printed. Read it once, the lesson will make you solve every part before explaining it."
+ },
+ {
+  "k": "lfrzqw",
+  "text": "What it tests: the diode tax: two P mos diodes take two whole V G S, then the N mos fence on M 3; the buffer fence on M 2 for the ceiling."
+ },
+ {
+  "k": "t8y4z3",
+  "text": "3 minus 2 V G S, P is at least 1.4 minus 0.7, so each P mos may use at most 1.15 volts: an overdrive of at most 0.35 volts."
+ },
+ {
+  "k": "1hb2k8e",
+  "text": "W over L equals 212.8, so W equals 106 micro m."
+ },
+ {
+  "k": "nbdeoa",
+  "text": "0.7 volts."
+ },
+ {
+  "k": "xkqit6",
+  "text": "The buffer fence on M 2 wins: 1.21 volts. The window is only half a volt."
+ },
+ {
+  "k": "7gi5ns",
+  "text": "About 1300."
+ },
+ {
+  "k": "9qdrow",
+  "text": "Exactly the diode tax and the buffer window from the background scenes, now with numbers."
+ },
+ {
+  "k": "ffs27r",
+  "text": "mid sem 2023-24 Q 3 times 14 marks, exactly as printed. Read it once, the lesson will make you solve every part before explaining it."
+ },
+ {
+  "k": "w5gpiv",
+  "text": "What it tests: the design order: slew rate, then current; floor, then N mos overdrive; ceiling, then P mos overdrive (the tail’s root 2 times V overdrive at full steering); bias limits by checks and links; two-look gain."
+ },
+ {
+  "k": "juv20l",
+  "text": "I S S equals 5 volts per microsecond times 10 picofarads equals 50 microamps: 25 microamps per side."
+ },
+ {
+  "k": "1sjb39x",
+  "text": "22.2."
+ },
+ {
+  "k": "1ba6neo",
+  "text": "22.5: both types end up the same size."
+ },
+ {
+  "k": "o4d2jr",
+  "text": "0.6 volts."
+ },
+ {
+  "k": "1de41g3",
+  "text": "0.88 volts."
+ },
+ {
+  "k": "puxznr",
+  "text": "1.3 volts."
+ },
+ {
+  "k": "5o829u",
+  "text": "About 1900."
+ },
+ {
+  "k": "1sywozi",
+  "text": "Specs to sizes in a fixed order: current, floor, ceiling, biases, gain."
+ },
+ {
   "k": "1i3syin",
   "text": "Four moves solve every Lecture 6 question: currents, levels by checks and links, fences for buffers and biases, and gain by two looks."
  },
