@@ -193,3 +193,15 @@ svg.stage .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
 .try .calc .k { font: 500 15px/1.9 "JetBrains Mono", ui-monospace, monospace; color: #fff; word-break: break-word; }
 .try .calc .s { font-size: 14px; color: #7ff0bb; margin-top: 2px; }
 .try kbd { display: inline-block; font: 600 12.5px/1.2 "Inter", sans-serif; padding: 2px 6px; margin: 0 1px; border-radius: 5px; background: #e9eef5; color: #111; border-bottom: 2px solid #9aa5b4; }
+
+/* step-by-step parts inside a your-turn stop */
+.try .parts { margin: 2px 0 6px; }
+.try .part { border-left: 3px solid #e0782f; padding: 6px 0 6px 12px; margin: 8px 0; }
+.try .part.done { border-left-color: #3fbf87; }
+.try .part .ph { font: 700 11.5px/1 "Inter", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #ffb36b; margin-bottom: 6px; }
+.try .part.done .ph { color: #6fe0aa; }
+.try .part .pq { font-size: 16px; line-height: 1.5; margin-bottom: 8px; }
+.try .part .psol { font-size: 15px; line-height: 1.5; color: #dce8f2; }
+.try .part .psol .pl { margin: 2px 0; }
+.try .part .psol .pa { margin-top: 2px; color: #7ff0bb; }
+.try .part .psol .tb .katex-display { margin: 2px 0; }

@@ -398,46 +398,98 @@ const Try = (() => {
       if (shown >= hints.length && hb) hb.disabled = true;
     };
     let hb = null;
-    if (st.choices) {
-      const ch = document.createElement('div'); ch.className = 'choices';
-      st.choices.forEach((c, i) => {
-        const bt = document.createElement('button'); bt.innerHTML = rt(c);
-        bt.onclick = () => {
-          if (i === st.answer) { bt.classList.add('right'); finish('✓ Right.', true); }
-          else { tries.n++; bt.classList.add('wrong'); fb.className = 'fb bad'; fb.innerHTML = '✗ Not this one.' + (tries.n === 1 && hints.length ? ' Open a hint, then try again.' : ''); }
+    // the main question: shown at once, or after the step-by-step parts
+    const mainBlock = (anchor) => {
+      if (st.choices) {
+        const ch = document.createElement('div'); ch.className = 'choices';
+        st.choices.forEach((c, i) => {
+          const bt = document.createElement('button'); bt.innerHTML = rt(c);
+          bt.onclick = () => {
+            if (i === st.answer) { bt.classList.add('right'); finish('✓ Right.', true); }
+            else { tries.n++; bt.classList.add('wrong'); fb.className = 'fb bad'; fb.innerHTML = '✗ Not this one.' + (tries.n === 1 && hints.length ? ' Open a hint, then try again.' : ''); }
+          };
+          ch.appendChild(bt);
+        });
+        (anchor || b).appendChild(ch);
+        const row = document.createElement('div'); row.className = 'row in';
+        hb = document.createElement('button'); hb.textContent = 'Hint';
+        const show = document.createElement('button'); show.textContent = 'Show me';
+        hb.onclick = nextHint; show.onclick = () => { ch.children[st.answer].classList.add('right'); finish('The answer is marked in green.', false); };
+        if (hints.length) row.append(hb); row.append(show); if (st.calc) row.append(calcBtn);
+        (anchor || b).appendChild(row);
+      } else {
+        const row = document.createElement('div'); row.className = 'row in';
+        row.innerHTML = `<input type="text" inputmode="decimal" placeholder="e.g. 0.25, 250m, 4.7µ" aria-label="your answer"> <span class="u">${st.unit || ''}</span>`;
+        const chk = document.createElement('button'); chk.className = 'go'; chk.textContent = 'Check';
+        hb = document.createElement('button'); hb.textContent = 'Hint';
+        const show = document.createElement('button'); show.textContent = 'Show me';
+        row.append(chk, hb, show); if (st.calc) row.append(calcBtn);
+        (anchor || b).appendChild(row);
+        const inp = row.querySelector('input');
+        const check = () => {
+          const v = parseNum(inp.value);
+          if (Number.isNaN(v)) { fb.className = 'fb bad'; fb.textContent = 'Type a number (you can use p, n, µ/u, m, k, M, G).'; return; }
+          const tol = st.tol ?? 0.03;
+          const ok = Math.abs(v - st.answer) <= tol * Math.abs(st.answer) + (st.abs || 0);
+          if (ok) finish('✓ Correct.', true);
+          else { tries.n++; fb.className = 'fb bad'; fb.innerHTML = `✗ Not quite: you wrote ${pretty(v, st.unit)}. ${shown < hints.length ? 'Open a hint and try again.' : 'Check your working, or press “Show me”.'}`; }
         };
-        ch.appendChild(bt);
-      });
-      b.appendChild(ch);
-      const row = document.createElement('div'); row.className = 'row in';
-      hb = document.createElement('button'); hb.textContent = 'Hint';
-      const show = document.createElement('button'); show.textContent = 'Show me';
-      hb.onclick = nextHint; show.onclick = () => { ch.children[st.answer].classList.add('right'); finish('The answer is marked in green.', false); };
-      if (hints.length) row.append(hb); row.append(show); if (st.calc) row.append(calcBtn);
-      b.appendChild(row);
-    } else {
-      const row = document.createElement('div'); row.className = 'row in';
-      row.innerHTML = `<input type="text" inputmode="decimal" placeholder="e.g. 0.25, 250m, 4.7µ" aria-label="your answer"> <span class="u">${st.unit || ''}</span>`;
+        chk.onclick = check;
+        inp.onkeydown = (e) => { e.stopPropagation(); if (e.key === 'Enter') check(); };
+        hb.onclick = nextHint;
+        show.onclick = () => finish('Here is the full method.', false);
+        setTimeout(() => inp.focus(), 50);
+      }
+    };
+    /* st.parts: [{ q, answer, unit, tol, hint, how }] — the intermediate results you must get first, checked one by one */
+    const parts = st.parts || [];
+    const partBox = document.createElement('div'); partBox.className = 'parts';
+    if (parts.length) b.appendChild(partBox);
+    const askPart = (i) => {
+      if (i >= parts.length) {
+        const last = document.createElement('div'); last.className = 'part final-q';
+        last.innerHTML = `<div class="ph">Step ${parts.length + 1} of ${parts.length + 1} · the answer</div>`;
+        partBox.appendChild(last);
+        mainBlock(last); return;
+      }
+      const P = parts[i];
+      const d = document.createElement('div'); d.className = 'part';
+      d.innerHTML = `<div class="ph">Step ${i + 1} of ${parts.length + 1}</div><div class="pq">${rt(P.q)}</div>`;
+      const row = document.createElement('div'); row.className = 'row';
+      row.innerHTML = `<input type="text" inputmode="decimal" placeholder="e.g. 0.25, 250m, 4.7µ" aria-label="step ${i + 1}"> <span class="u">${P.unit || ''}</span>`;
       const chk = document.createElement('button'); chk.className = 'go'; chk.textContent = 'Check';
-      hb = document.createElement('button'); hb.textContent = 'Hint';
-      const show = document.createElement('button'); show.textContent = 'Show me';
-      row.append(chk, hb, show); if (st.calc) row.append(calcBtn);
-      b.appendChild(row);
+      const ph = document.createElement('button'); ph.textContent = 'Hint';
+      const sh = document.createElement('button'); sh.textContent = 'Show me';
+      row.append(chk, ph, sh);
+      const hbx = document.createElement('div'); hbx.className = 'hints';
+      const pf = document.createElement('div'); pf.className = 'fb';
+      const ps = document.createElement('div'); ps.className = 'psol';
+      d.append(row, hbx, pf, ps);
+      partBox.appendChild(d);
+      const ph2 = Array.isArray(P.hint) ? P.hint : P.hint ? [P.hint] : [];
+      let k = 0;
+      ph.onclick = () => { if (k >= ph2.length) return; const x = document.createElement('div'); x.className = 'hint'; x.innerHTML = `<b>Hint${ph2.length > 1 ? ' ' + (k + 1) : ''}</b> ${rt(ph2[k])}`; hbx.appendChild(x); k++; if (k >= ph2.length) ph.disabled = true; };
+      if (!ph2.length) ph.style.display = 'none';
       const inp = row.querySelector('input');
+      const done = (ok) => {
+        pf.className = 'fb ' + (ok ? 'ok' : 'shown'); pf.innerHTML = ok ? '✓ Correct.' : 'Here is this step:';
+        ps.innerHTML = (P.how || []).map((l) => `<div class="pl">${rt(l)}</div>`).join('') + `<div class="pa">= <b>${pretty(P.answer, P.unit)}</b></div>`;
+        hbx.style.display = 'none'; row.querySelectorAll('button,input').forEach((x) => { x.disabled = true; });
+        d.classList.add('done');
+        askPart(i + 1);
+        setTimeout(() => { const n = partBox.lastElementChild.querySelector('input'); n && n.focus(); }, 40);
+      };
       const check = () => {
         const v = parseNum(inp.value);
-        if (Number.isNaN(v)) { fb.className = 'fb bad'; fb.textContent = 'Type a number (you can use p, n, µ/u, m, k, M, G).'; return; }
-        const tol = st.tol ?? 0.03;
-        const ok = Math.abs(v - st.answer) <= tol * Math.abs(st.answer) + (st.abs || 0);
-        if (ok) finish('✓ Correct.', true);
-        else { tries.n++; fb.className = 'fb bad'; fb.innerHTML = `✗ Not quite: you wrote ${pretty(v, st.unit)}. ${shown < hints.length ? 'Open a hint and try again.' : 'Check your working, or press “Show me”.'}`; }
+        if (Number.isNaN(v)) { pf.className = 'fb bad'; pf.textContent = 'Type a number (you can use p, n, µ/u, m, k, M, G).'; return; }
+        const ok = Math.abs(v - P.answer) <= (P.tol ?? 0.03) * Math.abs(P.answer) + (P.abs || 0);
+        if (ok) done(true); else { pf.className = 'fb bad'; pf.innerHTML = `✗ Not quite: you wrote ${pretty(v, P.unit)}. ${k < ph2.length ? 'Open the hint and try again.' : 'Check it, or press “Show me”.'}`; }
       };
-      chk.onclick = check;
+      chk.onclick = check; sh.onclick = () => done(false);
       inp.onkeydown = (e) => { e.stopPropagation(); if (e.key === 'Enter') check(); };
-      hb.onclick = nextHint;
-      show.onclick = () => finish('Here is the full method.', false);
       setTimeout(() => inp.focus(), 50);
-    }
+    };
+    if (parts.length) askPart(0); else mainBlock(null);
     b.append(hintBox, calcBox, fb, sol);
     sol.style.display = 'none';
     const r2 = document.createElement('div'); r2.className = 'row'; r2.style.marginTop = '10px';
