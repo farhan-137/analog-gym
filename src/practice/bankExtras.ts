@@ -12,7 +12,7 @@ const T = (n: number, q: number) => P(`t${n}q${q}`, `Tutorial ${n}, Question ${q
 
 const SQ = { what: 'W/L from the square law, in one line', keys: '2 × I ÷ ( µCox × Vov² )   e.g.  2 × 0.1[m] ÷ ( 400[µ] × 0.15² )', shows: '22.22' };
 const VOV = { what: 'Vov from a current', keys: '√( 2 × I ÷ ( µCox × W/L ) )' };
-const PAR = { what: 'Parallel resistors', keys: '( a⁻¹ + b⁻¹ )⁻¹   (x⁻¹ is the [x⁻¹] key)' };
+const PAR = { what: 'Parallel resistors', keys: '( a⁻¹ + b⁻¹ )⁻¹   (⁻¹ is [SHIFT] [^] on the CW)' };
 const ENG = { what: 'Type µ, m, k, M directly', keys: '[CATALOG] ▸ Engineer Symbol ▸ µ  (turn on: [SETTINGS] ▸ Calc Settings ▸ Engineer Symbol ▸ On)' };
 
 const OTA = {

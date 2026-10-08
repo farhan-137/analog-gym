@@ -31,7 +31,7 @@ const RECIPES: Array<{ id: string; title: string; when: string; steps: Array<[st
     id: 'R4',
     title: 'Parallel resistances',
     when: 'rO ‖ rO, Rup ‖ Rdown, R1 ‖ R2.',
-    steps: [['( a⁻¹ + b⁻¹ + c⁻¹ )⁻¹', 'x⁻¹ is the [x⁻¹] key']],
+    steps: [['( a⁻¹ + b⁻¹ + c⁻¹ )⁻¹', '⁻¹ is [SHIFT] [^] on the CW (no separate x⁻¹ key)']],
     example: '0.25m × ( 10M⁻¹ + 80M⁻¹ )⁻¹ = 2222.2',
   },
   {
