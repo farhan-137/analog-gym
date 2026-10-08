@@ -38,7 +38,7 @@ function cmfbGeneral(S) {
   isrc(S, 360, 240, { label: 'I_1', left: true }); isrc(S, 600, 240, { label: 'I_1' });
   wire(S, [[360, 170], [360, 198]]); wire(S, [[600, 170], [600, 198]]);
   wire(S, [[360, 282], [360, 380]]); wire(S, [[600, 282], [600, 380]]); dot(S, 360, 320); dot(S, 600, 320);
-  txt(S, 348, 314, 'V_out1', { size: 19, color: C.volt, weight: 700, anchor: 'end' }); txt(S, 612, 314, 'V_out2', { size: 19, color: C.volt, weight: 700 });
+  txt(S, 348, 314, 'V_out1', { size: 19, color: C.volt, weight: 700, anchor: 'end' }); txt(S, 612, 300, 'V_out2', { size: 19, color: C.volt, weight: 700 });
   nmos(S, 360, 430, { name: 'M1', gate: 'V_in1' }); nmos(S, 600, 430, { name: 'M2', gate: 'V_in2', right: true });
   wire(S, [[360, 480], [360, 500], [600, 500], [600, 480]]);
   isrc(S, 480, 550, { label: 'I_SS', len: 50 }); gnd(S, 480, 600);

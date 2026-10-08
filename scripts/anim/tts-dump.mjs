@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const key = process.argv[2] || 'c';
-const file = { a: 'index.html', b: 'lec11-14.html', c: 'lec06.html', d: 'lec15-17.html' }[key];
+const file = { a: 'index.html', b: 'lec11-14.html', c: 'lec06.html', d: 'lec15-17.html', e: 'rev01-10.html' }[key];
 const exe = ['/opt/pw-browsers/chromium', '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'].find((p) => existsSync(p));
 const b = await chromium.launch(exe ? { executablePath: exe } : {});
 const p = await b.newPage();

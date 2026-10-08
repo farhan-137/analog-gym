@@ -149,3 +149,11 @@ svg.stage .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
 .try .timer .tl { font-size: 13.5px; color: #cfd8e3; line-height: 1.35; } .try .timer .tl small { color: #8d9bb0; font-size: 12.5px; }
 .try .timer.warn .fg { stroke: #fbbf24; } .try .timer.over .fg { stroke: #f87171; } .try .timer.over .ring span { color: #ff8f86; }
 .try .took { color: #9fb0c3; font-size: 13.5px; margin-left: 6px; white-space: nowrap; }
+
+/* revision formula cards */
+.rcard { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.035); border: 1px solid #243042; }
+.rcard .l { font-size: 15px; color: #9fb0c3; }
+.rcard .l b { color: #ffd38a; }
+.rcard .e { font-size: 21px; color: #f1f5f9; overflow: hidden; }
+.whybox.trig { font-size: 16px; line-height: 1.55; }
+.whybox.trig .q { color: #7dd3fc; font-weight: 700; }
