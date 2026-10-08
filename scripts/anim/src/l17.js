@@ -274,13 +274,60 @@ scene(L17, 'Past tutorial Ex 5–6: dominant pole for gains down to 20 dB', 52, 
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 1 OF 9', title: 'Two ways to compensate one amplifier', src: 'Past tutorial 2024-25 T2 Ex 5–6',
     q: 'First pole 1 MHz, DC gain 100 dB, second pole 10 MHz. (Ex 5) Where must a <b>new</b> dominant pole go to be stable for closed-loop gains down to 20 dB? (Ex 6) Instead, lower the first pole (second pole unchanged): to what frequency, and by what factor must that node’s capacitance grow?', qh: 250,
+    giv: 'Stable means PM ≈ 45°: the loop gain reaches 1 at the next pole (the rule this tutorial uses).',
     tests: 'the dominant-pole rule $f_D = f_{GX}/(\\beta A_0)$ in its two versions.',
     fig: eqFig([['20\\,\\mathrm{dB} \\Rightarrow \\beta = 0.1,\\;\\; \\beta A_0 = 10^4', 290, 30], ['f_D = \\frac{f_{GX}}{\\beta A_0}', 410, 38, '#ffd38a'], ['\\text{Ex 5: } f_{GX} = 1\\,\\mathrm{MHz};\\;\\; \\text{Ex 6: } f_{GX} = 10\\,\\mathrm{MHz}', 530, 26]]),
     steps: [
-      { t: 6, title: 'Ex 5: a new pole; the crossover must land on the old first pole (1 MHz)', tex: stepTex('pyq-t24-ex56', 0), try: { q: 'βA₀ = 10⁴, f_GX = 1 MHz. New dominant pole f_D (Hz)?', answer: ans('pyq-t24-ex56', 'fd'), unit: 'Hz', tol: 0.01, hint: 'Four decades of −20 dB/dec below 1 MHz.' }, say: '1 MHz over $10^4$: 100 Hz.' },
-      { t: 15, title: 'Ex 6: move the first pole itself; now the crossover can sit on the 10 MHz pole', tex: stepTex('pyq-t24-ex56', 1), try: { q: 'f_GX = 10 MHz. New first pole (Hz)?', answer: ans('pyq-t24-ex56', 'fp1'), unit: 'Hz', tol: 0.01, hint: '10 MHz / 10⁴.' }, say: '1 kHz: ten times more bandwidth than Ex 5, because the old first pole is gone.' },
-      { t: 23, title: 'The pole is 1/(RC): C grows by the same factor', tex: stepTex('pyq-t24-ex56', 2), try: { q: 'Pole moves from 1 MHz to 1 kHz. Capacitance factor?', answer: ans('pyq-t24-ex56', 'cf'), unit: '×', tol: 0.01, hint: 'Same R.' }, say: '1000 times the capacitance. That is why we use Miller: a capacitor 1000 times bigger is impossible on chip.' },
-      { t: 31, ans: true, title: '**Answers:** Ex 5: 100 Hz · Ex 6: 1 kHz, C × 1000', say: 'Lowering an existing pole beats adding a new one.' },
+      {
+        t: 6, title: '**Ex 5: add a new pole below everything.** The lowest gain (20 dB) is the worst case, so β = 0.1 and βA₀ = 10⁴. The loop gain must fall to 1 exactly at the next pole up, the old 1 MHz pole.',
+        tex: 'f_D = \\frac{f_{GX}}{\\beta A_0} = \\frac{1\\,\\mathrm{MHz}}{10^4} = 100\\,\\mathrm{Hz}',
+        try: {
+          q: '**Ex 5.** We add a brand-new dominant pole and keep all the old poles. Where must it go so the amplifier is stable for closed-loop gains down to 20 dB?',
+          answer: ans('pyq-t24-ex56', 'fd'), unit: 'Hz', tol: 0.01,
+          hint: ['The worst case is the lowest gain, 20 dB: turn it into β. Then the loop gain $\\beta A$ must fall at −20 dB/dec from the new pole and reach 1 exactly at the next pole up (here the old 1 MHz pole).', 'Formula: $f_D = \\dfrac{f_{GX}}{\\beta A_0}$ with $\\beta = \\dfrac{1}{\\text{closed-loop gain}}$.'],
+          how: [
+            'Worst case = lowest closed-loop gain. 20 dB is a gain of 10, so $$\\beta = \\frac{1}{10} = 0.1$$',
+            'Loop gain at DC (100 dB is $10^5$): $$\\beta A_0 = 0.1\\times 10^5 = 10^4$$',
+            'The new pole is the lowest one, so the next pole up is the old first pole: the crossover must land there. $$f_{GX} = 1\\,\\mathrm{MHz}$$',
+            'Falling 20 dB per decade, $10^4$ needs 4 decades to reach 1, so the new pole sits 4 decades below the crossover: $$f_D = \\frac{f_{GX}}{\\beta A_0} = \\frac{1\\,\\mathrm{MHz}}{10^4} = 100\\,\\mathrm{Hz}$$',
+          ],
+          why: 'Dominant pole: $f_D = f_{GX}/(\\beta A_0)$, where $f_{GX}$ is the next pole above it.',
+        },
+        say: '1 MHz over $10^4$: 100 Hz.',
+      },
+      {
+        t: 15, title: '**Ex 6: lower the existing first pole instead.** The 1 MHz pole is no longer in the way, so the crossover can sit on the next pole, 10 MHz.',
+        tex: "f'_{p1} = \\frac{f_{GX}}{\\beta A_0} = \\frac{10\\,\\mathrm{MHz}}{10^4} = 1\\,\\mathrm{kHz}",
+        try: {
+          q: '**Ex 6.** Instead of adding a pole, we move the existing 1 MHz pole down (the 10 MHz pole stays). To what frequency must it go? (Same worst case as Ex 5: $\\beta A_0 = 10^4$.)',
+          answer: ans('pyq-t24-ex56', 'fp1'), unit: 'Hz', tol: 0.01,
+          hint: ['Same rule as Ex 5. Ask: after the move, which pole is the next one above it? The crossover goes there.', "$f'_{p1} = \\dfrac{f_{p2}}{\\beta A_0}$"],
+          how: [
+            "After the move only two poles are left: the new $f'_{p1}$ and the untouched 10 MHz pole. For 45° the crossover sits on the 10 MHz pole. $$f_{GX} = f_{p2} = 10\\,\\mathrm{MHz}$$",
+            "The loop gain at DC is still $10^4$ (Ex 5), so the pole sits 4 decades below the crossover: $$f'_{p1} = \\frac{f_{GX}}{\\beta A_0} = \\frac{10\\,\\mathrm{MHz}}{10^4} = 1\\,\\mathrm{kHz}$$",
+            'Compare with Ex 5: 1 kHz instead of 100 Hz, so ten times more bandwidth.',
+          ],
+          why: 'Moving an existing pole beats adding one: the crossover can use the next pole up.',
+        },
+        say: '1 kHz: ten times more bandwidth than Ex 5, because the old first pole is gone.',
+      },
+      {
+        t: 23, title: '**The capacitor sets the pole.** A pole is $1/(2\\pi RC)$; with the same R, a pole 1000 times lower needs 1000 times the C.',
+        tex: "\\frac{C_{new}}{C_{old}} = \\frac{f_{p1}}{f'_{p1}} = \\frac{1\\,\\mathrm{MHz}}{1\\,\\mathrm{kHz}} = 1000",
+        try: {
+          q: 'Ex 6, second half: the pole moved from 1 MHz down to your answer above. By what factor must the capacitance at that node grow? (Its resistance does not change.)',
+          answer: ans('pyq-t24-ex56', 'cf'), unit: '×', tol: 0.01,
+          hint: ['A pole is $1/(2\\pi RC)$. With R fixed, the pole frequency and C are inversely proportional.', "$\\dfrac{C_{new}}{C_{old}} = \\dfrac{f_{p1}}{f'_{p1}}$"],
+          how: [
+            'The pole is one over RC, and R stays the same, so C goes as one over the pole frequency: $$f_p = \\frac{1}{2\\pi RC} \\;\\Rightarrow\\; C \\propto \\frac{1}{f_p}$$',
+            "So C grows by the same factor the pole falls: $$\\frac{C_{new}}{C_{old}} = \\frac{f_{p1}}{f'_{p1}} = \\frac{1\\,\\mathrm{MHz}}{1\\,\\mathrm{kHz}} = 1000$$",
+            'A capacitor 1000 times bigger does not fit on a chip: that is why the Miller effect is used to multiply a small one.',
+          ],
+          why: 'Pole ∝ 1/C: lower the pole by a factor k → multiply C by k.',
+        },
+        say: '1000 times the capacitance. That is why we use Miller: a capacitor 1000 times bigger is impossible on chip.',
+      },
+      { t: 31, ans: true, title: "**Answers:** Ex 5: $f_D$ = 100 Hz · Ex 6: $f'_{p1}$ = 1 kHz, capacitance × 1000", say: 'Lowering an existing pole beats adding a new one.' },
     ],
   });
 }, { q: 'Past tutorial Ex 5–6' });
@@ -292,10 +339,58 @@ scene(L17, 'Problem Set 2 P3: compensate your page’s amplifier', 56, (S) => {
     tests: 'the PM recipe with three poles, then dominant-pole compensation with two remaining poles.',
     fig: eqFig([['\\beta A_0 = 10^4', 270, 32], ['\\tan^{-1}\\frac{f}{1\\,\\mathrm{M}} + \\tan^{-1}\\frac{f}{10\\,\\mathrm{M}} = 45^\\circ', 390, 28], ["f'_{p1} = \\frac{f_{GX}}{\\beta A_0}", 510, 34, '#ffd38a']]),
     steps: [
-      { t: 6, title: '(a) Find the crossover numerically, then the phase', tex: stepTex('bank-ps2-p3', 0), try: { q: '(a) PM as built (degrees)?', answer: ans('bank-ps2-p3', 'pm0'), unit: '°', tol: 0.1, abs: 0.3, hint: 'f_GX ≈ 3 MHz: angles atan(3000) + atan(3) + atan(0.3).' }, say: 'The crossover is at 3 MHz, where the three poles have used 178.4°: PM = 1.6°. It would ring for ages.' },
-      { t: 16, title: '(b) The two high poles may use only 90° − 45° = 45°', tex: stepTex('bank-ps2-p3', 1), say: 'The new first pole will give 90°, so the other two may use 45° between them: that happens at 844 kHz.' },
-      { t: 23, title: '−20 dB/dec from βA0 = 10⁴ down to 1 at 844 kHz', tex: stepTex('bank-ps2-p3', 2), try: { q: '(b) f_GX = 844 kHz, βA₀ = 10⁴. New first pole (Hz)?', answer: ans('bank-ps2-p3', 'fd'), unit: 'Hz', tol: 0.03, hint: '844k / 10⁴.' }, say: '84.4 Hz.' },
-      { t: 31, title: '(c) The capacitor factor', tex: stepTex('bank-ps2-p3', 3), try: { q: '(c) 1 kHz → 84.4 Hz: capacitor factor?', answer: ans('bank-ps2-p3', 'k'), unit: '×', tol: 0.03, hint: '1000/84.4.' }, say: '11.8 times.' },
+      {
+        t: 6, title: '**(a) Find the crossover, then add up the three pole angles.** With βA₀ = 10⁴ the loop gain only reaches 1 at about 3 MHz, past both high poles.',
+        tex: 'f_{GX} \\approx 3.01\\,\\mathrm{MHz},\\quad PM = 180^\\circ - (89.98^\\circ + 71.65^\\circ + 16.78^\\circ) = 1.6^\\circ',
+        try: {
+          q: '(a) The amplifier as built, used with β = 0.1. What is its phase margin?',
+          answer: ans('bank-ps2-p3', 'pm0'), unit: '°', tol: 0.1, abs: 0.3,
+          hint: ['First find the crossover $f_{GX}$ where $|\\beta A| = 1$ (start from βA₀ = 10⁴; the gain falls ×10 per decade after 1 kHz, faster after 1 MHz). Then add the three pole angles there.', '$PM = 180^\\circ - \\tan^{-1}\\frac{f_{GX}}{1\\,\\mathrm{k}} - \\tan^{-1}\\frac{f_{GX}}{1\\,\\mathrm{M}} - \\tan^{-1}\\frac{f_{GX}}{10\\,\\mathrm{M}}$'],
+          how: [
+            'Loop gain at DC: $$\\beta A_0 = 0.1\\times 10^5 = 10^4$$',
+            'Find where $|\\beta A| = 1$. With only the 1 kHz pole it would be at 10 MHz; the 1 MHz pole makes it fall faster. Trying values (or the Solver): $$|\\beta A(3.01\\,\\mathrm{MHz})| = \\frac{10^4}{3010\\times 3.17\\times 1.04} \\approx 1$$',
+            'Each pole’s lag at $f_{GX}$: $$\\tan^{-1}(3010) = 89.98^\\circ,\\; \\tan^{-1}(3.01) = 71.65^\\circ,\\; \\tan^{-1}(0.301) = 16.78^\\circ$$',
+            'The total lag is 178.4°, so almost nothing is left before 180°: $$PM = 180^\\circ - 178.4^\\circ = 1.6^\\circ$$',
+          ],
+          why: 'Small β (gain 10) pushes the crossover past both high poles: the amplifier would ring for ages.',
+          calc: [
+            { what: 'Crossover with the Solver', keys: '[HOME] ▸ Equation ▸ Solver: 10000 ÷ ( √(1+(x÷1k)[x²]) × √(1+(x÷1M)[x²]) × √(1+(x÷10M)[x²]) ) [SHIFT][(] 1, start 3M, [EXE]', shows: 'x = 3.0145M', note: 'x is [SHIFT] [0]; the Solver keeps the root in x.' },
+            { what: 'PM using that x (degree mode)', keys: '180 − [SHIFT][tan] x ÷ 1k ) − [SHIFT][tan] x ÷ 1M ) − [SHIFT][tan] x ÷ 10M ) [EXE]', shows: '1.595' },
+          ],
+        },
+        say: 'The crossover is at 3 MHz, where the three poles have used 178.4°: PM = 1.6°. It would ring for ages.',
+      },
+      { t: 16, title: '**(b) The new first pole will take its full 90°**, so the two high poles may use only 90° − 45° = 45° between them. Solve for the frequency where that happens.', tex: stepTex('bank-ps2-p3', 1), say: 'The new first pole will give 90°, so the other two may use 45° between them: that happens at 844 kHz.' },
+      {
+        t: 23, title: '**Slide down at −20 dB/dec** from βA₀ = 10⁴ at the new pole to 1 at 844 kHz: the new first pole sits 4 decades below the crossover.',
+        tex: "f'_{p1} = \\frac{f_{GX}}{\\beta A_0} = \\frac{844\\,\\mathrm{kHz}}{10^4} = 84.4\\,\\mathrm{Hz}",
+        try: {
+          q: '(b) For PM = 45° the crossover must be at 844 kHz (step 2: there the 1 MHz and 10 MHz poles together lag 45°). Where must the first pole go?',
+          answer: ans('bank-ps2-p3', 'fd'), unit: 'Hz', tol: 0.03,
+          hint: ['Below the crossover only the first pole matters: the loop gain falls 20 dB/dec from βA₀ at the new pole down to 1 at $f_{GX}$.', "$f'_{p1} = \\dfrac{f_{GX}}{\\beta A_0}$"],
+          how: [
+            'Why 844 kHz: the new first pole gives 90°, so the other two may share 45°: $$\\tan^{-1}(0.844) + \\tan^{-1}(0.0844) = 40.16^\\circ + 4.82^\\circ \\approx 45^\\circ$$',
+            "The loop gain must drop from $10^4$ to 1 between the new pole and 844 kHz, which is 4 decades: $$f'_{p1} = \\frac{f_{GX}}{\\beta A_0} = \\frac{844\\,\\mathrm{kHz}}{10^4} = 84.4\\,\\mathrm{Hz}$$",
+            'Use βA₀ = 10⁴, not A₀ = 10⁵: that slip gives 8.44 Hz, ten times too low.',
+          ],
+        },
+        say: '84.4 Hz.',
+      },
+      {
+        t: 31, title: '**(c) Pole ∝ 1/C.** The resistance is unchanged, so the capacitor grows by the same factor the pole falls.',
+        tex: "k = \\frac{C_{new}}{C_{old}} = \\frac{f_{p1}}{f'_{p1}} = \\frac{1000\\,\\mathrm{Hz}}{84.4\\,\\mathrm{Hz}} = 11.8",
+        try: {
+          q: '(c) The first pole moves from 1 kHz to your answer in (b). By what factor must its capacitor grow?',
+          answer: ans('bank-ps2-p3', 'k'), unit: '×', tol: 0.03,
+          hint: ['$f_p = 1/(2\\pi RC)$ with R unchanged.', "$k = \\dfrac{f_{p1}}{f'_{p1}}$"],
+          how: [
+            "The pole is one over RC and R is unchanged, so C scales as one over the pole: $$k = \\frac{C_{new}}{C_{old}} = \\frac{f_{p1}}{f'_{p1}}$$",
+            'Put in the numbers: $$k = \\frac{1000\\,\\mathrm{Hz}}{84.4\\,\\mathrm{Hz}} = 11.8$$',
+            'Only about 12 times: moving the existing pole is much cheaper than adding a new one.',
+          ],
+        },
+        say: '11.8 times.',
+      },
       { t: 38, ans: true, title: '**Answers:** (a) 1.6° · (b) 84.4 Hz · (c) 11.8×', say: 'Notice we never needed a 45° shortcut here: two poles share the 45°, so solve the angle equation.' },
     ],
   });
@@ -305,12 +400,58 @@ scene(L17, '2024 Quiz 2 Q1: GBW, PM and Cc from Bode data', 52, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 3 OF 9', title: 'Read a Miller op amp’s numbers', src: 'Quiz 2 2024-25 Q1 · 6 marks', paper: 'q24bq1',
     q: 'Miller-compensated two-stage: DC gain 80 dB, poles at 15.9 kHz and 740 MHz, a zero at 3.18 GHz, $C_L$ = 5 pF. Find the GBW, the PM and $C_c$.', qh: 190,
+    giv: 'Assume unity feedback (β = 1) for the PM; the zero is the Miller RHP zero.',
     tests: 'GBW = $A_0f_{p1}$, the PM with a second pole and an RHP zero, and $\\omega_{p2} = g_{m2}/C_L$, $\\omega_z = g_{m2}/C_c$.',
     fig: eqFig([['GBW = A_0\\,f_{p1}', 270, 32], ['PM = 90^\\circ - \\tan^{-1}\\tfrac{GBW}{f_{p2}} - \\tan^{-1}\\tfrac{GBW}{f_z}', 390, 28], ['g_{m2} = 2\\pi f_{p2}C_L,\\;\\; C_c = \\frac{g_{m2}}{2\\pi f_z}', 510, 28, '#ffd38a']]),
     steps: [
-      { t: 6, title: 'GBW = 10⁴ × 15.9 kHz', tex: stepTex('pyq-q24b-q1', 0), try: { q: 'GBW (Hz)?', answer: ans('pyq-q24b-q1', 'gbw'), unit: 'Hz', tol: 0.01, hint: '80 dB = 10⁴.' }, say: '159 MHz.' },
-      { t: 13, title: 'PM: the second pole and the RHP zero both subtract', tex: stepTex('pyq-q24b-q1', 1), try: { q: 'PM = 90° − atan(159/740) − atan(159/3180)?', answer: ans('pyq-q24b-q1', 'pm'), unit: '°', tol: 0.01, hint: '12.1° + 2.9°.' }, say: '12.1° and 2.9°: PM = 75°.' },
-      { t: 21, title: 'gm2 from the second pole, then Cc from the zero', tex: stepTex('pyq-q24b-q1', 2), try: { q: 'g_m2 = 2π(740M)(5p) = 23.2 mS. C_c = g_m2/(2π·3.18 GHz) in F (type e.g. 1.2p)?', answer: 1.161e-12, unit: 'F', tol: 0.02, hint: '23.25 mS / 19.98 G.' }, say: '$g_{m2}$ = 23.2 mS, so $C_c$ = 1.16 pF.' },
+      {
+        t: 6, title: '**GBW = DC gain × dominant pole.** 80 dB is 10⁴, and above the first pole gain × frequency stays constant.',
+        tex: 'GBW = A_0f_{p1} = 10^4\\times 15.9\\,\\mathrm{kHz} = 159\\,\\mathrm{MHz}',
+        try: {
+          q: 'Find the gain-bandwidth product GBW of this op amp.',
+          answer: ans('pyq-q24b-q1', 'gbw'), unit: 'Hz', tol: 0.01,
+          hint: ['Above the dominant pole the gain falls 20 dB/dec, so gain × frequency stays the same all the way down to unity gain. Turn 80 dB into a plain number first.', '$GBW = A_0\\,f_{p1}$ with $A_0 = 10^{80/20}$'],
+          how: [
+            'Convert the DC gain from dB: $$A_0 = 10^{80/20} = 10^4$$',
+            'Above $f_{p1}$, gain × frequency is constant, so the gain reaches 1 at $$GBW = A_0f_{p1} = 10^4\\times 15.9\\,\\mathrm{kHz} = 159\\,\\mathrm{MHz}$$',
+            'This is well below the second pole (740 MHz), so the one-pole picture is fair.',
+          ],
+        },
+        say: '159 MHz.',
+      },
+      {
+        t: 13, title: '**PM at the GBW:** the dominant pole takes 90°, then the second pole AND the RHP zero each take a little more.',
+        tex: stepTex('pyq-q24b-q1', 1),
+        try: {
+          q: 'Find the phase margin (unity feedback, so the crossover is at the GBW you just found).',
+          answer: ans('pyq-q24b-q1', 'pm'), unit: '°', tol: 0.01,
+          hint: ['At the GBW the dominant pole has used its full 90°. The second pole and the right-half-plane zero both add lag (an RHP zero lags like a pole).', '$PM = 90^\\circ - \\tan^{-1}\\frac{GBW}{f_{p2}} - \\tan^{-1}\\frac{GBW}{f_z}$'],
+          how: [
+            'The dominant pole is $10^4$ times below the GBW, so it gives its full 90°. Left over: $$180^\\circ - 90^\\circ = 90^\\circ$$',
+            'Lag of the second pole at the GBW: $$\\tan^{-1}\\frac{159\\,\\mathrm{M}}{740\\,\\mathrm{M}} = \\tan^{-1}(0.215) = 12.1^\\circ$$',
+            'The RHP zero lags too: $$\\tan^{-1}\\frac{159\\,\\mathrm{M}}{3180\\,\\mathrm{M}} = \\tan^{-1}(0.05) = 2.9^\\circ$$',
+            'Subtract both: $$PM = 90^\\circ - 12.1^\\circ - 2.9^\\circ = 75^\\circ$$',
+          ],
+          why: 'An RHP zero is subtracted exactly like a pole.',
+          calc: [{ what: 'PM in one line (degree mode)', keys: '90 − [SHIFT][tan] 159 ÷ 740 ) − [SHIFT][tan] 159 ÷ 3180 ) [EXE]', shows: '75.01' }],
+        },
+        say: '12.1° and 2.9°: PM = 75°.',
+      },
+      {
+        t: 21, title: '**One $g_{m2}$, two formulas:** the second pole ($g_{m2}/C_L$) gives $g_{m2}$; the zero ($g_{m2}/C_c$) then gives $C_c$.',
+        tex: stepTex('pyq-q24b-q1', 2),
+        try: {
+          q: 'Find the compensation capacitor $C_c$.',
+          answer: ans('pyq-q24b-q1', 'cc'), unit: 'F', tol: 0.02,
+          hint: ['In a Miller op amp the second pole is $g_{m2}/C_L$ and the RHP zero is $g_{m2}/C_c$. You know $C_L$ and both frequencies.', '$g_{m2} = 2\\pi f_{p2}C_L$, then $C_c = \\dfrac{g_{m2}}{2\\pi f_z}$'],
+          how: [
+            'The second pole gives $g_{m2}$: $$g_{m2} = 2\\pi f_{p2}C_L = 2\\pi(740\\,\\mathrm{MHz})(5\\,\\mathrm{pF}) = 23.2\\,\\mathrm{mS}$$',
+            'The RHP zero has the same $g_{m2}$ but over $C_c$: $$C_c = \\frac{g_{m2}}{2\\pi f_z} = \\frac{23.2\\,\\mathrm{mS}}{2\\pi(3.18\\,\\mathrm{GHz})} = 1.16\\,\\mathrm{pF}$$',
+            'Shortcut: divide the two formulas and $g_{m2}$ cancels: $$C_c = C_L\\frac{f_{p2}}{f_z} = 5\\,\\mathrm{pF}\\times\\frac{740}{3180} = 1.16\\,\\mathrm{pF}$$',
+          ],
+        },
+        say: '$g_{m2}$ = 23.2 mS, so $C_c$ = 1.16 pF.',
+      },
       { t: 30, ans: true, title: '**Answers:** GBW = 159 MHz · PM = 75° · $C_c$ = 1.16 pF', say: 'Every number in a Miller op amp is tied to $g_{m1}$, $g_{m2}$, $C_c$ and $C_L$.' },
     ],
   });
@@ -320,12 +461,46 @@ scene(L17, '2023 mid-sem Q5: K at PM = 50°, and Cc versus CL', 52, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 4 OF 9', title: 'A peak from a margin, then Allen’s relation', src: 'Mid-sem 2023-24 Q5 · 5 marks', paper: 'm23q5',
     q: '(a) If PM = 50°, $|V_{out}/V_{in}(j\\omega_{GX})| = K/\\beta$. Find K. (b) In a Miller-compensated OTA, for PM = 45° with the RHP zero at 10 × GBW, what relation is needed between $C_L$ and $C_c$?', qh: 230,
+    giv: '(b) Two-stage Miller dictionary: $\\omega_u = g_{m1}/C_c$, $\\omega_{p2} = g_{m2}/C_L$, $\\omega_z = g_{m2}/C_c$; unity feedback.',
     tests: 'Lecture 16’s peak formula, and the PM equation of a Miller op amp with its zero.',
     fig: eqFig([['K = \\frac{1}{2\\sin(PM/2)}', 270, 34], ['45^\\circ = 90^\\circ - \\tan^{-1}\\tfrac{\\omega_u}{\\omega_{p2}} - \\tan^{-1}(0.1)', 390, 26], ['\\omega_z = 10\\omega_u \\Rightarrow g_{m2} = 10g_{m1}', 500, 28, '#ffd38a']]),
     steps: [
-      { t: 6, title: '(a) K = 1/(2 sin 25°)', tex: stepTex('pyq-m23-q5', 0), try: { q: '(a) K for PM = 50°?', answer: ans('pyq-m23-q5', 'k'), unit: '', tol: 0.01, hint: 'sin 25° = 0.423.' }, say: '1.18: an 18 % peak.' },
-      { t: 14, title: '(b) The zero at 10·GBW takes tan⁻¹(0.1) = 5.71°', tex: stepTex('pyq-m23-q5', 1), say: 'The zero takes 5.7°, so the second pole may take only 39.3° at the GBW.' },
-      { t: 21, title: 'ωp2 = ωu/tan 39.29°, with gm2 = 10gm1', tex: stepTex('pyq-m23-q5', 2), try: { q: 'g_m2/C_L = g_m1/(C_c·tan 39.29°), g_m2 = 10 g_m1. C_c/C_L ≥ ?', answer: ans('pyq-m23-q5', 'ratio'), unit: '', tol: 0.02, hint: 'C_c/C_L = 1/(10·tan 39.29°).' }, say: '$C_c \\ge 0.122\\,C_L$. For 60° the same steps give Allen’s 0.22.' },
+      {
+        t: 6, title: '**(a) Peaking from the margin.** At the crossover the loop gain is 1 at an angle of −(180° − PM); the closed-loop gain there is $(1/\\beta)/(2\\sin(PM/2))$.',
+        tex: 'K = \\frac{1}{2\\sin(PM/2)} = \\frac{1}{2\\sin 25^\\circ} = \\frac{1}{2(0.423)} = 1.18',
+        try: {
+          q: '(a) With PM = 50°, the closed-loop gain at $\\omega_{GX}$ is $K/\\beta$. Find K.',
+          answer: ans('pyq-m23-q5', 'k'), unit: '', tol: 0.01,
+          hint: ['At $\\omega_{GX}$, $|\\beta A| = 1$ and its phase is −(180° − PM). Put that into $A/(1 + \\beta A)$: you need the size of $1 + \\beta A$.', '$K = \\dfrac{1}{2\\sin(PM/2)}$'],
+          how: [
+            'At the crossover βA is a unit arrow at −(180° − PM). Its distance from −1 is a chord of the unit circle: $$|1 + \\beta A| = 2\\sin\\frac{PM}{2}$$',
+            'So the closed-loop gain there is $$\\left|\\frac{A}{1 + \\beta A}\\right| = \\frac{1/\\beta}{2\\sin(PM/2)} \\;\\Rightarrow\\; K = \\frac{1}{2\\sin(PM/2)}$$',
+            'Put in PM = 50°: $$K = \\frac{1}{2\\sin 25^\\circ} = \\frac{1}{2(0.423)} = 1.18$$',
+            'K > 1: the response peaks about 18 % above the flat 1/β.',
+          ],
+          calc: [{ what: 'K (degree mode)', keys: '1 ÷ ( 2 [sin] 25 ) ) [EXE]', shows: '1.183' }],
+        },
+        say: '1.18: an 18 % peak.',
+      },
+      { t: 14, title: '**(b) Share out the 45°.** The dominant pole takes 90°; the zero at 10 × GBW takes tan⁻¹(0.1) = 5.71°; what is left, 39.29°, is all the second pole may take.', tex: '\\tan^{-1}\\frac{\\omega_u}{\\omega_{p2}} = 180^\\circ - 45^\\circ - 90^\\circ - \\tan^{-1}(0.1) = 45^\\circ - 5.71^\\circ = 39.29^\\circ', say: 'The zero takes 5.7°, so the second pole may take only 39.3° at the GBW.' },
+      {
+        t: 21, title: '**Turn the angle into a capacitor ratio** with $\\omega_u = g_{m1}/C_c$, $\\omega_{p2} = g_{m2}/C_L$, and $g_{m2} = 10g_{m1}$ (because $\\omega_z/\\omega_u = g_{m2}/g_{m1} = 10$).',
+        tex: '\\frac{C_c}{C_L} = \\frac{g_{m1}}{g_{m2}\\tan 39.29^\\circ} = \\frac{1}{10(0.818)} = 0.122',
+        try: {
+          q: '(b) The second pole may take 39.29° at the GBW (step 2). What is the smallest $C_c/C_L$ that gives PM = 45°?',
+          answer: ans('pyq-m23-q5', 'ratio'), unit: '', tol: 0.02,
+          hint: ['Write each frequency with the Miller dictionary on the card. The zero at $10\\omega_u$ tells you $g_{m2}/g_{m1}$.', '$\\dfrac{\\omega_u}{\\omega_{p2}} = \\tan 39.29^\\circ \\;\\Rightarrow\\; \\dfrac{C_c}{C_L} = \\dfrac{g_{m1}}{g_{m2}\\tan 39.29^\\circ}$'],
+          how: [
+            'The zero at 10 × GBW fixes the transconductance ratio: $$\\frac{\\omega_z}{\\omega_u} = \\frac{g_{m2}/C_c}{g_{m1}/C_c} = \\frac{g_{m2}}{g_{m1}} = 10$$',
+            'The second pole may take 39.29°, so $$\\frac{\\omega_u}{\\omega_{p2}} = \\frac{g_{m1}/C_c}{g_{m2}/C_L} = \\tan 39.29^\\circ = 0.818$$',
+            'Solve for the capacitor ratio: $$\\frac{C_c}{C_L} = \\frac{g_{m1}}{g_{m2}}\\cdot\\frac{1}{0.818} = \\frac{1}{10\\times 0.818} = 0.122$$',
+            'A bigger $C_c$ only adds margin, so the relation is $C_c \\ge 0.122\\,C_L$.',
+          ],
+          why: 'The same steps with 60° give Allen’s $C_c \\ge 0.22\\,C_L$.',
+          calc: [{ what: 'Ratio in one line (degree mode)', keys: '0.1 ÷ [tan] ( 45 − [SHIFT][tan] 0.1 ) ) ) [EXE]', shows: '0.1222' }],
+        },
+        say: '$C_c \\ge 0.122\\,C_L$. For 60° the same steps give Allen’s 0.22.',
+      },
       { t: 30, ans: true, title: '**Answers:** (a) K = 1.18 · (b) $C_c \\ge 0.122\\,C_L$', say: 'Small question, two big ideas: peaking from PM, and the zero’s share of the margin.' },
     ],
   });
@@ -335,11 +510,41 @@ scene(L17, 'Razavi Ex 10.6: a first estimate of Cc', 42, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 5 OF 9', title: 'Cc for 45° in unity feedback', src: 'Razavi Example 10.6',
     q: 'Miller two-stage: $g_{m1}$ = 1 mS, $g_{m9}$ = 5 mS (second stage), $C_L$ = 2 pF. Estimate $C_c$ for 45° in unity feedback: (a) ignoring the second pole’s effect on the size, (b) including it.', qh: 210,
+    giv: 'Numbers chosen by the app (the book gives this example in symbols). RHP zero ignored.',
     tests: 'GBW = $g_{m1}/C_c$ placed on $\\omega_{p2} = g_{m9}/C_L$.',
     fig: eqFig([['\\frac{g_{m1}}{C_c} = \\frac{g_{m9}}{C_L}\\;\\;(45^\\circ)', 320, 34], ['\\text{(b): } |\\beta A| \\text{ is already } 1/\\sqrt2 \\text{ at } \\omega_{p2}', 460, 26]]),
     steps: [
-      { t: 6, title: '(a) Crossover on the second pole', tex: stepTex('bank-ex10-6', 1), try: { q: '(a) C_c = (g_m1/g_m9)·C_L in F (type 0.4p)?', answer: ans('bank-ex10-6', 'a'), unit: 'F', tol: 0.02, hint: '(1/5) × 2 pF.' }, say: '0.4 pF.' },
-      { t: 14, title: '(b) The second pole already cuts the size by √2', tex: stepTex('bank-ex10-6', 2), try: { q: '(b) C_c = g_m1·C_L/(√2·g_m9) in F?', answer: ans('bank-ex10-6', 'b'), unit: 'F', tol: 0.02, hint: '0.4 pF / 1.414.' }, say: '0.28 pF: a slightly smaller capacitor is enough.' },
+      {
+        t: 6, title: '**(a) Put the crossover on the second pole.** Above $P_1$ the loop gain is $g_{m1}/(\\omega C_c)$; make it 1 at $\\omega_{p2} = g_{m9}/C_L$.',
+        tex: 'C_c = \\frac{g_{m1}}{g_{m9}}C_L = \\frac{1\\,\\mathrm{mS}}{5\\,\\mathrm{mS}}(2\\,\\mathrm{pF}) = 0.4\\,\\mathrm{pF}',
+        try: {
+          q: '(a) Estimate $C_c$ for PM = 45° in unity feedback, ignoring how much the second pole lowers the gain.',
+          answer: ans('bank-ex10-6', 'a'), unit: 'F', tol: 0.02,
+          hint: ['For 45°, the loop gain must reach 1 exactly at the second pole. Above the first pole the loop gain is $g_{m1}/(\\omega C_c)$, and the second pole is at $g_{m9}/C_L$.', '$\\dfrac{g_{m1}}{C_c} = \\dfrac{g_{m9}}{C_L} \\;\\Rightarrow\\; C_c = \\dfrac{g_{m1}}{g_{m9}}C_L$'],
+          how: [
+            '45° in unity feedback: the crossover sits on the second pole. $$\\omega_u = \\omega_{p2}$$',
+            'Write both with the Miller dictionary (stage 2 is $g_{m9}$ here): $$\\frac{g_{m1}}{C_c} = \\frac{g_{m9}}{C_L}$$',
+            'Solve: $$C_c = \\frac{g_{m1}}{g_{m9}}C_L = \\frac{1\\,\\mathrm{mS}}{5\\,\\mathrm{mS}}\\times 2\\,\\mathrm{pF} = 0.4\\,\\mathrm{pF}$$',
+          ],
+          why: 'Stage 1 over stage 2. Flipping the ratio gives 10 pF.',
+        },
+        say: '0.4 pF.',
+      },
+      {
+        t: 14, title: '**(b) The second pole also shrinks the gain:** at $\\omega_{p2}$ it divides $|\\beta A|$ by √2, so the crossover comes earlier and a √2 smaller $C_c$ is enough.',
+        tex: 'C_c = \\frac{g_{m1}}{\\sqrt2\\,g_{m9}}C_L = \\frac{0.4\\,\\mathrm{pF}}{1.414} = 0.283\\,\\mathrm{pF}',
+        try: {
+          q: '(b) Now include it: at $\\omega_{p2}$ the second pole also reduces $|\\beta A|$. Estimate $C_c$ again.',
+          answer: ans('bank-ex10-6', 'b'), unit: 'F', tol: 0.02,
+          hint: ['At its own frequency a pole divides the gain by $\\sqrt{1 + 1^2} = \\sqrt2$. So the one-pole gain $g_{m1}/(\\omega C_c)$ only needs to be √2 at $\\omega_{p2}$.', '$\\dfrac{g_{m1}}{\\omega_{p2}C_c}\\cdot\\dfrac{1}{\\sqrt2} = 1 \\;\\Rightarrow\\; C_c = \\dfrac{g_{m1}C_L}{\\sqrt2\\,g_{m9}}$'],
+          how: [
+            'At $\\omega = \\omega_{p2}$ the second pole divides the gain by $$|1 + j1| = \\sqrt2$$',
+            'Set the full loop gain to 1 at $\\omega_{p2} = g_{m9}/C_L$: $$\\frac{g_{m1}}{\\omega_{p2}C_c}\\cdot\\frac{1}{\\sqrt2} = 1 \\;\\Rightarrow\\; C_c = \\frac{g_{m1}C_L}{\\sqrt2\\,g_{m9}}$$',
+            'That is part (a) divided by √2: $$C_c = \\frac{0.4\\,\\mathrm{pF}}{1.414} = 0.283\\,\\mathrm{pF}$$',
+          ],
+        },
+        say: '0.28 pF: a slightly smaller capacitor is enough.',
+      },
       { t: 22, ans: true, title: '**Answers:** (a) 0.4 pF · (b) 0.28 pF', say: 'A first estimate: real designs take 60° and a little extra.' },
     ],
   });
@@ -350,14 +555,75 @@ scene(L17, '2024 mid-sem Q2, part 1: SR, GBW, gain, bandwidth', 66, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 6 OF 9 (PART 1)', title: 'Analyse a Miller two-stage op amp (15 marks)', src: 'Mid-sem 2024-25 Q2 · 15 marks', paper: 'm24q2',
     q: '$I_1$ = 10 µA, $(W/L)_6$ = 10, $(W/L)_5$ = 20, $(W/L)_{1,2}$ = 10, $(W/L)_{3,4}$ = 10, $(W/L)_7$ = 80, $C_c$ = 0.22 pF, $C_L$ = 1 pF. SR, GBW, DC gain, bandwidth, second pole, RHP zero, PM. $V_{DD}$ = 1.8 V, $\\mu_nC_{ox}$ = 100, $\\mu_pC_{ox}$ = 50 µA/V², $\\lambda_p$ = 0.2, $\\lambda_n$ = 0.1 V⁻¹.', qh: 280,
+    giv: '$V_{thn}$ = 0.4 V, $|V_{thp}|$ = 0.5 V, all L = 1. M1, M2, M5, M6, M8 PMOS; M3, M4, M7 NMOS. M8 is assumed to carry $I_7$.',
     tests: 'every Lecture 17 formula on one circuit: mirror ratios for currents, $SR = I_5/C_c$, $GBW = g_{m1}/2\\pi C_c$, $A_1A_2$, $f_{p2} = g_{m7}/2\\pi C_L$, $f_z = g_{m7}/2\\pi C_c$, and the PM.',
-    fig: paperFig('m24q2f', [['SR = \\frac{I_5}{C_c},\\;\\; GBW = \\frac{g_{m1}}{2\\pi C_c}', 600, 28], ['A_0 = g_{m1}(r_{O2}\\parallel r_{O4})\\cdot g_{m7}(r_{O6}\\parallel r_{O7}),\\;\\; f_{-3dB} = \\frac{GBW}{A_0}', 700, 24, '#ffd38a']], 400),
+    fig: paperFig('m24q2f', [['SR = \\frac{I_5}{C_c},\\;\\; GBW = \\frac{g_{m1}}{2\\pi C_c}', 600, 28], ['A_0 = g_{m1}(r_{O2}\\parallel r_{O4})\\cdot g_{m7}(r_{O7}\\parallel r_{O8}),\\;\\; f_{-3dB} = \\frac{GBW}{A_0}', 700, 24, '#ffd38a']], 400),
     steps: [
-      { t: 6, title: 'Currents by mirror ratios, then SR', tex: stepTex(M24, 0), try: { q: 'I₅ = 20 µA, C_c = 0.22 pF. SR in V/s (type 90.9M)?', answer: ans(M24, 'sr'), unit: 'V/s', tol: 0.01, hint: '20µ / 0.22p.' }, say: 'M5 is twice M6, so $I_5$ = 20 µA and each input device carries 10 µA. SR = 90.9 V/µs.' },
-      { t: 15, title: 'GBW from gm1', tex: stepTex(M24, 1), try: { q: 'g_m1 = √(2·50µ·10·10µ) = 0.1 mS. GBW (Hz)?', answer: ans(M24, 'gbw'), unit: 'Hz', tol: 0.01, hint: '0.1 mS / (2π·0.22 pF).' }, say: '72.3 MHz.' },
-      { t: 24, title: 'I7 and gm7 (VGS7 = VGS4: currents scale with W/L)', tex: stepTex(M24, 2), say: '$V_{GS7} = V_{GS4}$, so $I_7$ scales with W/L: 80/10 × 10 µA = 80 µA, and $g_{m7}$ = 1.13 mS.' },
-      { t: 31, title: 'DC gain = A1 × A2', tex: 'A_0 = \\underbrace{0.1\\,\\mathrm{mS}(500\\,\\mathrm{k}\\parallel 1\\,\\mathrm{M})}_{33.3}\\times\\underbrace{1.13\\,\\mathrm{mS}(125\\,\\mathrm{k}\\parallel 62.5\\,\\mathrm{k})}_{47.1} = 1571', try: { q: 'A₁ = 33.3, A₂ = 1.13 mS × 41.7 kΩ. A₀?', answer: ans(M24, 'a0'), unit: '', tol: 0.02, hint: 'A₂ = 47.1.' }, say: '$A_1$ = 33.3, $A_2$ = 47.1: $A_0$ = 1571, about 64 dB.' },
-      { t: 41, title: 'Bandwidth = GBW / A0', tex: stepTex(M24, 4), try: { q: 'Bandwidth (Hz)?', answer: ans(M24, 'bw'), unit: 'Hz', tol: 0.02, hint: '72.3 MHz / 1571.' }, say: '46 kHz: the dominant pole.' },
+      {
+        t: 6, title: '**Currents first, by mirror ratios.** M5 is twice M6, so $I_5$ = 20 µA. In a big input step all of $I_5$ charges $C_c$.',
+        tex: 'I_5 = \\frac{(W/L)_5}{(W/L)_6}I_1 = 2(10\\,\\mu\\mathrm{A}) = 20\\,\\mu\\mathrm{A},\\quad SR = \\frac{I_5}{C_c} = \\frac{20\\,\\mu\\mathrm{A}}{0.22\\,\\mathrm{pF}} = 90.9\\,\\mathrm{V/\\mu s}',
+        try: {
+          q: 'Find the slew rate SR. (Start from the bias: $I_1$ = 10 µA flows in the diode M6.)',
+          answer: ans(M24, 'sr'), unit: 'V/s', tol: 0.01,
+          hint: ['Slewing: the input pair steers the whole tail current $I_5$ into $C_c$. Get $I_5$ from the mirror M6 → M5 (currents scale with W/L).', '$I_5 = \\dfrac{(W/L)_5}{(W/L)_6}I_1$, then $SR = \\dfrac{I_5}{C_c}$'],
+          how: [
+            'M5 copies M6, scaled by the size ratio 20/10: $$I_5 = \\frac{(W/L)_5}{(W/L)_6}I_1 = \\frac{20}{10}\\times 10\\,\\mu\\mathrm{A} = 20\\,\\mu\\mathrm{A}$$',
+            'In a large step all of $I_5$ goes through one input device into $C_c$, so the output ramps at $$SR = \\frac{I_5}{C_c} = \\frac{20\\,\\mu\\mathrm{A}}{0.22\\,\\mathrm{pF}} = 90.9\\,\\mathrm{V/\\mu s}$$',
+            'In normal operation each input device carries half the tail, 10 µA (you need it next for $g_{m1}$).',
+          ],
+          why: '90.9 V/µs = 90.9 MV/s: the box wants V/s.',
+        },
+        say: 'M5 is twice M6, so $I_5$ = 20 µA and each input device carries 10 µA. SR = 90.9 V/µs.',
+      },
+      {
+        t: 15, title: '**GBW comes from stage 1 and $C_c$ only.** Find $g_{m1}$ of the PMOS input device (10 µA, W/L = 10), then divide by $2\\pi C_c$.',
+        tex: 'g_{m1} = \\sqrt{2\\mu_pC_{ox}(W/L)_1I_{D1}} = \\sqrt{2(50\\,\\mu)(10)(10\\,\\mu)} = 0.1\\,\\mathrm{mS},\\quad GBW = \\frac{g_{m1}}{2\\pi C_c} = \\frac{0.1\\,\\mathrm{mS}}{2\\pi(0.22\\,\\mathrm{pF})} = 72.3\\,\\mathrm{MHz}',
+        try: {
+          q: 'Find the gain-bandwidth product GBW (in Hz). The input pair M1, M2 is PMOS; $I_5$ = 20 µA from the last step.',
+          answer: ans(M24, 'gbw'), unit: 'Hz', tol: 0.01,
+          hint: ['Above the dominant pole, stage 1’s current $g_{m1}v_{in}$ just charges $C_c$, so unity gain is at $g_{m1}/C_c$. Each input device carries $I_5/2$.', '$g_{m1} = \\sqrt{2\\mu_pC_{ox}(W/L)_1I_{D1}}$, $GBW = \\dfrac{g_{m1}}{2\\pi C_c}$'],
+          how: [
+            'Each input device carries half the tail: $$I_{D1} = \\frac{I_5}{2} = 10\\,\\mu\\mathrm{A}$$',
+            'PMOS square law, so use $\\mu_pC_{ox}$: $$g_{m1} = \\sqrt{2\\mu_pC_{ox}(W/L)_1I_{D1}} = \\sqrt{2(50\\,\\mu)(10)(10\\,\\mu)} = 0.1\\,\\mathrm{mS}$$',
+            'Divide by $2\\pi C_c$ to get hertz: $$GBW = \\frac{g_{m1}}{2\\pi C_c} = \\frac{0.1\\,\\mathrm{mS}}{2\\pi(0.22\\,\\mathrm{pF})} = 72.3\\,\\mathrm{MHz}$$',
+          ],
+          why: 'Forgetting the 2π gives 455 M: that is ω in rad/s, not hertz.',
+        },
+        say: '72.3 MHz.',
+      },
+      { t: 24, title: '**Second-stage current.** $V_{GS7} = V_{GS4}$ (same gate, same source), so $I_7$ scales with W/L: $I_7 = (80/10)\\times 10$ µA. M7 is NMOS, so $g_{m7}$ uses $\\mu_nC_{ox}$.', tex: 'I_7 = \\frac{80}{10}(10\\,\\mu\\mathrm{A}) = 80\\,\\mu\\mathrm{A},\\quad g_{m7} = \\sqrt{2(100\\,\\mu)(80)(80\\,\\mu)} = 1.13\\,\\mathrm{mS}', say: '$V_{GS7} = V_{GS4}$, so $I_7$ scales with W/L: 80/10 × 10 µA = 80 µA, and $g_{m7}$ = 1.13 mS.' },
+      {
+        t: 31, title: '**DC gain = stage-1 gain × stage-2 gain.** Each stage is $g_m$ times the two output resistances in parallel, with $r_O = 1/(\\lambda I_D)$.',
+        tex: 'A_0 = \\underbrace{0.1\\,\\mathrm{mS}(500\\,\\mathrm{k}\\parallel 1\\,\\mathrm{M})}_{33.3}\\times\\underbrace{1.13\\,\\mathrm{mS}(125\\,\\mathrm{k}\\parallel 62.5\\,\\mathrm{k})}_{47.1} = 1571',
+        try: {
+          q: 'Find the DC gain $A_0$ (V/V). From the steps above: $g_{m1}$ = 0.1 mS at 10 µA per input device, $g_{m7}$ = 1.13 mS at $I_7$ = 80 µA.',
+          answer: ans(M24, 'a0'), unit: '', tol: 0.02,
+          hint: ['Each stage: $g_m$ × (resistance at its output node). Node 1 sees $r_{O2}\\parallel r_{O4}$ (PMOS input, NMOS load); the output sees $r_{O7}\\parallel r_{O8}$ (NMOS M7, PMOS source M8). Use $r_O = 1/(\\lambda I_D)$ with the right λ.', '$A_0 = g_{m1}(r_{O2}\\parallel r_{O4})\\cdot g_{m7}(r_{O7}\\parallel r_{O8})$'],
+          how: [
+            'Stage-1 resistances at 10 µA: $$r_{O2} = \\frac{1}{\\lambda_pI_D} = \\frac{1}{0.2(10\\,\\mu)} = 500\\,\\mathrm{k\\Omega},\\; r_{O4} = \\frac{1}{\\lambda_nI_D} = \\frac{1}{0.1(10\\,\\mu)} = 1\\,\\mathrm{M\\Omega}$$',
+            'Stage-1 gain: $$A_1 = g_{m1}(r_{O2}\\parallel r_{O4}) = 0.1\\,\\mathrm{mS}\\times 333\\,\\mathrm{k\\Omega} = 33.3$$',
+            'Stage 2 at 80 µA: $r_{O7} = 1/(0.1\\times 80\\,\\mu) = 125$ kΩ and $r_{O8} = 1/(0.2\\times 80\\,\\mu) = 62.5$ kΩ: $$A_2 = g_{m7}(r_{O7}\\parallel r_{O8}) = 1.13\\,\\mathrm{mS}\\times 41.7\\,\\mathrm{k\\Omega} = 47.1$$',
+            'Multiply: $$A_0 = A_1A_2 = 33.3\\times 47.1 = 1571$$ (about 64 dB).',
+          ],
+          calc: [{ what: 'Both stages in one line (prefixes on)', keys: '0.1m × ( 500k [SHIFT][^] + 1M [SHIFT][^] ) [SHIFT][^] × 1.131m × ( 125k [SHIFT][^] + 62.5k [SHIFT][^] ) [SHIFT][^] [EXE]', shows: '1571', note: '[SHIFT][^] is x⁻¹: (a⁻¹ + b⁻¹)⁻¹ is a ∥ b.' }],
+        },
+        say: '$A_1$ = 33.3, $A_2$ = 47.1: $A_0$ = 1571, about 64 dB.',
+      },
+      {
+        t: 41, title: '**Bandwidth = GBW ÷ DC gain.** The gain is flat up to the dominant pole, then falls so that gain × frequency = GBW.',
+        tex: 'f_{-3dB} = \\frac{GBW}{A_0} = \\frac{72.3\\,\\mathrm{MHz}}{1571} = 46\\,\\mathrm{kHz}',
+        try: {
+          q: 'Find the open-loop −3 dB bandwidth (the dominant pole), using the GBW and $A_0$ you found.',
+          answer: ans(M24, 'bw'), unit: 'Hz', tol: 0.02,
+          hint: ['On the one-pole slope gain × frequency is constant: the gain is $A_0$ at the dominant pole and 1 at the GBW.', '$f_{-3dB} = \\dfrac{GBW}{A_0}$'],
+          how: [
+            'On the −20 dB/dec slope gain × frequency stays the same, from $A_0$ at $f_{-3dB}$ to 1 at the GBW: $$A_0\\,f_{-3dB} = 1\\times GBW$$',
+            'So $$f_{-3dB} = \\frac{GBW}{A_0} = \\frac{72.3\\,\\mathrm{MHz}}{1571} = 46.0\\,\\mathrm{kHz}$$',
+            'A tiny bandwidth next to a big GBW is exactly what a dominant pole is meant to do.',
+          ],
+        },
+        say: '46 kHz: the dominant pole.',
+      },
       { t: 49, ans: true, title: '**So far:** SR 90.9 V/µs · GBW 72.3 MHz · $A_0$ = 1571 · BW 46 kHz', say: 'Part 2: the second pole, the zero and the margin.' },
     ],
   });
@@ -367,12 +633,57 @@ scene(L17, '2024 mid-sem Q2, part 2: second pole, zero, PM', 50, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 6 OF 9 (PART 2)', title: 'Second pole, RHP zero and phase margin', src: 'Mid-sem 2024-25 Q2 · 15 marks',
     q: 'Same op amp: $g_{m7}$ = 1.13 mS, $C_c$ = 0.22 pF, $C_L$ = 1 pF, GBW = 72.3 MHz. Find the second pole, the RHP zero and the phase margin (β = 1).', qh: 180,
+    giv: 'From part 1: $I_7$ = 80 µA, $g_{m7} = \\sqrt{2\\mu_nC_{ox}(W/L)_7I_7}$ (M7 NMOS); dominant pole 46 kHz.',
     tests: '$f_{p2} = g_{m7}/2\\pi C_L$, $f_z = g_{m7}/2\\pi C_c$ and the three-angle PM.',
     fig: paperFig('m24q2f', [['f_{p2} = \\frac{g_{m7}}{2\\pi C_L},\\quad f_z = \\frac{g_{m7}}{2\\pi C_c}', 600, 28], ['PM = 90^\\circ - \\tan^{-1}\\tfrac{GBW}{f_{p2}} - \\tan^{-1}\\tfrac{GBW}{f_z}', 700, 26, '#ffd38a']], 400),
     steps: [
-      { t: 6, title: 'Second pole', tex: 'f_{p2} = \\frac{1.13\\,\\mathrm{mS}}{2\\pi(1\\,\\mathrm{pF})} = 180\\,\\mathrm{MHz}', try: { q: 'f_p2 (Hz)?', answer: ans(M24, 'fp2'), unit: 'Hz', tol: 0.02, hint: '1.131 mS / 6.283 pF.' }, say: '180 MHz.' },
-      { t: 13, title: 'RHP zero', tex: stepTex(M24, 6), try: { q: 'f_z (Hz)?', answer: ans(M24, 'fz'), unit: 'Hz', tol: 0.02, hint: 'Same g_m7, but C_c = 0.22 pF.' }, say: '818 MHz.' },
-      { t: 20, title: 'Phase margin at the GBW', tex: stepTex(M24, 7), try: { q: 'PM = 90° − atan(72.3/180) − atan(72.3/818)?', answer: ans(M24, 'pm'), unit: '°', tol: 0.01, hint: '21.9° + 5.05°.' }, say: '21.9° from the pole, 5.1° from the zero: PM = 63.1°.' },
+      {
+        t: 6, title: '**The second pole is the output node:** pole splitting makes the output stage look like $1/g_{m7}$, driving $C_L$.',
+        tex: 'f_{p2} = \\frac{g_{m7}}{2\\pi C_L} = \\frac{1.13\\,\\mathrm{mS}}{2\\pi(1\\,\\mathrm{pF})} = 180\\,\\mathrm{MHz}',
+        try: {
+          q: 'Find the second (non-dominant) pole $f_{p2}$.',
+          answer: ans(M24, 'fp2'), unit: 'Hz', tol: 0.02,
+          hint: ['At high frequency $C_c$ ties M7’s gate to its drain, so the output node looks like a resistance $1/g_{m7}$ driving $C_L$.', '$f_{p2} = \\dfrac{g_{m7}}{2\\pi C_L}$'],
+          how: [
+            'At high frequency $C_c$ shorts M7’s gate to its drain, so the output stage is a diode of about $1/g_{m7}$ loaded by $C_L$: $$f_{p2} \\approx \\frac{g_{m7}}{2\\pi C_L}$$',
+            'Put in $g_{m7}$ = 1.13 mS and $C_L$ = 1 pF: $$f_{p2} = \\frac{1.13\\,\\mathrm{mS}}{2\\pi(1\\,\\mathrm{pF})} = 180\\,\\mathrm{MHz}$$',
+            'It is 2.5 times above the GBW (72.3 MHz): fine, but it will still eat some phase.',
+          ],
+        },
+        say: '180 MHz.',
+      },
+      {
+        t: 13, title: '**The RHP zero:** same $g_{m7}$, but over $C_c$. It is the frequency where the sneak current through $C_c$ cancels M7’s current.',
+        tex: 'f_z = \\frac{g_{m7}}{2\\pi C_c} = \\frac{1.13\\,\\mathrm{mS}}{2\\pi(0.22\\,\\mathrm{pF})} = 818\\,\\mathrm{MHz}',
+        try: {
+          q: 'Find the right-half-plane zero $f_z$.',
+          answer: ans(M24, 'fz'), unit: 'Hz', tol: 0.02,
+          hint: ['The zero is where the current through $C_c$ ($\\omega C_cv$) equals M7’s current ($g_{m7}v$), so they cancel at the output.', '$f_z = \\dfrac{g_{m7}}{2\\pi C_c}$'],
+          how: [
+            'At the zero, the feed-forward current through $C_c$ equals and cancels M7’s current: $$\\omega_zC_c = g_{m7} \\;\\Rightarrow\\; f_z = \\frac{g_{m7}}{2\\pi C_c}$$',
+            'Same $g_{m7}$, but the small $C_c$: $$f_z = \\frac{1.13\\,\\mathrm{mS}}{2\\pi(0.22\\,\\mathrm{pF})} = 818\\,\\mathrm{MHz}$$',
+            'Quick check: $f_z/f_{p2} = C_L/C_c = 1/0.22 = 4.5$.',
+          ],
+        },
+        say: '818 MHz.',
+      },
+      {
+        t: 20, title: '**Phase margin at the GBW** (β = 1): 90° is left after the dominant pole; subtract the second pole’s angle and the zero’s angle.',
+        tex: stepTex(M24, 7),
+        try: {
+          q: 'Find the phase margin in unity feedback, using $f_{p2}$ and $f_z$ from the last two parts.',
+          answer: ans(M24, 'pm'), unit: '°', tol: 0.01,
+          hint: ['With β = 1 the crossover is at the GBW. The dominant pole takes 90° there; the second pole and the RHP zero both add lag.', '$PM = 90^\\circ - \\tan^{-1}\\frac{GBW}{f_{p2}} - \\tan^{-1}\\frac{GBW}{f_z}$'],
+          how: [
+            'Crossover at the GBW; the dominant pole (46 kHz) gives its full 90°: $$180^\\circ - 90^\\circ = 90^\\circ$$',
+            'Second pole: $$\\tan^{-1}\\frac{72.3}{180} = \\tan^{-1}(0.402) = 21.9^\\circ$$',
+            'RHP zero (lags like a pole): $$\\tan^{-1}\\frac{72.3}{818} = \\tan^{-1}(0.0884) = 5.05^\\circ$$',
+            'Subtract both: $$PM = 90^\\circ - 21.9^\\circ - 5.05^\\circ = 63.1^\\circ$$',
+          ],
+          calc: [{ what: 'PM in one line (degree mode)', keys: '90 − [SHIFT][tan] 72.34 ÷ 180.06 ) − [SHIFT][tan] 72.34 ÷ 818.5 ) [EXE]', shows: '63.06', note: 'The key keeps tan⁻¹(A₀) ≈ 89.96° instead of 90°: 63.1°.' }],
+        },
+        say: '21.9° from the pole, 5.1° from the zero: PM = 63.1°.',
+      },
       { t: 28, ans: true, title: '**Answers:** $f_{p2}$ = 180 MHz · $f_z$ = 818 MHz · PM = 63.1°', say: 'Fifteen marks, one dictionary: $G_{m1} = g_{m1}$, $G_{m2} = g_{m7}$, $C_c$, $C_L$.' },
     ],
   });
@@ -382,14 +693,88 @@ scene(L17, 'Problem Set 2 P4: add a second stage and compensate', 60, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 7 OF 9', title: 'Your exam OTA + a CS stage', src: 'Problem Set 2 P4',
     q: 'OTA: $G_{m1}$ = 0.8 mS, $R_1$ = 111 kΩ, $I_{SS}$ = 120 µA. CS stage: $G_{m2}$ = 4 mS, $R_2$ = 20 kΩ, $I_7$ = 500 µA, $C_L$ = 4 pF. With $R_z = 1/G_{m2}$: (a) $C_c$ for 60° (β = 1); (b) GBW; (c) $P_1\'$; (d) $R_z$; (e) slew rate.', qh: 240,
+    giv: 'Use $\\omega_{p2} \\approx G_{m2}/C_L$ and $P_1\' \\approx 1/(R_1A_2C_c)$.',
     tests: 'the design chain: $C_c$ from the margin, GBW, the Miller pole, $R_z$, and the two slew limits.',
     fig: eqFig([['C_c = \\frac{G_{m1}C_L\\tan 60^\\circ}{G_{m2}}', 260, 30], ["P_1' = \\frac{1}{2\\pi R_1A_2C_c},\\;\\; A_2 = G_{m2}R_2", 380, 28], ['SR = \\min\\left(\\tfrac{I_{SS}}{C_c},\\tfrac{I_7 - I_{SS}}{C_L}\\right)', 500, 28, '#ffd38a']]),
     steps: [
-      { t: 6, title: '(a) Cc for 60°', tex: stepTex('bank-ps2-p4', 0), try: { q: '(a) C_c in F (type 1.39p)?', answer: 1.3856e-12, unit: 'F', tol: 0.02, hint: '0.8m × 4p × 1.732 / 4m.' }, say: '1.39 pF.' },
-      { t: 14, title: '(b) GBW', tex: stepTex('bank-ps2-p4', 1), try: { q: '(b) GBW (Hz)?', answer: ans('bank-ps2-p4', 'fu'), unit: 'Hz', tol: 0.02, hint: '0.8 mS/(2π·1.39 pF).' }, say: '91.9 MHz.' },
-      { t: 22, title: '(c) The Miller pole', tex: stepTex('bank-ps2-p4', 2), try: { q: '(c) A₂ = 80. P₁′ (Hz)?', answer: ans('bank-ps2-p4', 'p1'), unit: 'Hz', tol: 0.02, hint: '1/(2π·111k·80·1.39p).' }, say: '12.9 kHz.' },
-      { t: 30, title: '(d) Rz', tex: stepTex('bank-ps2-p4', 3), try: { q: '(d) R_z (Ω)?', answer: ans('bank-ps2-p4', 'rz'), unit: 'Ω', tol: 0.01, hint: '1/4 mS.' }, say: '250 Ω.' },
-      { t: 37, title: '(e) Slew rate: the smaller limit', tex: stepTex('bank-ps2-p4', 4), try: { q: '(e) SR in V/s?', answer: ans('bank-ps2-p4', 'sr'), unit: 'V/s', tol: 0.02, hint: 'min(120µ/1.39p, 380µ/4p).' }, say: '86.6 V/µs from $C_c$; the output stage could do 95, so $C_c$ limits.' },
+      {
+        t: 6, title: '**(a) For 60°, the second pole must sit tan 60° = 1.73 times above the GBW.** Write both with the dictionary and solve for $C_c$.',
+        tex: 'C_c = \\frac{G_{m1}C_L\\tan 60^\\circ}{G_{m2}} = \\frac{0.8\\,\\mathrm{mS}\\times 4\\,\\mathrm{pF}\\times 1.732}{4\\,\\mathrm{mS}} = 1.39\\,\\mathrm{pF}',
+        try: {
+          q: '(a) Find $C_c$ for PM = 60° in unity feedback. With $R_z = 1/G_{m2}$ the RHP zero is gone, so only the second pole costs phase.',
+          answer: ans('bank-ps2-p4', 'cc'), unit: 'F', tol: 0.02,
+          hint: ['PM = 90° − tan⁻¹(ω_u/ω_p2) = 60° means the second pole may take 30°, i.e. $\\omega_{p2} = \\omega_u\\tan 60^\\circ$. Use $\\omega_u = G_{m1}/C_c$ and $\\omega_{p2} = G_{m2}/C_L$.', '$C_c = \\dfrac{G_{m1}C_L\\tan 60^\\circ}{G_{m2}}$'],
+          how: [
+            'A 60° margin lets the second pole take only 30° at $\\omega_u$: $$\\tan^{-1}\\frac{\\omega_u}{\\omega_{p2}} = 30^\\circ \\;\\Rightarrow\\; \\omega_{p2} = \\omega_u\\tan 60^\\circ = 1.732\\,\\omega_u$$',
+            'Dictionary: $$\\frac{G_{m2}}{C_L} = 1.732\\,\\frac{G_{m1}}{C_c}$$',
+            'Solve for $C_c$: $$C_c = \\frac{G_{m1}C_L\\tan 60^\\circ}{G_{m2}} = \\frac{0.8\\,\\mathrm{mS}\\times 4\\,\\mathrm{pF}\\times 1.732}{4\\,\\mathrm{mS}} = 1.39\\,\\mathrm{pF}$$',
+          ],
+          why: 'tan 30° instead of tan 60° gives 0.46 pF: too small, only 30° of margin.',
+          calc: [{ what: 'C_c in one line (degree mode, prefixes on)', keys: '0.8m × 4p × [tan] 60 ) ÷ 4m [EXE]', shows: '1.385p' }],
+        },
+        say: '1.39 pF.',
+      },
+      {
+        t: 14, title: '**(b) GBW = $G_{m1}/(2\\pi C_c)$:** stage 1’s current charging $C_c$.',
+        tex: 'f_u = \\frac{G_{m1}}{2\\pi C_c} = \\frac{0.8\\,\\mathrm{mS}}{2\\pi(1.39\\,\\mathrm{pF})} = 91.9\\,\\mathrm{MHz}',
+        try: {
+          q: '(b) Find the GBW (in Hz) with the $C_c$ from (a).',
+          answer: ans('bank-ps2-p4', 'fu'), unit: 'Hz', tol: 0.02,
+          hint: ['Above the dominant pole, stage 1’s current charges $C_c$; the gain reaches 1 at $G_{m1}/C_c$ (rad/s).', '$GBW = \\dfrac{G_{m1}}{2\\pi C_c}$'],
+          how: [
+            'Unity-gain frequency in rad/s: $$\\omega_u = \\frac{G_{m1}}{C_c} = \\frac{0.8\\,\\mathrm{mS}}{1.39\\,\\mathrm{pF}} = 577\\,\\mathrm{Mrad/s}$$',
+            'Divide by 2π for hertz: $$GBW = \\frac{577\\,\\mathrm{M}}{2\\pi} = 91.9\\,\\mathrm{MHz}$$',
+            'Forgetting the 2π (577 M) is the classic slip.',
+          ],
+        },
+        say: '91.9 MHz.',
+      },
+      {
+        t: 22, title: '**(c) The Miller pole.** Node 1 sees $C_c$ multiplied by $(1 + A_2) \\approx A_2$, with $A_2 = G_{m2}R_2$ = 80, through $R_1$.',
+        tex: "P_1' = \\frac{1}{2\\pi R_1A_2C_c} = \\frac{1}{2\\pi(111\\,\\mathrm{k})(80)(1.39\\,\\mathrm{p})} = 12.9\\,\\mathrm{kHz}",
+        try: {
+          q: "(c) Find the dominant (Miller) pole $P_1'$ in Hz, with the $C_c$ from (a).",
+          answer: ans('bank-ps2-p4', 'p1'), unit: 'Hz', tol: 0.02,
+          hint: ['Node 1 (stage-1 output) sees $R_1$ and the Miller-multiplied $C_c(1 + A_2)$. First find the second-stage gain $A_2 = G_{m2}R_2$.', "$P_1' \\approx \\dfrac{1}{2\\pi R_1A_2C_c}$"],
+          how: [
+            'Second-stage gain: $$A_2 = G_{m2}R_2 = 4\\,\\mathrm{mS}\\times 20\\,\\mathrm{k\\Omega} = 80$$',
+            'Miller: from node 1, $C_c$ looks $(1 + A_2) \\approx 80$ times bigger: $$C_{eff} \\approx A_2C_c = 80\\times 1.39\\,\\mathrm{pF} = 111\\,\\mathrm{pF}$$',
+            "That capacitance with $R_1$: $$P_1' = \\frac{1}{2\\pi R_1A_2C_c} = \\frac{1}{2\\pi(111\\,\\mathrm{k\\Omega})(111\\,\\mathrm{pF})} = 12.9\\,\\mathrm{kHz}$$",
+          ],
+          calc: [{ what: 'Miller pole (prefixes on)', keys: '1 ÷ ( 2 [SHIFT][7] × 111k × 80 × 1.3856p ) [EXE]', shows: '12.93k', note: 'π is [SHIFT] [7].' }],
+        },
+        say: '12.9 kHz.',
+      },
+      {
+        t: 30, title: '**(d) $R_z = 1/G_{m2}$** cancels the sneak path through $C_c$, pushing the RHP zero to infinity.',
+        tex: 'R_z = \\frac{1}{G_{m2}} = \\frac{1}{4\\,\\mathrm{mS}} = 250\\,\\Omega',
+        try: {
+          q: '(d) What value of $R_z$ (in series with $C_c$) removes the RHP zero?',
+          answer: ans('bank-ps2-p4', 'rz'), unit: 'Ω', tol: 0.01,
+          hint: ['With $R_z$ in series, the zero moves to $1/(C_c(1/G_{m2} - R_z))$. Make the bracket zero.', '$R_z = 1/G_{m2}$'],
+          how: [
+            'With $R_z$ the zero is at $$\\omega_z = \\frac{1}{C_c\\,(1/G_{m2} - R_z)}$$',
+            'It goes to infinity when the bracket is zero: $$R_z = \\frac{1}{G_{m2}} = \\frac{1}{4\\,\\mathrm{mS}} = 250\\,\\Omega$$',
+            'A larger $R_z$ would move the zero into the left half plane, where it can even cancel the second pole.',
+          ],
+        },
+        say: '250 Ω.',
+      },
+      {
+        t: 37, title: '**(e) Two slew limits; the smaller wins.** $C_c$ is charged by the tail $I_{SS}$; $C_L$ by what is left of $I_7$ after $I_{SS}$ goes into $C_c$.',
+        tex: stepTex('bank-ps2-p4', 4),
+        try: {
+          q: '(e) Find the slew rate, with the $C_c$ from (a). Check both the first stage and the output stage.',
+          answer: ans('bank-ps2-p4', 'sr'), unit: 'V/s', tol: 0.02,
+          hint: ['Limit 1: the whole tail $I_{SS}$ charges $C_c$. Limit 2: on a falling edge M7’s $I_7$ must supply $C_c$’s current $I_{SS}$ and also charge $C_L$. The slower one sets the slew rate.', '$SR = \\min\\left(\\dfrac{I_{SS}}{C_c}\\,;\\; \\dfrac{I_7 - I_{SS}}{C_L}\\right)$'],
+          how: [
+            'First stage: all of $I_{SS}$ into $C_c$: $$\\frac{I_{SS}}{C_c} = \\frac{120\\,\\mu\\mathrm{A}}{1.39\\,\\mathrm{pF}} = 86.6\\,\\mathrm{V/\\mu s}$$',
+            'Output stage: $I_{SS}$ of $I_7$ already goes into $C_c$, the rest charges $C_L$: $$\\frac{I_7 - I_{SS}}{C_L} = \\frac{380\\,\\mu\\mathrm{A}}{4\\,\\mathrm{pF}} = 95\\,\\mathrm{V/\\mu s}$$',
+            'The smaller limit wins: 86.6 V/µs (set by $C_c$).',
+          ],
+        },
+        say: '86.6 V/µs from $C_c$; the output stage could do 95, so $C_c$ limits.',
+      },
       { t: 45, ans: true, title: '**Answers:** 1.39 pF · 91.9 MHz · 12.9 kHz · 250 Ω · 86.6 V/µs', say: 'The order to remember: margin → $C_c$ → GBW → Miller pole → $R_z$ → slew.' },
     ],
   });
@@ -400,13 +785,72 @@ scene(L17, '2025 mid-sem Q2, part 1: Cc, I5, (W/L)1 and (W/L)3', 62, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 8 OF 9 (PART 1)', title: 'Design a Miller two-stage op amp (14 marks)', src: 'Mid-sem 2025-26 Q2 · 14 marks', paper: 'm25q2',
     q: 'DC gain 60 dB, GBW 50 MHz, PM ≥ 60°, SR 50 V/µs, ICMR(+) 1.6 V, ICMR(−) 0.9 V, $C_L$ = 5 pF; minimum $C_c$ for 60°. $\\mu_nC_{ox}$ = 300, $\\mu_pC_{ox}$ = 60 µA/V², $V_{th1}$ = 0.47–0.59 V, $|V_{th3}|_{max}$ = 0.51 V, $V_{DD}$ = 1.8 V.', qh: 250,
+    giv: 'NMOS input pair M1, M2; PMOS mirror load M3, M4; M5 = M6 (so $I = I_5$). Standard choice: RHP zero at 10 × GBW.',
     tests: 'Allen’s design order: $C_c$ from the margin, $I_5$ from SR, $(W/L)_1$ from GBW, $(W/L)_3$ from ICMR(+), $(W/L)_5$ from ICMR(−), then the output stage.',
     fig: paperFig('m25q2f', [['C_c = 0.22\\,C_L,\\quad I_5 = SR\\cdot C_c', 580, 26], ['g_{m1} = 2\\pi\\,GBW\\,C_c,\\;\\; (W/L)_1 = \\frac{g_{m1}^2}{2\\mu_nC_{ox}I_{D1}}', 670, 24], ['(W/L)_3 = \\frac{2I_{D1}}{\\mu_pC_{ox}(V_{DD} - V_{in,max} - |V_{th3}|_{max} + V_{th1,min})^2}', 770, 20, '#ffd38a']], 400),
     steps: [
-      { t: 6, title: '① Cc for 60° (zero at 10·GB)', tex: stepTex(M25, 0), try: { q: '① C_c = 0.22 × 5 pF, in F?', answer: ans(M25, 'cc'), unit: 'F', tol: 0.01, hint: 'Allen’s rule.' }, say: '1.1 pF.' },
-      { t: 13, title: '② Slew rate sets the tail', tex: stepTex(M25, 1), try: { q: '② I₅ = SR × C_c in A (type 55u)?', answer: ans(M25, 'i'), unit: 'A', tol: 0.01, hint: '50 V/µs × 1.1 pF.' }, say: '55 µA.' },
-      { t: 20, title: '③ GBW sets gm1, the square law sets (W/L)1', tex: stepTex(M25, 2), try: { q: '③ (W/L)₁,₂?', answer: ans(M25, 'wl1'), unit: '', tol: 0.02, hint: 'g_m1 = 2π·50M·1.1p = 0.346 mS; I_D1 = 27.5 µA.' }, say: '$g_{m1}$ = 0.346 mS and $(W/L)_{1,2}$ = 7.24.' },
-      { t: 30, title: '④ ICMR(+): M1 at its edge against M3’s diode', tex: stepTex(M25, 3), try: { q: '④ (W/L)₃,₄?', answer: ans(M25, 'wl3'), unit: '', tol: 0.02, hint: 'Overdrive left for M3: 1.8 − 1.6 − 0.51 + 0.47 = 0.16 V.' }, say: 'Only 0.16 V of overdrive left for M3: $(W/L)_{3,4}$ = 35.8.' },
+      {
+        t: 6, title: '**① $C_c$ from the margin.** With the zero at 10 × GBW ($g_{m7} = 10g_{m1}$), 60° needs $C_c \\ge 0.22\\,C_L$ (Allen’s rule); take the minimum.',
+        tex: 'C_c = 0.22\\,C_L = 0.22\\times 5\\,\\mathrm{pF} = 1.1\\,\\mathrm{pF}',
+        try: {
+          q: '① Find the minimum $C_c$ for PM = 60°, with the RHP zero placed at 10 × GBW.',
+          answer: ans(M25, 'cc'), unit: 'F', tol: 0.01,
+          hint: ['The zero at 10·GBW costs tan⁻¹(0.1) = 5.7° and the dominant pole 90°, so the second pole may take 24.3°. With $g_{m7} = 10g_{m1}$ that gives Allen’s rule.', '$C_c \\ge 0.22\\,C_L$'],
+          how: [
+            'Phase budget for the second pole: $$\\tan^{-1}\\frac{\\omega_u}{\\omega_{p2}} = 90^\\circ - 60^\\circ - \\tan^{-1}(0.1) = 24.29^\\circ$$',
+            'With $\\omega_u = g_{m1}/C_c$, $\\omega_{p2} = g_{m7}/C_L$ and $g_{m7} = 10g_{m1}$: $$\\frac{C_c}{C_L} = \\frac{1}{10\\tan 24.29^\\circ} = \\frac{1}{10(0.451)} = 0.22$$',
+            'Minimum capacitor: $$C_c = 0.22\\times 5\\,\\mathrm{pF} = 1.1\\,\\mathrm{pF}$$',
+          ],
+        },
+        say: '1.1 pF.',
+      },
+      {
+        t: 13, title: '**② The slew rate sets the tail current:** in a big step all of $I_5$ charges $C_c$, so $I_5 = SR\\times C_c$.',
+        tex: stepTex(M25, 1),
+        try: {
+          q: '② Find the tail current $I_5$ from the slew-rate spec, with $C_c$ from ①.',
+          answer: ans(M25, 'i'), unit: 'A', tol: 0.01,
+          hint: ['During slewing the whole tail current charges $C_c$: $SR = I_5/C_c$. Read it backwards.', '$I_5 = SR\\times C_c$'],
+          how: [
+            'Slewing: $C_c$ is charged by all of $I_5$: $$SR = \\frac{I_5}{C_c}$$',
+            'Read it backwards: $$I_5 = SR\\times C_c = 50\\,\\mathrm{V/\\mu s}\\times 1.1\\,\\mathrm{pF} = 55\\,\\mu\\mathrm{A}$$',
+            'Units trick: V/µs × pF = µA, so it is just 50 × 1.1.',
+          ],
+        },
+        say: '55 µA.',
+      },
+      {
+        t: 20, title: '**③ The GBW spec fixes $g_{m1}$**, and the square law at $I_{D1} = I_5/2$ then gives $(W/L)_{1,2}$ (NMOS pair).',
+        tex: stepTex(M25, 2),
+        try: {
+          q: '③ Size the NMOS input pair: find $(W/L)_{1,2}$ from the GBW spec (use $C_c$ and $I_5$ from ① and ②).',
+          answer: ans(M25, 'wl1'), unit: '', tol: 0.02,
+          hint: ['GBW = $g_{m1}/(2\\pi C_c)$ gives the $g_{m1}$ you need; each input device carries $I_5/2$. Then use $g_m = \\sqrt{2\\mu_nC_{ox}(W/L)I_D}$.', '$g_{m1} = 2\\pi\\,GBW\\,C_c$, $(W/L)_1 = \\dfrac{g_{m1}^2}{2\\mu_nC_{ox}I_{D1}}$'],
+          how: [
+            'Required $g_{m1}$ from the GBW: $$g_{m1} = 2\\pi\\,GBW\\,C_c = 2\\pi(50\\,\\mathrm{MHz})(1.1\\,\\mathrm{pF}) = 0.346\\,\\mathrm{mS}$$',
+            'Current per input device: $$I_{D1} = \\frac{I_5}{2} = \\frac{55\\,\\mu\\mathrm{A}}{2} = 27.5\\,\\mu\\mathrm{A}$$',
+            'Square law turned round: $$(W/L)_{1,2} = \\frac{g_{m1}^2}{2\\mu_nC_{ox}I_{D1}} = \\frac{(0.346\\,\\mathrm{mS})^2}{2(300\\,\\mu)(27.5\\,\\mu)} = 7.24$$',
+          ],
+          calc: [{ what: 'W/L in one line (prefixes on)', keys: '( 2 [SHIFT][7] × 50M × 1.1p ) [x²] ÷ ( 2 × 300µ × 27.5µ ) [EXE]', shows: '7.238' }],
+        },
+        say: '$g_{m1}$ = 0.346 mS and $(W/L)_{1,2}$ = 7.24.',
+      },
+      {
+        t: 30, title: '**④ ICMR(+) sizes the mirror load.** At the highest input M1 is at its saturation edge; the voltage left for M3’s overdrive uses the worst-case thresholds.',
+        tex: '|V_{ov3}| = V_{DD} - V_{in,max} - |V_{th3}|_{max} + V_{th1,min} = 1.8 - 1.6 - 0.51 + 0.47 = 0.16\\,\\mathrm{V},\\quad (W/L)_{3,4} = \\frac{2I_{D3}}{\\mu_pC_{ox}|V_{ov3}|^2} = \\frac{2(27.5\\,\\mu)}{60\\,\\mu(0.16)^2} = 35.8',
+        try: {
+          q: '④ Size the PMOS mirror load: find $(W/L)_{3,4}$ from ICMR(+) = 1.6 V. M3 carries $I_{D1}$ = 27.5 µA (from ③).',
+          answer: ans(M25, 'wl3'), unit: '', tol: 0.02,
+          hint: ['M1 stays saturated while its drain is above $V_{in} - V_{th1}$. Its drain sits at $V_{DD} - |V_{GS3}|$. Use the worst cases (largest $|V_{th3}|$, smallest $V_{th1}$); what is left is M3’s overdrive.', '$|V_{ov3}| = V_{DD} - V_{in,max} - |V_{th3}|_{max} + V_{th1,min}$, then $(W/L)_3 = \\dfrac{2I_{D3}}{\\mu_pC_{ox}|V_{ov3}|^2}$'],
+          how: [
+            'M1’s drain is M3’s diode, at $V_{DD} - |V_{GS3}|$. At the edge of saturation it equals $V_{in,max} - V_{th1}$: $$V_{DD} - |V_{th3}| - |V_{ov3}| = V_{in,max} - V_{th1}$$',
+            'Solve with the worst-case thresholds: $$|V_{ov3}| = 1.8 - 1.6 - 0.51 + 0.47 = 0.16\\,\\mathrm{V}$$',
+            'Square law for M3 at 27.5 µA: $$(W/L)_{3,4} = \\frac{2I_{D3}}{\\mu_pC_{ox}|V_{ov3}|^2} = \\frac{2(27.5\\,\\mu)}{60\\,\\mu\\,(0.16)^2} = 35.8$$',
+          ],
+          calc: [{ what: 'W/L in one line (prefixes on)', keys: '2 × 27.5µ ÷ ( 60µ × ( 1.8 − 1.6 − 0.51 + 0.47 ) [x²] ) [EXE]', shows: '35.81' }],
+        },
+        say: 'Only 0.16 V of overdrive left for M3: $(W/L)_{3,4}$ = 35.8.',
+      },
       { t: 40, ans: true, title: '**So far:** $C_c$ = 1.1 pF · $I_5$ = 55 µA · $(W/L)_1$ = 7.24 · $(W/L)_3$ = 35.8', say: 'Part 2: the tail and the output stage.' },
     ],
   });
@@ -416,12 +860,56 @@ scene(L17, '2025 mid-sem Q2, part 2: (W/L)5, (W/L)7, (W/L)8', 54, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 8 OF 9 (PART 2)', title: 'The tail and the output stage', src: 'Mid-sem 2025-26 Q2 · 14 marks',
     q: 'Continue: ICMR(−) = 0.9 V sets $(W/L)_5$ (= $(W/L)_6$); the RHP zero at 10·GB sets $g_{m7} = 10g_{m1}$; a perfect mirror means $|V_{ov7}| = |V_{ov3}|$; M8 mirrors M5 and carries $I_7$.', qh: 210,
+    giv: '$\\mu_nC_{ox}$ = 300, $\\mu_pC_{ox}$ = 60 µA/V², $V_{th1,max}$ = 0.59 V. Part 1: $I_5$ = 55 µA, $I_{D1}$ = 27.5 µA, $g_{m1}$ = 0.346 mS, $(W/L)_1$ = 7.24, $|V_{ov3}|$ = 0.16 V. M5, M8 NMOS; M7 PMOS.',
     tests: 'the floor check for the tail, the zero rule for the output device, and a mirror ratio for its current source.',
     fig: paperFig('m25q2f', [['V_{ov5} = V_{in,min} - V_{GS1} - \\ldots', 580, 24], ['g_{m7} = 10\\,g_{m1},\\;\\; (W/L)_7 = \\frac{g_{m7}}{\\mu_pC_{ox}|V_{ov3}|}', 670, 24], ['(W/L)_8 = (W/L)_5\\,\\frac{I_7}{I_5}', 770, 26, '#ffd38a']], 400),
     steps: [
-      { t: 6, title: '⑤ ICMR(−): what is left for the tail', tex: stepTex(M25, 4), try: { q: '⑤ V_ov5 = 0.151 V, I₅ = 55 µA. (W/L)₅ = 2I₅/(µnCox·V_ov5²)?', answer: ans(M25, 'wl5'), unit: '', tol: 0.02, hint: '110µ/(300µ × 0.0228).' }, say: '$(W/L)_{5,6}$ = 16.1.' },
-      { t: 15, title: '⑥ Zero at 10·GB → gm7 = 10gm1; same overdrive as M3', tex: stepTex(M25, 5), try: { q: '⑥ g_m7 = 3.46 mS, |V_ov| = 0.16 V. (W/L)₇?', answer: ans(M25, 'wl7'), unit: '', tol: 0.02, hint: 'g_m = µpCox(W/L)V_ov.' }, say: '$(W/L)_7$ = 360: a wide output device.' },
-      { t: 24, title: '⑦ M8 carries I7', tex: stepTex(M25, 6), try: { q: '⑦ I₇ = 276 µA. (W/L)₈ = 16.11 × 276/55?', answer: ans(M25, 'wl8'), unit: '', tol: 0.02, hint: 'Mirror ratio.' }, say: '$I_7$ = 276 µA and $(W/L)_8$ = 81.' },
+      {
+        t: 6, title: '**⑤ ICMR(−) sizes the tail.** At the lowest input, $V_{GS1}$ (with the largest $V_{th1}$) uses most of the 0.9 V; what is left is M5’s overdrive.',
+        tex: 'V_{ov5} = V_{in,min} - V_{ov1} - V_{th1,max} = 0.9 - 0.159 - 0.59 = 0.151\\,\\mathrm{V},\\quad (W/L)_{5,6} = \\frac{2I_5}{\\mu_nC_{ox}V_{ov5}^2} = \\frac{2(55\\,\\mu)}{300\\,\\mu(0.151)^2} = 16.1',
+        try: {
+          q: '⑤ Size the tail M5 (= M6) from ICMR(−) = 0.9 V. (Values from part 1 are on the card.)',
+          answer: ans(M25, 'wl5'), unit: '', tol: 0.02,
+          hint: ['At the lowest input, the tail’s drain (node P) is at $V_{in,min} - V_{GS1}$, and M5 needs at least its overdrive there. Use the largest $V_{th1}$ (worst case).', '$V_{ov5} = V_{in,min} - \\sqrt{\\dfrac{2I_{D1}}{\\mu_nC_{ox}(W/L)_1}} - V_{th1,max}$, then $(W/L)_5 = \\dfrac{2I_5}{\\mu_nC_{ox}V_{ov5}^2}$'],
+          how: [
+            'Overdrive of M1 at 27.5 µA: $$V_{ov1} = \\sqrt{\\frac{2I_{D1}}{\\mu_nC_{ox}(W/L)_1}} = \\sqrt{\\frac{2(27.5\\,\\mu)}{300\\,\\mu\\times 7.24}} = 0.159\\,\\mathrm{V}$$',
+            'Voltage left for M5 at the lowest input: $$V_{ov5} = V_{in,min} - V_{ov1} - V_{th1,max} = 0.9 - 0.159 - 0.59 = 0.151\\,\\mathrm{V}$$',
+            'Square law for the tail: $$(W/L)_{5,6} = \\frac{2I_5}{\\mu_nC_{ox}V_{ov5}^2} = \\frac{2(55\\,\\mu)}{300\\,\\mu\\,(0.151)^2} = 16.1$$',
+          ],
+          calc: [{ what: 'All of ⑤ in one line (prefixes on)', keys: '2 × 55µ ÷ ( 300µ × ( 0.9 − √( 2 × 27.5µ ÷ ( 300µ × 7.238 ) ) − 0.59 ) [x²] ) [EXE]', shows: '16.11' }],
+        },
+        say: '$(W/L)_{5,6}$ = 16.1.',
+      },
+      {
+        t: 15, title: '**⑥ The zero at 10 × GBW needs $g_{m7} = 10g_{m1}$**, and a perfect mirror gives M7 the same overdrive as M3; $g_m = \\mu_pC_{ox}(W/L)|V_{ov}|$ gives its size.',
+        tex: 'g_{m7} = 10g_{m1} = 3.46\\,\\mathrm{mS},\\quad (W/L)_7 = \\frac{g_{m7}}{\\mu_pC_{ox}|V_{ov3}|} = \\frac{3.46\\,\\mathrm{mS}}{60\\,\\mu\\times 0.16} = 360',
+        try: {
+          q: '⑥ Size the PMOS output device: find $(W/L)_7$.',
+          answer: ans(M25, 'wl7'), unit: '', tol: 0.02,
+          hint: ['RHP zero at 10·GBW: $g_{m7}/C_c = 10\\,g_{m1}/C_c$, so $g_{m7} = 10g_{m1}$. M7’s gate sits at the mirror’s drain voltage, so with a perfect mirror it has M3’s overdrive.', '$g_m = \\mu_pC_{ox}(W/L)|V_{ov}| \\;\\Rightarrow\\; (W/L)_7 = \\dfrac{g_{m7}}{\\mu_pC_{ox}|V_{ov3}|}$'],
+          how: [
+            'Zero at 10 × GBW: $$\\frac{g_{m7}}{C_c} = 10\\,\\frac{g_{m1}}{C_c} \\;\\Rightarrow\\; g_{m7} = 10g_{m1} = 10(0.346\\,\\mathrm{mS}) = 3.46\\,\\mathrm{mS}$$',
+            'Perfect mirror: M7 has the same $|V_{GS}|$ as M3/M4, so $|V_{ov7}| = |V_{ov3}| = 0.16$ V (from ④).',
+            'Use $g_m = \\mu_pC_{ox}(W/L)|V_{ov}|$: $$(W/L)_7 = \\frac{g_{m7}}{\\mu_pC_{ox}|V_{ov3}|} = \\frac{3.46\\,\\mathrm{mS}}{60\\,\\mu\\times 0.16} = 360$$',
+          ],
+        },
+        say: '$(W/L)_7$ = 360: a wide output device.',
+      },
+      {
+        t: 24, title: '**⑦ M8 must carry $I_7$.** Find $I_7$ from M7’s square law, then M8 copies M5 scaled by the current ratio.',
+        tex: stepTex(M25, 6),
+        try: {
+          q: '⑦ Size the output current source M8 (it mirrors M5). Use $(W/L)_7$ = 360 from ⑥ and $(W/L)_5$ = 16.1 from ⑤.',
+          answer: ans(M25, 'wl8'), unit: '', tol: 0.02,
+          hint: ['First get M7’s current from its square law; M8 must sink exactly that. M8 and M5 share a gate voltage, so currents scale with W/L.', '$I_7 = \\tfrac12\\mu_pC_{ox}(W/L)_7|V_{ov3}|^2$, $(W/L)_8 = (W/L)_5\\dfrac{I_7}{I_5}$'],
+          how: [
+            'Current in M7: $$I_7 = \\tfrac12\\mu_pC_{ox}(W/L)_7|V_{ov3}|^2 = \\tfrac12(60\\,\\mu)(360)(0.16)^2 = 276\\,\\mu\\mathrm{A}$$',
+            'M8 mirrors M5 (same $V_{GS}$), so sizes scale with currents: $$(W/L)_8 = (W/L)_5\\frac{I_7}{I_5} = 16.1\\times\\frac{276\\,\\mu\\mathrm{A}}{55\\,\\mu\\mathrm{A}} = 81$$',
+          ],
+          why: 'The fixed order: $C_c$ → $I_5$ → (W/L)₁ → (W/L)₃ → (W/L)₅ → (W/L)₇ → (W/L)₈.',
+        },
+        say: '$I_7$ = 276 µA and $(W/L)_8$ = 81.',
+      },
       { t: 33, ans: true, title: '**All answers:** $C_c$ 1.1 pF · $I_5$ 55 µA · (W/L)₁ 7.24 · (W/L)₃ 35.8 · (W/L)₅ 16.1 · (W/L)₇ 360 · (W/L)₈ 81', say: 'Seven steps in a fixed order. Write the order down first in the exam, then fill in numbers.' },
     ],
   });
@@ -444,13 +932,77 @@ scene(L17, 'Compre 2023-24 Q8: a full two-stage analysis', 64, (S) => {
   pyqFrame(S, {
     tag: 'LEC 17 · QUESTION 9 OF 9 (COMPRE STYLE)', title: 'Currents, gain, GBP, SR, power, PM', src: 'Compre 2023-24 Q8 · 10 marks', paper: 'c24q8',
     q: 'Two-stage op amp, ±2.5 V, $C_c$ = 5 pF, $C_L$ = 20 pF, sizes in the figure. $V_{Tn} = |V_{Tp}|$ = 0.7 V, $\\mu_nC_{ox}$ = 110, $\\mu_pC_{ox}$ = 50 µA/V², $\\lambda_n$ = 0.04, $\\lambda_p$ = 0.05 V⁻¹. Find $I_8$, $I_5$, $I_7$, the DC gain, GBP, SR, power and PM.', qh: 250,
+    giv: 'Sizes: M9 (PMOS diode) 1/1, M8 (NMOS diode) 1/1, M5 2/1, M7 10/1, M1, M2 (NMOS) 10/1, M3, M4 (PMOS) 10/1, M6 (PMOS) 100/1. All saturated; PM for β = 1.',
     tests: 'the same Miller dictionary on a ±2.5 V circuit: a diode stack sets $I_8$, mirrors give the rest.',
     fig: paperFig('c24q8f', [['5\\,\\mathrm{V} = \\sqrt{\\tfrac{2I_8}{\\mu_nC_{ox}}} + 0.7 + \\sqrt{\\tfrac{2I_8}{\\mu_pC_{ox}}} + 0.7,\\;\\; I_5 = 2I_8,\\; I_7 = 10I_8', 590, 22], ['A_0 = g_{m1}(r_{O2}\\parallel r_{O4})\\cdot g_{m6}(r_{O6}\\parallel r_{O7})', 680, 24], ['PM = 90^\\circ - \\tan^{-1}\\tfrac{GBP}{f_{p2}} - \\tan^{-1}\\tfrac{GBP}{f_z}', 770, 24, '#ffd38a']], 400),
     steps: [
-      { t: 6, title: 'M9 and M8 are diodes stacked across 5 V', tex: `I_8 = ${fx(CQ8.i8 * 1e6, 4)}\\,\\mu\\mathrm{A},\\; I_5 = ${fx(CQ8.i5 * 1e6, 4)}\\,\\mu\\mathrm{A},\\; I_7 = ${fx(CQ8.i7 * 1e3, 4)}\\,\\mathrm{mA}`, try: { q: 'Solve 3.6 V = √I₈(√(2/110µ) + √(2/50µ)). I₈ in A (type 115u)?', answer: CQ8.i8, unit: 'A', tol: 0.01, hint: 'The square roots are 134.8 and 200: √I₈ = 3.6/334.8.' }, say: 'The overdrives share 3.6 V: $I_8$ = 115.6 µA. M5 is twice M8 and M7 ten times: 231 µA and 1.156 mA.' },
-      { t: 16, title: 'DC gain', tex: `A_0 = ${fx(CQ8.gm1 * 1e3, 3)}\\,\\mathrm{mS}\\times 96.1\\,\\mathrm{k}\\times ${fx(CQ8.gm6 * 1e3, 3)}\\,\\mathrm{mS}\\times 9.61\\,\\mathrm{k} = ${fx(CQ8.a0, 4)}`, try: { q: 'A₀ (V/V)?', answer: CQ8.a0, unit: '', tol: 0.02, hint: 'A₁ = 48.5, A₂ = 32.7.' }, say: '$A_1$ = 48.5 and $A_2$ = 32.7: about 1580 (the key: 1581).' },
-      { t: 26, title: 'GBP and slew rate', tex: `GBP = \\frac{g_{m1}}{2\\pi C_c} = ${fx(CQ8.gbw / 1e6, 4)}\\,\\mathrm{MHz},\\;\\; SR = \\frac{I_5}{C_c} = ${fx(CQ8.sr / 1e6, 4)}\\,\\mathrm{V/\\mu s}`, try: { q: 'GBP (Hz)?', answer: CQ8.gbw, unit: 'Hz', tol: 0.01, hint: '0.504 mS/(2π·5 pF).' }, say: '16.05 MHz and 46.2 V/µs.' },
-      { t: 35, title: 'Power and phase margin', tex: `P = 5\\,\\mathrm{V}\\times(I_8 + I_5 + I_7) = ${fx(CQ8.pw * 1e3, 4)}\\,\\mathrm{mW},\\;\\; PM = ${fx(CQ8.pm, 4)}^\\circ`, try: { q: 'PM = 90° − atan(GBP/f_p2) − atan(GBP/f_z), f_p2 = 27.1 MHz, f_z = 108 MHz?', answer: CQ8.pm, unit: '°', tol: 0.01, hint: '30.7° + 8.4°.' }, say: '7.51 mW, and a margin of 50.9°: matches the key exactly.' },
+      {
+        t: 6, title: '**The bias branch:** M9 and M8 are diodes in series across 5 V, so their two $V_{GS}$ add up to 5 V. Then M5 = 2 × M8 and M7 = 10 × M8 by mirror ratio.',
+        tex: `\\sqrt{I_8}\\,(134.8 + 200) = 5 - 1.4 = 3.6 \\Rightarrow I_8 = ${fx(CQ8.i8 * 1e6, 4)}\\,\\mu\\mathrm{A},\\quad I_5 = 2I_8 = ${fx(CQ8.i5 * 1e6, 4)}\\,\\mu\\mathrm{A},\\quad I_7 = 10I_8 = ${fx(CQ8.i7 * 1e3, 4)}\\,\\mathrm{mA}`,
+        try: {
+          q: 'Find the bias current $I_8$ in the diode branch (M9 and M8 in series across the 5 V supply, both W/L = 1).',
+          answer: CQ8.i8, unit: 'A', tol: 0.01,
+          hint: ['Both are diode-connected and carry the same $I_8$, and their $V_{GS}$ add up to the full 5 V. Each $|V_{GS}| = 0.7 + \\sqrt{2I_8/\\mu C_{ox}}$.', '$5 - 2(0.7) = \\sqrt{I_8}\\left(\\sqrt{\\tfrac{2}{\\mu_nC_{ox}}} + \\sqrt{\\tfrac{2}{\\mu_pC_{ox}}}\\right)$'],
+          how: [
+            'The two diodes share the 5 V between the rails: $$V_{GS8} + |V_{GS9}| = 2.5 - (-2.5) = 5\\,\\mathrm{V}$$',
+            'Take away the two thresholds; the overdrives share the rest: $$\\sqrt{\\frac{2I_8}{\\mu_nC_{ox}}} + \\sqrt{\\frac{2I_8}{\\mu_pC_{ox}}} = 5 - 1.4 = 3.6\\,\\mathrm{V}$$',
+            'Pull out $\\sqrt{I_8}$ ($\\sqrt{2/110\\,\\mu} = 134.8$, $\\sqrt{2/50\\,\\mu} = 200$): $$\\sqrt{I_8} = \\frac{3.6}{134.8 + 200} = 0.01075$$',
+            'Square it: $$I_8 = (0.01075)^2 = 115.6\\,\\mu\\mathrm{A}$$',
+            'The mirrors then give $I_5 = 2I_8 = 231$ µA and $I_7 = 10I_8 = 1.156$ mA.',
+          ],
+          calc: [{ what: 'I₈ in one line (prefixes on)', keys: '( 3.6 ÷ ( √( 2 ÷ 110µ ) + √( 2 ÷ 50µ ) ) ) [x²] [EXE]', shows: '115.6µ' }],
+        },
+        say: 'The overdrives share 3.6 V: $I_8$ = 115.6 µA. M5 is twice M8 and M7 ten times: 231 µA and 1.156 mA.',
+      },
+      {
+        t: 16, title: '**DC gain = $A_1 \\times A_2$.** Stage 1: $g_{m1}$ at $I_5/2$ into $r_{O2}\\parallel r_{O4}$. Stage 2: $g_{m6}$ at $I_7$ into $r_{O6}\\parallel r_{O7}$.',
+        tex: `A_0 = ${fx(CQ8.gm1 * 1e3, 3)}\\,\\mathrm{mS}\\times 96.1\\,\\mathrm{k}\\times ${fx(CQ8.gm6 * 1e3, 3)}\\,\\mathrm{mS}\\times 9.61\\,\\mathrm{k} = ${fx(CQ8.a0, 4)}`,
+        try: {
+          q: 'Find the DC gain $A_0$ (V/V), using the currents from the last step.',
+          answer: CQ8.a0, unit: '', tol: 0.02,
+          hint: ['Each stage is $g_m$ × (the two $r_O$ at its output in parallel). The two devices of a stage carry the same current, so $r_{On}\\parallel r_{Op} = 1/((\\lambda_n + \\lambda_p)I_D)$.', '$A_0 = \\sqrt{2\\mu_nC_{ox}(10)\\tfrac{I_5}{2}}\\cdot\\dfrac{1}{0.09\\cdot I_5/2}\\;\\times\\;\\sqrt{2\\mu_pC_{ox}(100)I_7}\\cdot\\dfrac{1}{0.09\\cdot I_7}$'],
+          how: [
+            'Stage 1: each input device carries $I_5/2$ = 115.6 µA: $$g_{m1} = \\sqrt{2(110\\,\\mu)(10)(115.6\\,\\mu)} = 0.504\\,\\mathrm{mS}$$',
+            'Both devices see the same current, so: $$r_{O2}\\parallel r_{O4} = \\frac{1}{(\\lambda_n + \\lambda_p)I_D} = \\frac{1}{0.09\\times 115.6\\,\\mu} = 96.1\\,\\mathrm{k\\Omega}$$ and $A_1 = 0.504\\,\\mathrm{mS}\\times 96.1\\,\\mathrm{k\\Omega} = 48.5$.',
+            'Stage 2 at $I_7$ = 1.156 mA: $$g_{m6} = \\sqrt{2(50\\,\\mu)(100)(1.156\\,\\mathrm{m})} = 3.40\\,\\mathrm{mS},\\quad r_{O6}\\parallel r_{O7} = \\frac{1}{0.09\\times 1.156\\,\\mathrm{m}} = 9.61\\,\\mathrm{k\\Omega}$$',
+            'So $A_2 = 3.40\\,\\mathrm{mS}\\times 9.61\\,\\mathrm{k\\Omega} = 32.7$ and $$A_0 = A_1A_2 = 48.5\\times 32.7 \\approx 1584$$ (the key, rounding on the way, prints 1581).',
+          ],
+        },
+        say: '$A_1$ = 48.5 and $A_2$ = 32.7: about 1580 (the key: 1581).',
+      },
+      {
+        t: 26, title: '**GBP = $g_{m1}/(2\\pi C_c)$ and SR = $I_5/C_c$:** both need only stage 1 and $C_c$.',
+        tex: `GBP = \\frac{g_{m1}}{2\\pi C_c} = ${fx(CQ8.gbw / 1e6, 4)}\\,\\mathrm{MHz},\\;\\; SR = \\frac{I_5}{C_c} = ${fx(CQ8.sr / 1e6, 4)}\\,\\mathrm{V/\\mu s}`,
+        try: {
+          q: 'Find the gain-bandwidth product GBP (in Hz), with $g_{m1}$ from the gain step.',
+          answer: CQ8.gbw, unit: 'Hz', tol: 0.01,
+          hint: ['Stage 1’s current charges $C_c$; unity gain is at $g_{m1}/C_c$ in rad/s.', '$GBP = \\dfrac{g_{m1}}{2\\pi C_c}$'],
+          how: [
+            'Stage 1 drives $C_c$: $$GBP = \\frac{g_{m1}}{2\\pi C_c} = \\frac{0.504\\,\\mathrm{mS}}{2\\pi(5\\,\\mathrm{pF})} = 16.05\\,\\mathrm{MHz}$$',
+            'While you are here, the slew rate: $$SR = \\frac{I_5}{C_c} = \\frac{231\\,\\mu\\mathrm{A}}{5\\,\\mathrm{pF}} = 46.2\\,\\mathrm{V/\\mu s}$$',
+            'The printed “unity-gain bandwidth 1 MHz” is not used: the key computes the GBP from the circuit.',
+          ],
+        },
+        say: '16.05 MHz and 46.2 V/µs.',
+      },
+      {
+        t: 35, title: '**Power and margin.** Power = supply (5 V) × every branch current. PM = 90° minus the second pole’s and the RHP zero’s angles at the GBP.',
+        tex: `P = 5\\,\\mathrm{V}\\times(I_8 + I_5 + I_7) = ${fx(CQ8.pw * 1e3, 4)}\\,\\mathrm{mW},\\;\\; PM = 90^\\circ - 30.7^\\circ - 8.4^\\circ = ${fx(CQ8.pm, 4)}^\\circ`,
+        try: {
+          q: 'Find the phase margin in unity feedback, using GBP = 16.05 MHz and $g_{m6}$ from the gain step.',
+          answer: CQ8.pm, unit: '°', tol: 0.01,
+          hint: ['Find the second pole $g_{m6}/(2\\pi C_L)$ and the RHP zero $g_{m6}/(2\\pi C_c)$ first, then take their angles at the GBP.', '$PM = 90^\\circ - \\tan^{-1}\\frac{GBP}{f_{p2}} - \\tan^{-1}\\frac{GBP}{f_z}$'],
+          how: [
+            'Second pole (output node, $C_L$): $$f_{p2} = \\frac{g_{m6}}{2\\pi C_L} = \\frac{3.40\\,\\mathrm{mS}}{2\\pi(20\\,\\mathrm{pF})} = 27.1\\,\\mathrm{MHz}$$',
+            'RHP zero (same $g_{m6}$, over $C_c$): $$f_z = \\frac{g_{m6}}{2\\pi C_c} = \\frac{3.40\\,\\mathrm{mS}}{2\\pi(5\\,\\mathrm{pF})} = 108\\,\\mathrm{MHz}$$',
+            'Their angles at 16.05 MHz: $$\\tan^{-1}\\frac{16.05}{27.1} = 30.7^\\circ,\\quad \\tan^{-1}\\frac{16.05}{108} = 8.4^\\circ$$',
+            'Subtract from 90°: $$PM = 90^\\circ - 30.7^\\circ - 8.4^\\circ = 50.9^\\circ$$',
+          ],
+          why: 'The power asked in the same part: $P = 5\\,\\mathrm{V}\\times(I_8 + I_5 + I_7) = 7.51$ mW.',
+          calc: [{ what: 'PM in one line (degree mode)', keys: '90 − [SHIFT][tan] 16.05 ÷ 27.06 ) − [SHIFT][tan] 16.05 ÷ 108.2 ) [EXE]', shows: '50.89' }],
+        },
+        say: '7.51 mW, and a margin of 50.9°: matches the key exactly.',
+      },
       { t: 44, ans: true, title: `**Answers:** 115.6 µA, 231 µA, 1.156 mA · $A_0$ ≈ 1580 · 16.05 MHz · 46.2 V/µs · 7.51 mW · 50.9°`, say: 'Note the printed “open loop unity gain bandwidth 1 MHz” is never used: the answer key computes the GBP from the circuit.' },
     ],
   });
