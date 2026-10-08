@@ -182,7 +182,7 @@ scene(L11, 'Follow the current: sensing with differential pairs', 56, (S) => {
   current(S, [[730, 290], [620, 290], [620, 440], [440, 440]], 10, null, 'I_D3', { color: C.p, at: [530, 476] });
   current(S, [[730, 290], [840, 290], [840, 440], [1020, 440]], 10, null, 'I_D4', { color: C.n, at: [930, 476] });
   eqAt(S, 'I_5 = I_{D3} + I_{D4}', 1360, 260, 10, { size: 30, w: 400 });
-  S.say(10, 'At that node it splits: part goes down through M3, the rest through M4. K C L: I 5 equals I D 3 plus I D 4. With equal outputs the circuit is symmetric, so the halves are equal.');
+  S.say(10, 'At that node it splits: part goes down through M3, the rest through M4. K C L: I 5 equals I D 3 plus I D 4. With equal outputs the circuit is symmetric, so the halves are equal. When the outputs move away from V REF, the split shifts with the square of the difference: that shift is what the sensor measures.');
   current(S, [[440, 160], [440, 440]], 17, null, 'I_D1', { color: C.p, at: [372, 230] });
   current(S, [[1020, 160], [1020, 440]], 17, null, 'I_D2', { color: C.n, at: [1092, 230] });
   current(S, [[440, 440], [440, 532]], 17, null, null, { color: C.cur });
@@ -198,6 +198,7 @@ scene(L11, 'Follow the current: sensing with differential pairs', 56, (S) => {
       'Solve for the follower: $$I_{D1} = I_1 - I_{D3} = 50\\,\\mu - 10\\,\\mu = 40\\,\\mu\\mathrm A$$',
     ],
     why: 'A fixed sink shared by two branches: whatever one branch brings, the other gives up.',
+    parts: [{ q: 'How much of M5’s current flows through M3?', hint: ['Equal outputs ⇒ the two sides are identical ⇒ equal split.'], how: ['$$I_{D3} = \\frac{I_5}{2} = \\frac{20\\,\\mu}{2}$$'], answer: I5 / 2, unit: 'A', tol: 0.02 }],
     answer: I1 - I5 / 2, unit: 'A', tol: 0.02,
   });
   eqAt(S, 'I_{D3} = I_{D4} = 10\\,\\mu\\mathrm A', 1360, 420, 24.5, { size: 28, w: 400, color: '#ffd38a' });
@@ -390,7 +391,7 @@ scene(L11, 'Tutorial 5 Q1 = 2025 mid-sem Q4: size the triode CMFB', 80, (S) => {
     },
     steps: [
       { t: 8, title: '**(a) Size the triode pair.** M7, M8 sit between P and ground, so $V_{DS} = V_P = 0.1$ V (tiny: **triode**). Their gates are the outputs, so $V_{GS}$ = output CM = 1.5 V. Each carries 0.5 mA. Use the full triode equation, as the key does.',
-        tex: `I_D = \\tfrac12\\mu_nC_{ox}\\tfrac WL\\left[2(V_{GS}-V_{th})V_{DS}-V_{DS}^2\\right],\\; 0.5\\,\\mathrm{mA} = \\tfrac12(135\\,\\mu)\\tfrac WL\\left[2(0.8)(0.1)-0.1^2\\right] = (67.5\\,\\mu)(0.15)\\tfrac WL,\\; \\left(\\tfrac WL\\right)_{7,8} = \\frac{0.5\\,\\mathrm m}{10.125\\,\\mu} = ${fx(wl, 4)}`,
+        tex: `V_{GS}-V_{th} = 1.5 - 0.7 = 0.8\\,\\mathrm V,\\; I_D = \\tfrac12\\mu_nC_{ox}\\tfrac WL\\left[2(V_{GS}-V_{th})V_{DS}-V_{DS}^2\\right],\\; 0.5\\,\\mathrm{mA} = \\tfrac12(135\\,\\mu)\\tfrac WL\\left[2(0.8)(0.1)-0.1^2\\right] = (67.5\\,\\mu)(0.15)\\tfrac WL,\\; \\left(\\tfrac WL\\right)_{7,8} = \\frac{0.5\\,\\mathrm m}{10.125\\,\\mu} = ${fx(wl, 4)}`,
         hl: [T([600, 660, 200, 120, C.amb])],
         try: {
           q: '**(a)** Find $(W/L)_{7,8}$ of the triode pair so that the output CM is 1.5 V with $V_P = 100$ mV.',
@@ -404,6 +405,10 @@ scene(L11, 'Tutorial 5 Q1 = 2025 mid-sem Q4: size the triode CMFB', 80, (S) => {
           ],
           why: 'The deep-triode shortcut (drop $V_{DS}^2$) gives 46.3 — also marked right. Write the full equation to match the key.',
           calc: [{ what: 'W/L in one line (prefixes on)', keys: '2 × 0.5m ÷ ( 135µ × ( 2 × 0.8 × 0.1 − 0.1 [x²] ) )', shows: fx(wl, 4), note: 'Type µ and m with [CATALOG] ▸ Engineer Symbol.' }],
+          parts: [
+            { q: 'The overdrive of M7, M8, $V_{GS} - V_{th}$.', hint: ['Their gates are the outputs: $V_{GS}$ = output CM.'], how: ['$$V_{GS} - V_{th} = 1.5 - 0.7 = 0.8\\,\\mathrm V$$'], answer: 0.8, unit: 'V', tol: 0.01 },
+            { q: 'The triode bracket $2(V_{GS}-V_{th})V_{DS} - V_{DS}^2$ (in V²), with $V_{DS} = V_P$.', hint: ['$V_{DS} = V_P = 0.1$ V.'], how: ['$$2(0.8)(0.1) - 0.1^2 = 0.16 - 0.01 = 0.15$$'], answer: 2 * 0.8 * 0.1 - 0.01, unit: 'V²', tol: 0.01 },
+          ],
           answer: wl, unit: '', tol: 0.07,
         },
         say: 'Triode equation with $V_{GS} = 1.5$ V and $V_{DS} = 0.1$ V: $(W/L)_{7,8} = 49.4$. (Dropping $V_{DS}^2$ gives 46.3 — both marked right.)' },
@@ -420,11 +425,12 @@ scene(L11, 'Tutorial 5 Q1 = 2025 mid-sem Q4: size the triode CMFB', 80, (S) => {
             `Its gate is one $V_{GS5} = V_{th} + V_{ov5}$ above P: $$V_{b1} = V_P + V_{th} + V_{ov5} = 0.1 + 0.7 + ${fx(vovn, 3)} = ${fx(vb1, 4)}\\,\\mathrm V$$`,
           ],
           why: 'A gate bias = the node under the device + one $V_{GS}$ (a link).',
+          parts: [{ q: 'The overdrive $V_{ov5}$ of M5 (0.5 mA, W/L from part a).', hint: ['$V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}\\,W/L)}$'], how: [`$$V_{ov5} = \\sqrt{\\frac{2(0.5\\,\\mathrm m)}{135\\,\\mu\\times ${fx(wl, 4)}}}$$`], answer: vovn, unit: 'V', tol: 0.01 }],
           answer: vb1, unit: 'V', tol: 0.01,
         },
         say: 'M5’s source is P, so its gate sits one $V_{GS5}$ above: $V_{b1} = 0.1 + 0.7 + 0.387 = 1.187$ V.' },
       { t: 26, title: '**(c) Swing by checks.** Lowest output: P plus the two NMOS overdrives below it (M5, M3). Highest: $V_{DD}$ minus the two PMOS overdrives above it (M9, M11). The differential swing is twice the single-ended range.',
-        tex: `V_{out,min} = V_P + 2V_{ov,n} = 0.1 + 2(${fx(vovn, 3)}) = ${fx(vmin, 3)}\\,\\mathrm V,\\; V_{out,max} = V_{DD} - 2|V_{ov,p}| = 3 - 2(${fx(vovp, 3)}) = ${fx(vmax, 4)}\\,\\mathrm V,\\; V_{pp,diff} = 2(${fx(vmax, 4)} - ${fx(vmin, 3)}) = ${fx(sw, 3)}\\,\\mathrm V`,
+        tex: `|V_{ov,p}| = \\sqrt{\\frac{2(0.5\\,\\mathrm m)}{40\\,\\mu\\times ${fx(wl, 4)}}} = ${fx(vovp, 3)}\\,\\mathrm V,\\; V_{out,min} = V_P + 2V_{ov,n} = 0.1 + 2(${fx(vovn, 3)}) = ${fx(vmin, 3)}\\,\\mathrm V,\\; V_{out,max} = V_{DD} - 2|V_{ov,p}| = 3 - 2(${fx(vovp, 3)}) = ${fx(vmax, 4)}\\,\\mathrm V,\\; V_{pp,diff} = 2(${fx(vmax, 4)} - ${fx(vmin, 3)}) = ${fx(sw, 3)}\\,\\mathrm V`,
         hl: [T([480, 150, 440, 470, C.volt])],
         try: {
           q: '**(c)** All devices are sized as in (a) and carry 0.5 mA. Find the maximum **differential** output swing (peak-to-peak).',
@@ -438,6 +444,11 @@ scene(L11, 'Tutorial 5 Q1 = 2025 mid-sem Q4: size the triode CMFB', 80, (S) => {
           ],
           why: 'Differential swing = 2 × the single-ended range. The key rounds to 1.412 V.',
           calc: [{ what: 'PMOS overdrive', keys: '[√] ( 2 × 0.5m ÷ ( 40µ × 49.38 ) )', shows: fx(vovp, 4) }, { what: 'swing', keys: '2 × ( 3 − 2 × [Ans] − 0.8746 )', shows: fx(sw, 4), note: 'Ans is the last result: press [Ans].' }],
+          parts: [
+            { q: 'The PMOS overdrive $|V_{ov,p}|$ (0.5 mA, same W/L, $\\mu_pC_{ox} = 40\\,\\mu$A/V²).', hint: ['$|V_{ov,p}| = \\sqrt{2I_D/(\\mu_pC_{ox}\\,W/L)}$'], how: [`$$|V_{ov,p}| = \\sqrt{\\frac{2(0.5\\,\\mathrm m)}{40\\,\\mu\\times ${fx(wl, 4)}}}$$`], answer: vovp, unit: 'V', tol: 0.01 },
+            { q: 'The lowest output $V_{out,min}$.', hint: ['Start at P, add the overdrives of the two NMOS below the output (M5, M3); $V_{ov,n}$ is from part (b).'], how: [`$$V_{out,min} = V_P + 2V_{ov,n} = 0.1 + 2(${fx(vovn, 3)})$$`], answer: vmin, unit: 'V', tol: 0.01 },
+            { q: 'The highest output $V_{out,max}$.', hint: ['Start at $V_{DD}$, subtract the overdrives of the two PMOS above the output (M9, M11).'], how: [`$$V_{out,max} = V_{DD} - 2|V_{ov,p}| = 3 - 2(${fx(vovp, 3)})$$`], answer: vmax, unit: 'V', tol: 0.01 },
+          ],
           answer: sw, unit: 'V', tol: 0.01,
         },
         say: 'Output range by checks: [0.875, 1.58] V per side; doubled for the differential output, 1.40 V.' },
@@ -469,6 +480,7 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
             `P is its source, one $V_{GS}$ below the gate: $$V_P = V_{b1} - V_{GS} = 0.6 - ${fx(0.4 + ova, 3)} = ${fx(A('vp'), 3)}\\,\\mathrm V$$`,
           ],
           why: 'Known gate, unknown source: subtract one $V_{GS}$.',
+          parts: [{ q: 'The overdrive of the input device M10 (40 µA, W/L = 50).', hint: ['$V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}\\,W/L)}$'], how: ['$$V_{ov} = \\sqrt{\\frac{2(40\\,\\mu)}{200\\,\\mu\\times 50}}$$'], answer: ova, unit: 'V', tol: 0.02 }],
           answer: A('vp'), unit: 'V', tol: 0.02,
         },
         say: 'Link down from the gate bias: $V_P = 0.6 - (0.4 + 0.089) = 0.111$ V.' },
@@ -485,6 +497,10 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
             `Ohm’s law at P with the triode resistance, solved for W/L: $$\\tfrac WL = \\frac{2I_D}{\\mu_nC_{ox}V_P(1.0)} = \\frac{80\\,\\mu}{200\\,\\mu\\times ${fx(A('vp'), 4)}\\times 1.0} = ${fx(A('wl'), 3)}$$`,
           ],
           why: 'The key rounds $V_P$ to 0.11 V and gets ≈ 3.64; both are marked right.',
+          parts: [
+            { q: 'The tail current $2I_D$ through the triode pair.', hint: ['Both branches (40 µA each) meet at P.'], how: ['$$2I_D = 2(40\\,\\mu)$$'], answer: 80e-6, unit: 'A', tol: 0.01 },
+            { q: '$V_{out1}+V_{out2}-2V_{th}$ with the outputs at the CM $0.5V_{DD}$.', hint: ['Each output sits at $0.5 \\times 1.8 = 0.9$ V.'], how: ['$$0.9 + 0.9 - 2(0.4) = 1.8 - 0.8$$'], answer: 1.0, unit: 'V', tol: 0.01 },
+          ],
           answer: A('wl'), unit: '', tol: 0.03,
         },
         say: 'Rearrange the Lecture 12 equation: $(W/L)_{11,12} = 2I_D/(\\mu_nC_{ox}V_P(1.8 - 0.8)) ≈ 3.62$.' },
@@ -503,7 +519,7 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
         },
         say: 'Two checks above P: $0.111 + 2(0.089) = 0.289$ V.' },
       { t: 32, title: '**Part B, same moves:** $\\mu_nC_{ox} = 150\\,\\mu$A/V², NMOS W/L = 40 at 50 µA, $V_{b1} = 0.6$ V, output CM = $0.6V_{DD}$ = 1.08 V. Link down to P, then the triode equation.',
-        tex: `V_P = 0.6 - 0.4 - ${fx(ovb, 3)} = ${fx(B('vp'), 3)}\\,\\mathrm V,\\; \\left(\\tfrac WL\\right)_{11,12} = \\frac{100\\,\\mu}{150\\,\\mu\\times ${fx(B('vp'), 3)}\\times(2.16 - 0.8)} = ${fx(B('wl'), 3)}`,
+        tex: `V_{ov} = \\sqrt{\\frac{2(50\\,\\mu)}{150\\,\\mu\\times 40}} = ${fx(ovb, 3)}\\,\\mathrm V,\\; V_P = 0.6 - 0.4 - ${fx(ovb, 3)} = ${fx(B('vp'), 3)}\\,\\mathrm V,\\; \\left(\\tfrac WL\\right)_{11,12} = \\frac{100\\,\\mu}{150\\,\\mu\\times ${fx(B('vp'), 3)}\\times(2.16 - 0.8)} = ${fx(B('wl'), 3)}`,
         try: {
           q: '**Part B** (new numbers, same circuit): $\\mu_nC_{ox} = 150\\,\\mu$A/V², NMOS W/L = 40 at 50 µA each, $V_{b1} = 0.6$ V, $V_{thn} = 0.4$ V, $V_{DD} = 1.8$ V, output CM = $0.6V_{DD}$. Find $(W/L)_{11,12}$.',
           hint: ['Same two moves as Part A: link down from $V_{b1}$ to get $V_P$, then the triode equation for W/L.',
@@ -518,11 +534,16 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
             { what: '$V_P$, then store it', keys: '0.6 − 0.4 − [√] ( 2 × 50µ ÷ ( 150µ × 40 ) ) [EXE], then [VARIABLE] ▸ A ▸ Store', shows: fx(B('vp'), 4) },
             { what: 'W/L using A', keys: '100µ ÷ ( 150µ × [SHIFT] [4] × ( 2.16 − 0.8 ) )', shows: fx(B('wl'), 4), note: '[SHIFT] [4] types the variable A.' },
           ],
+          parts: [
+            { q: 'The overdrive of the input device (50 µA, W/L = 40).', hint: ['$V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}\\,W/L)}$'], how: ['$$V_{ov} = \\sqrt{\\frac{2(50\\,\\mu)}{150\\,\\mu\\times 40}}$$'], answer: ovb, unit: 'V', tol: 0.02 },
+            { q: '$V_P$, by a link down from $V_{b1}$.', hint: ['$V_P = V_{b1} - V_{th} - V_{ov}$'], how: [`$$V_P = 0.6 - 0.4 - ${fx(ovb, 3)}$$`], answer: B('vp'), unit: 'V', tol: 0.02 },
+            { q: '$V_{out1}+V_{out2}-2V_{th}$ with the outputs at $0.6V_{DD}$.', hint: ['Each output sits at $0.6 \\times 1.8 = 1.08$ V.'], how: ['$$2(1.08) - 2(0.4) = 2.16 - 0.8$$'], answer: 1.36, unit: 'V', tol: 0.01 },
+          ],
           answer: B('wl'), unit: '', tol: 0.03,
         },
         say: 'Part B, new numbers: link down from $V_{b1}$ gives $V_P = 0.071$ V; the triode equation gives $(W/L)_{11,12} = 6.91$.' },
       { t: 41, title: '**Part C, same method:** $\\mu_nC_{ox} = 120\\,\\mu$A/V², $V_{thn} = 0.3$ V, NMOS W/L = 60 at 60 µA, $V_{b1} = 0.55$ V, output CM = $0.4V_{DD}$ = 0.72 V.',
-        tex: `V_P = 0.55 - 0.3 - ${fx(ovc, 3)} = ${fx(Cc('vp'), 3)}\\,\\mathrm V,\\; \\left(\\tfrac WL\\right)_{11,12} = \\frac{120\\,\\mu}{120\\,\\mu\\times ${fx(Cc('vp'), 3)}\\times(1.44 - 0.6)} = ${fx(Cc('wl'), 3)}`,
+        tex: `V_{ov} = \\sqrt{\\frac{2(60\\,\\mu)}{120\\,\\mu\\times 60}} = ${fx(ovc, 3)}\\,\\mathrm V,\\; V_P = 0.55 - 0.3 - ${fx(ovc, 3)} = ${fx(Cc('vp'), 3)}\\,\\mathrm V,\\; \\left(\\tfrac WL\\right)_{11,12} = \\frac{120\\,\\mu}{120\\,\\mu\\times ${fx(Cc('vp'), 3)}\\times(1.44 - 0.6)} = ${fx(Cc('wl'), 3)}`,
         try: {
           q: '**Part C** (same circuit): $\\mu_nC_{ox} = 120\\,\\mu$A/V², $V_{thn} = 0.3$ V, NMOS W/L = 60 at 60 µA each, $V_{b1} = 0.55$ V, $V_{DD} = 1.8$ V, output CM = $0.4V_{DD}$. Find $(W/L)_{11,12}$.',
           hint: ['Link down from $V_{b1}$ to P, then solve the triode-pair equation for W/L.', '$\\tfrac WL = \\dfrac{2I_D}{\\mu_nC_{ox}V_P(V_{out1}+V_{out2}-2V_{th})}$.'],
@@ -533,6 +554,11 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
             `Triode equation for W/L: $$\\tfrac WL = \\frac{120\\,\\mu}{120\\,\\mu\\times ${fx(Cc('vp'), 3)}\\times 0.84} = ${fx(Cc('wl'), 3)}$$`,
           ],
           why: 'Three versions, one recipe: link to P, triode equation for W/L.',
+          parts: [
+            { q: 'The overdrive of the input device (60 µA, W/L = 60).', hint: ['$V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}\\,W/L)}$'], how: ['$$V_{ov} = \\sqrt{\\frac{2(60\\,\\mu)}{120\\,\\mu\\times 60}}$$'], answer: ovc, unit: 'V', tol: 0.02 },
+            { q: '$V_P$, by a link down from $V_{b1}$.', hint: ['$V_P = V_{b1} - V_{th} - V_{ov}$'], how: [`$$V_P = 0.55 - 0.3 - ${fx(ovc, 3)}$$`], answer: Cc('vp'), unit: 'V', tol: 0.02 },
+            { q: '$V_{out1}+V_{out2}-2V_{th}$ with the outputs at $0.4V_{DD}$.', hint: ['Each output sits at $0.4 \\times 1.8 = 0.72$ V.'], how: ['$$2(0.72) - 2(0.3) = 1.44 - 0.6$$'], answer: 0.84, unit: 'V', tol: 0.01 },
+          ],
           answer: Cc('wl'), unit: '', tol: 0.03,
         },
         say: 'Part C: $V_P = 0.121$ V and $(W/L)_{11,12} = 9.85$.' },
@@ -589,6 +615,7 @@ scene(L11, 'Problem Set 2 P5: sizing the replica', 58, (S) => {
             'So $V_{out,CM} - 0.7 = 24/24 = 1.0$ V. Add back $V_{th}$: $$V_{out,CM} = 0.7 + 1.0 = 1.7\\,\\mathrm V$$',
           ],
           why: 'An oversized M15 conducts more at $V_{REF}$, so the outputs must rise until M12 + M13 match it: the CM ends 0.2 V too high.',
+          parts: [{ q: 'How far above $V_{th}$ must the output CM sit, $V_{out,CM} - V_{th}$?', hint: ['$30(V_{REF}-V_{th}) = 24(V_{out,CM}-V_{th})$'], how: ['$$V_{out,CM} - V_{th} = \\frac{30(1.5 - 0.7)}{24} = \\frac{24}{24}$$'], answer: 30 * 0.8 / 24, unit: 'V', tol: 0.01 }],
           answer: v, unit: 'V', tol: 0.01,
         },
         say: 'An oversized M15 conducts more at $V_{REF}$, so the loop pushes the outputs up until M12 + M13 match it: 1.7 V instead of 1.5 V.' },
