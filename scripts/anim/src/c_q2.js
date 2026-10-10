@@ -5,7 +5,8 @@ scene(CQ, 'Tutorial 2 Q2: the diode-stack telescopic, every part', 70, (S) => {
     tag: 'LEC 6 · BACKGROUND QUESTION', title: 'Minimum width, swing and gain', src: 'Tutorial 2 Q2 · Razavi 9.2', paper: 't2q2',
     q: 'Single-ended telescopic with a diode-stack PMOS mirror (M2’s gate tied to the output): $(W/L)_{1-4}$ = 100/0.5, $I_{SS}$ = 1 mA, $V_b$ = 1.4 V, M5–M8 identical with L = 0.5 µm, $V_{DD}$ = 3 V. (a) Minimum PMOS width W for M3 to stay saturated. (b) Output swing. (c) Gain.', giv: SETA, qh: 260,
     tests: 'the diode tax: two PMOS diodes take two whole $|V_{GS}|$, then the NMOS fence on M3; the buffer fence on M2 for the ceiling.',
-    fig: (S2) => { const g = teleSE(S2, { load: 'diode', buffer: true }); g.setAttribute('transform', 'translate(-200 30) scale(0.95)'); },
+    // names as printed: one gate bias V_b on M3, M4; X = M4's source (M2's drain); M1's gate V_in
+    fig: (S2) => { const g = teleSE(S2, { load: 'diode', buffer: true, vb: 'V_b', vin1: 'V_in', xname: '', qname: '', pname: '', rname: 'X' }); g.setAttribute('transform', 'translate(-200 30) scale(0.95)'); },
     steps: [
       { t: 6, title: '(a) **The diode tax sets the limit.** Two PMOS diodes from $V_{DD}$ put M3’s drain at $V_{DD} - 2|V_{GS,p}|$. M3’s NMOS fence (gate $V_b$) needs that drain ≥ $V_b - V_{thn}$, which caps the PMOS $|V_{GS}|$.', tex: '3 - 2|V_{GS,p}| \\ge 1.4 - 0.7 \\;\\Rightarrow\\; |V_{GS,p}| \\le 1.15\\,\\mathrm{V},\\;\\; |V_{ov,p}| \\le 1.15 - 0.8 = 0.35\\,\\mathrm{V}', say: '$3 - 2|V_{GS,p}| \\ge 1.4 - 0.7$, so each PMOS may use at most 1.15 V: an overdrive of at most 0.35 V.' },
       { t: 14, title: '**Smallest width**: a smaller overdrive at the same 0.5 mA needs a wider PMOS. Square law at the largest allowed $|V_{ov}|$ = 0.35 V.', tex: '\\tfrac{W}{L} = \\frac{2(0.5\\,\\mathrm{m})}{38.36\\,\\mu\\,(0.35)^2} = 212.8 \\;\\Rightarrow\\; W = 212.8\\times0.5\\,\\mu\\mathrm{m} = 106\\,\\mu\\mathrm{m}',
@@ -30,8 +31,8 @@ scene(CQ, 'Tutorial 2 Q2: the diode-stack telescopic, every part', 70, (S) => {
             pt('$V_{GS4}$ of the NMOS cascode (0.5 mA, W/L = 200)?', NUM.vgsn, 'V', ['Square law for the overdrive, plus the threshold.', '$V_{GS4} = V_{thn} + \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}}$'], [`$$0.7 + \\sqrt{\\frac{2(0.5\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.7 + ${fx(NUM.vovn, 3)}$$`]),
           ],
           q: '(b) Highest output voltage? (M2’s gate is tied to the output; from (a), $|V_{ov,p}| = 0.35$ V.)', answer: ans('bank-t2q2', 'vmax'), unit: 'V', tol: 0.02,
-          hint: ['Two ceilings: the PMOS diode stack (M6, M8) and M2’s fence. M2’s drain is one $V_{GS4}$ below $V_b$; its gate is the output and may be at most $V_{thn}$ above that drain. The lower ceiling wins.', '$V_{out,max} = \\min(V_{DD} - |V_{thp}| - 2|V_{ov,p}|,\\;V_b - V_{GS4} + V_{thn})$, $V_{GS4} = V_{thn} + \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}}$'],
-          how: ['Ceiling from the PMOS stack (overdrive 0.35 V from (a)): $$V_{DD} - |V_{thp}| - 2|V_{ov,p}| = 3 - 0.8 - 2(0.35) = 1.5\\,\\text{V}$$', 'M4 at 0.5 mA, W/L = 200: $$V_{GS4} = 0.7 + \\sqrt{\\frac{2(0.5\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.7 + 0.193 = 0.893\\,\\text{V}$$', 'M2’s fence (gate = output, drain $V_b - V_{GS4}$): $$V_b - V_{GS4} + V_{thn} = 1.4 - 0.893 + 0.7 = 1.207\\,\\text{V}$$', 'The lower ceiling binds: $V_{out,max} = 1.21$ V. The window is only about half a volt.'] },
+          hint: ['Two ceilings: the PMOS diode stack (M6, M8) and M2’s fence. M2’s drain (node X) is one $V_{GS4}$ below $V_b$; its gate is the output and may be at most $V_{thn}$ above that drain. The lower ceiling wins.', '$V_{out,max} = \\min(V_{DD} - |V_{thp}| - 2|V_{ov,p}|,\\;V_b - V_{GS4} + V_{thn})$, $V_{GS4} = V_{thn} + \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}}$'],
+          how: ['Ceiling from the PMOS stack (overdrive 0.35 V from (a)): $$V_{DD} - |V_{thp}| - 2|V_{ov,p}| = 3 - 0.8 - 2(0.35) = 1.5\\,\\text{V}$$', 'M4 at 0.5 mA, W/L = 200: $$V_{GS4} = 0.7 + \\sqrt{\\frac{2(0.5\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.7 + 0.193 = 0.893\\,\\text{V}$$', 'Fence on M2 (NMOS: drain = X = $V_b - V_{GS4}$, one link below M4’s gate; gate = $V_{out}$): the gate may sit at most $V_{thn}$ above the drain: $$V_b - V_{GS4} + V_{thn} = 1.4 - 0.893 + 0.7 = 1.207\\,\\text{V}$$', 'The lower ceiling binds: $V_{out,max} = 1.21$ V. The window is only about half a volt.'] },
         say: 'The buffer fence on M2 wins: 1.21 V. The window is only half a volt.' },
       { t: 39, title: '(c) **Gain by two looks**: down into the NMOS cascode M4 on M2, up into the PMOS cascode M6 on M8; each is about $g_mr_O\\cdot r_O$.', tex: 'A_v = g_{m1}(g_{m4}r_{O4}r_{O2}\\parallel g_{m6}r_{O6}r_{O8}) = 5.18\\,\\mathrm{mS}\\,(2.07\\,\\mathrm{M\\Omega}\\parallel 286\\,\\mathrm{k\\Omega}) \\approx 1301',
         try: {
@@ -87,7 +88,7 @@ scene(CQ, '2023 mid-sem Q3: design a high-swing telescopic', 80, (S) => {
           ],
           q: 'Lowest allowed $V_{b1}$ (gate of the NMOS cascodes M5, M6)? From the floor step: $V_{ov,N} = 0.15$ V.', answer: ans('pyq-m23-q3', 'vb1'), unit: 'V', tol: 0.01,
           hint: ['The bottom source M7 needs $V_{ov,N}$ (a check); M5’s gate sits one $V_{GS5}$ above M5’s source (a link).', '$V_{b1,min} = V_{ov7} + V_{GS5}$, $V_{GS5} = V_{thn} + V_{ov,N}$'],
-          how: ['$$V_{GS5} = V_{thn} + V_{ov,N} = 0.3 + 0.15 = 0.45\\,\\text{V}$$', 'M7 at its edge puts M5’s source at $V_{ov7} = 0.15$ V; add the link: $$V_{b1,min} = 0.15 + 0.45 = 0.6\\,\\text{V}$$'] },
+          how: ['$$V_{GS5} = V_{thn} + V_{ov,N} = 0.3 + 0.15 = 0.45\\,\\text{V}$$', 'Check on M7 (NMOS: source = ground, drain = M5’s source): one $V_{ov}$ puts M5’s source at $V_{ov7} = 0.15$ V. Link through M5 (NMOS: gate = $V_{b1}$): source to gate adds $V_{GS5}$: $$V_{b1,min} = 0.15 + 0.45 = 0.6\\,\\text{V}$$'] },
         say: '0.6 V.' },
       { t: 39, title: '$V_{b2,max}$: walk down from $V_{DD}$. **Tail check** ($\\sqrt2|V_{ov,P}|$), **M2’s check** ($|V_{ov,P}|$), then the **link** $|V_{GS4}|$ down to M4’s gate.', tex: 'V_{b2,max} = 2 - 0.298 - 0.211 - (0.4 + 0.211) = 0.88\\,\\mathrm{V}',
         try: {
@@ -97,7 +98,7 @@ scene(CQ, '2023 mid-sem Q3: design a high-swing telescopic', 80, (S) => {
           ],
           q: 'Highest allowed $V_{b2}$ (gate of the PMOS cascodes M3, M4) before M2 leaves saturation? From the ceiling step: $|V_{ov,P}| = 0.211$ V (tail $\\sqrt2$ times that).', answer: ans('pyq-m23-q3', 'vb2'), unit: 'V', tol: 0.02,
           hint: ['Walk down from $V_{DD}$: the tail M9 needs $\\sqrt2|V_{ov,P}|$, M2 needs $|V_{ov,P}|$ (two checks) — that is M4’s source at its highest. M4’s gate sits one $|V_{GS4}|$ lower (a link).', '$V_{b2,max} = V_{DD} - \\sqrt2|V_{ov,P}| - |V_{ov,P}| - |V_{GS4}|$'],
-          how: ['Tail check: $$\\sqrt2|V_{ov,P}| = 1.414\\times0.211 = 0.298\\,\\text{V}$$', 'Link through M4: $$|V_{GS4}| = |V_{thp}| + |V_{ov,P}| = 0.4 + 0.211 = 0.611\\,\\text{V}$$', '$$V_{b2,max} = 2 - 0.298 - 0.211 - 0.611 = 0.88\\,\\text{V}$$'] },
+          how: ['Tail check: $$\\sqrt2|V_{ov,P}| = 1.414\\times0.211 = 0.298\\,\\text{V}$$', 'Checks on M9 and M2 put M4’s source (M2’s drain) at $2 - 0.298 - 0.211 = 1.491$ V. Link through M4 (PMOS: source = M2’s drain on top, gate = $V_{b2}$): from a source down to its gate is $$|V_{GS4}| = |V_{thp}| + |V_{ov,P}| = 0.4 + 0.211 = 0.611\\,\\text{V}$$', '$$V_{b2,max} = 2 - 0.298 - 0.211 - 0.611 = 0.88\\,\\text{V}$$'] },
         say: '0.88 V.' },
       { t: 47, title: '$V_{b3}$ **biases the tail M9** at 50 µA: its gate sits one $|V_{GS9}|$ below $V_{DD}$, with $|V_{ov9}| = \\sqrt2|V_{ov,P}|$.', tex: 'V_{b3} = V_{DD} - (|V_{thp}| + |V_{ov9}|) = 2 - (0.4 + 0.298) = 1.30\\,\\mathrm{V}',
         try: {

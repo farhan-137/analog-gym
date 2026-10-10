@@ -455,7 +455,7 @@ scene(L10, 'Quiz 2 2024 Q2: VREF, optimum input CM, CM gain for ±1%', 84, (S) =
   pyqFrame(S, {
     paper: 'q24bq2', tag: 'LEC 10 · PAST PAPER 1 OF 4', title: 'Resistive-sensing CMFB: where should everything sit?', src: 'Quiz 2 2024-25 Q2 · 9 marks',
     q: '$A_d = 50$ without the sensing R’s and feedback amp. $2V_{ov1} = V_{ov5}$, $3V_{ov1} = |V_{ov3}|$. Find $V_{REF}$ for a symmetric output swing, the optimum $V_{in,CM}$, and the CM gain allowed if $V_{o,CM}$ may vary by ±1%.',
-    giv: '$\\lambda_n = \\lambda_p = 0.2$ V⁻¹, $V_{thn} = 0.4$ V, $|V_{thp}| = 0.5$ V, $V_{DD} = 1.8$ V, $\\mu_nC_{ox} = 150$, $\\mu_pC_{ox} = 50\\,\\mu$A/V², $(W/L)_{3,4,6}$ equal, $I_{REF} = 50\\,\\mu$A', qh: 250,
+    giv: '$\\lambda_n = \\lambda_p = 0.2$ V⁻¹, $V_{thn} = 0.4$ V, $|V_{thp}| = 0.5$ V, $V_{DD} = 1.8$ V, $\\mu_nC_{ox} = 150$, $\\mu_pC_{ox} = 50\\,\\mu$A/V², $(W/L)_{3,4,6}$ equal, reference source (under M6) $= 50\\,\\mu$A', qh: 250,
     tests: 'turning a **gain into an overdrive** ($A_d = 1/(\\lambda V_{ov})$), the **output range from checks** (its middle is $V_{REF}$), the **input-CM range from a check + a fence**, and what “±1%” means for the CM gain.',
     fig: (S2) => { const g = q24bq2Fig(S2); g.setAttribute('transform', 'translate(0 110)'); },
     steps: [
@@ -472,28 +472,28 @@ scene(L10, 'Quiz 2 2024 Q2: VREF, optimum input CM, CM gain for ±1%', 84, (S) =
       { t: 17, title: '**Output range from the checks.** Lowest output: the tail M5 and M1 must stay saturated. Highest: M3 must stay saturated. A **symmetric swing** puts $V_{REF}$ in the middle.',
         tex: 'V_{o,min} = V_{ov5} + V_{ov1} = 0.2 + 0.1 = 0.3\\,\\text{V},\\; V_{o,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.3 = 1.5\\,\\text{V},\\; V_{REF} = \\frac{0.3 + 1.5}{2} = 0.9\\,\\text{V}', hl: [T([330, 160, 400, 380, C.volt])],
         try: { parts: [
-          { q: 'First: the lowest output $V_{o,min}$ that keeps M5 and M1 saturated?', answer: Q24.vomin, unit: 'V', tol: 0.01, hint: '$V_{o,min} = V_{ov5} + V_{ov1}$, with $V_{ov5} = 2V_{ov1}$', how: ['$$V_{o,min} = 0.2 + 0.1 = 0.3\\,\\text{V}$$'] },
-          { q: 'Next: the highest output $V_{o,max}$ that keeps M3 saturated?', answer: Q24.vomax, unit: 'V', tol: 0.01, hint: '$V_{o,max} = V_{DD} - |V_{ov3}|$, with $|V_{ov3}| = 3V_{ov1}$', how: ['$$V_{o,max} = 1.8 - 0.3 = 1.5\\,\\text{V}$$'] }],
+          { q: 'First: the lowest output $V_{o,min}$ that keeps M5 and M1 saturated?', answer: Q24.vomin, unit: 'V', tol: 0.01, hint: '$V_{o,min} = V_{ov5} + V_{ov1}$, with $V_{ov5} = 2V_{ov1}$', how: ['Check (how far the output can fall): M1 (NMOS, drain = output, source = P) needs $V_{DS1} \\ge V_{ov1}$, and M5 (NMOS, drain = P, source = ground) needs $V_{DS5} \\ge V_{ov5}$: $$V_{o,min} = 0.2 + 0.1 = 0.3\\,\\text{V}$$'] },
+          { q: 'Next: the highest output $V_{o,max}$ that keeps M3 saturated?', answer: Q24.vomax, unit: 'V', tol: 0.01, hint: '$V_{o,max} = V_{DD} - |V_{ov3}|$, with $|V_{ov3}| = 3V_{ov1}$', how: ['Check (how far the output can rise): M3 is PMOS, source = $V_{DD}$ (top), drain = output, so it needs $|V_{DS3}| \\ge |V_{ov3}|$: $$V_{o,max} = 1.8 - 0.3 = 1.5\\,\\text{V}$$'] }],
           q: 'The CMFB loop holds the output CM at $V_{REF}$. Using the overdrives from the first part, choose $V_{REF}$ so the outputs can swing equally far up and down.', answer: 0.9, unit: 'V', tol: 0.01,
           hint: ['Find the lowest and the highest output that keep every device saturated; $V_{REF}$ sits in the middle.',
             '$V_{o,min} = V_{ov5} + V_{ov1}$, $\\;V_{o,max} = V_{DD} - |V_{ov3}|$, $\\;V_{REF} = \\frac{V_{o,min} + V_{o,max}}{2}$'],
-          how: ['Lowest output: going down from the output, M1 and the tail M5 each need their overdrive: $$V_{o,min} = V_{ov5} + V_{ov1} = 0.2 + 0.1 = 0.3\\,\\text{V}$$',
-            'Highest output: the PMOS load M3 needs $|V_{ov3}|$ below $V_{DD}$: $$V_{o,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.3 = 1.5\\,\\text{V}$$',
+          how: ['Lowest output, by checks (the question is how far a drain can move): M1 (NMOS, drain = output, source = P) needs $V_{DS1} \\ge V_{ov1}$, and the tail M5 (drain = P, source = ground) needs $V_{DS5} \\ge V_{ov5}$: $$V_{o,min} = V_{ov5} + V_{ov1} = 0.2 + 0.1 = 0.3\\,\\text{V}$$',
+            'Highest output, by a check: M3 is PMOS, source = $V_{DD}$ (top), drain = output, so it needs $|V_{DS3}| \\ge |V_{ov3}|$: $$V_{o,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.3 = 1.5\\,\\text{V}$$',
             'Equal swing both ways means resting in the middle, and CMFB makes the output rest at $V_{REF}$: $$V_{REF} = \\frac{0.3 + 1.5}{2} = 0.9\\,\\text{V}$$'],
           why: '$V_{REF}$ = the middle of the output range.' },
         say: 'Lowest output: the tail’s and M1’s overdrives, 0.3 V. Highest: $1.8 - 0.3 = 1.5$ V. CMFB holds the CM at $V_{REF}$, so put it in the middle: 0.9 V.' },
       { t: 26, title: '**Input-CM range.** Floor: the tail needs $V_{ov5}$ at P, and the gate sits one $V_{GS1}$ above P. Ceiling: M1’s gate may be at most $V_{thn}$ above its drain, which sits at $V_{o,CM}$. The **optimum is the middle**.',
         tex: 'V_{in,min} = V_{ov5} + V_{GS1} = 0.2 + 0.5 = 0.7\\,\\text{V},\\; V_{in,max} = V_{o,CM} + V_{thn} = 0.9 + 0.4 = 1.3\\,\\text{V},\\; V_{in,CM} = \\frac{0.7 + 1.3}{2} = 1.0\\,\\text{V}', hl: [T([330, 380, 400, 260, C.amb])],
         try: { parts: [
-          { q: 'First: M1’s gate–source voltage $V_{GS1}$?', answer: Q24.vgs1, unit: 'V', tol: 0.01, hint: '$V_{GS1} = V_{thn} + V_{ov1}$', how: ['$$V_{GS1} = 0.4 + 0.1 = 0.5\\,\\text{V}$$'] },
-          { q: 'The lowest input CM $V_{in,min}$ (tail M5 just saturated)?', answer: Q24.vinmin, unit: 'V', tol: 0.01, hint: '$V_{in,min} = V_{ov5} + V_{GS1}$', how: ['$$V_{in,min} = 0.2 + 0.5 = 0.7\\,\\text{V}$$'] },
-          { q: 'The highest input CM $V_{in,max}$ (M1 just saturated, drain at $V_{o,CM} = 0.9$ V)?', answer: Q24.vinmax, unit: 'V', tol: 0.01, hint: '$V_{in,max} = V_{o,CM} + V_{thn}$', how: ['$$V_{in,max} = 0.9 + 0.4 = 1.3\\,\\text{V}$$'] }],
+          { q: 'First: M1’s gate–source voltage $V_{GS1}$?', answer: Q24.vgs1, unit: 'V', tol: 0.01, hint: '$V_{GS1} = V_{thn} + V_{ov1}$', how: ['Link (from P up to the gate): M1 is NMOS, gate = $V_{in1}$, source = P: $$V_{GS1} = V_{thn} + V_{ov1} = 0.4 + 0.1 = 0.5\\,\\text{V}$$'] },
+          { q: 'The lowest input CM $V_{in,min}$ (tail M5 just saturated)?', answer: Q24.vinmin, unit: 'V', tol: 0.01, hint: '$V_{in,min} = V_{ov5} + V_{GS1}$', how: ['Check on M5 (drain = P): P ≥ $V_{ov5}$; then the link through M1 (source = P, gate = input) adds $V_{GS1}$: $$V_{in,min} = 0.2 + 0.5 = 0.7\\,\\text{V}$$'] },
+          { q: 'The highest input CM $V_{in,max}$ (M1 just saturated, drain at $V_{o,CM} = 0.9$ V)?', answer: Q24.vinmax, unit: 'V', tol: 0.01, hint: '$V_{in,max} = V_{o,CM} + V_{thn}$', how: ['Fence on M1 (NMOS, gate = input, drain = output at $V_{o,CM}$): it stays saturated while $V_{G1} \\le V_{D1} + V_{thn}$: $$V_{in,max} = 0.9 + 0.4 = 1.3\\,\\text{V}$$'] }],
           q: 'Find the optimum input common-mode level $V_{in,CM}$: the middle of the range of input CM that keeps M5 and M1 saturated, with the output CM at $V_{REF}$ from the previous part.', answer: 1.0, unit: 'V', tol: 0.01,
           hint: ['Bottom: keep the tail M5 saturated, then add M1’s gate–source voltage. Top: keep M1 saturated with its drain at $V_{o,CM}$.',
             '$V_{in,min} = V_{ov5} + (V_{thn} + V_{ov1})$, $\\;V_{in,max} = V_{o,CM} + V_{thn}$'],
-          how: ['M1’s gate–source voltage: $$V_{GS1} = V_{thn} + V_{ov1} = 0.4 + 0.1 = 0.5\\,\\text{V}$$',
-            'Lowest input CM: the tail needs $V_{ov5}$ at node P, and the gate sits $V_{GS1}$ above P: $$V_{in,min} = V_{ov5} + V_{GS1} = 0.2 + 0.5 = 0.7\\,\\text{V}$$',
-            'Highest input CM: M1 stays saturated while its gate is at most $V_{thn}$ above its drain, at $V_{o,CM} = 0.9$ V: $$V_{in,max} = 0.9 + 0.4 = 1.3\\,\\text{V}$$',
+          how: ['Link: M1 is NMOS, gate = $V_{in1}$, source = P, so the gate sits one $V_{GS1}$ above P: $$V_{GS1} = V_{thn} + V_{ov1} = 0.4 + 0.1 = 0.5\\,\\text{V}$$',
+            'Lowest input CM: a check on the tail M5 (NMOS, drain = P, source = ground) puts P at least $V_{ov5}$ up, then the link through M1 adds $V_{GS1}$: $$V_{in,min} = V_{ov5} + V_{GS1} = 0.2 + 0.5 = 0.7\\,\\text{V}$$',
+            'Highest input CM, a fence on M1 (gate = input, drain = output at $V_{o,CM} = 0.9$ V): it stays saturated while its gate is at most $V_{thn}$ above its drain: $$V_{in,max} = 0.9 + 0.4 = 1.3\\,\\text{V}$$',
             'Take the middle: $$V_{in,CM} = \\frac{0.7 + 1.3}{2} = 1.0\\,\\text{V}$$'],
           why: 'Floor = check + link; ceiling = the fence $V_{G} \\le V_{D} + V_{th}$.' },
         say: 'Floor: tail check plus the link up to M1’s gate, $0.2 + 0.5 = 0.7$ V. Ceiling: M1’s drain sits at $V_{o,CM} = 0.9$ V and its gate may be $V_{th}$ above: 1.3 V. The middle, 1.0 V, is the optimum.' },
@@ -538,7 +538,7 @@ function t5q3Fig(S, sc = 1) {
   isrc(S, 620, 340, { label: 'I_2', left: true, len: 40 }); gnd(S, 620, 380);
   pmos(S, 780, 205, { name: 'M11', gl: 30 }); wire(S, [[680, 205], [716, 205]]); wire(S, [[780, 150], [780, 155]]);
   wire(S, [[780, 255], [780, 280]]); dot(S, 780, 280); wire(S, [[720, 280], [840, 280], [840, 300]]); wire(S, [[720, 280], [720, 300]]);
-  pmos(S, 720, 350, { name: 'M7', gate: 'V_REF', gl: 24 }); pmos(S, 840, 350, { name: 'M8', gate: 'V_O,CM', gl: 24, right: true });
+  pmos(S, 720, 350, { name: 'M7', gl: 24 }); txt(S, 668, 384, 'V_REF', { size: 18, color: C.muted, anchor: 'middle' }); /* printed: V_REF under M7’s gate, clear of I_2 */ pmos(S, 840, 350, { name: 'M8', gate: 'V_O,CM', gl: 24, right: true });
   wire(S, [[720, 400], [720, 490]]); wire(S, [[840, 400], [840, 490]]);
   const m9 = nmos(S, 720, 540, { name: 'M9', right: true, gl: 24, nameSide: 'l' }); dot(S, 720, 470); wire(S, [[720, 470], [764, 470], [764, 540]]);
   nmos(S, 840, 540, { name: 'M10', gl: 24, right: true }); dot(S, 840, 470); wire(S, [[840, 470], [884, 470], [884, 540]]);
@@ -684,8 +684,8 @@ scene(L10, '2024 mid-sem Q1 (Tutorial 5 Q3), part 1: no CMFB', 80, (S) => {
           hint: ['Find each overdrive from its current, then the lowest and highest output that keep M5, M1 and M3 saturated; take the middle.',
             '$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu C_{ox}(W/L)}}$, $\\;V_{O,CM} = \\frac{(V_{ov5} + V_{ov1}) + (V_{DD} - |V_{ov3}|)}{2}$'],
           how: ['Overdrives from the currents (W/L = 50): $$V_{ov1} = \\sqrt{\\frac{2(50\\,\\mu)}{100\\,\\mu\\times 50}} = 0.141\\,\\text{V},\\quad V_{ov5} = \\sqrt{\\frac{2(100\\,\\mu)}{100\\,\\mu\\times 50}} = 0.2\\,\\text{V},\\quad |V_{ov3}| = \\sqrt{\\frac{2(50\\,\\mu)}{50\\,\\mu\\times 50}} = 0.2\\,\\text{V}$$',
-            'Lowest output (M5 and M1 saturated): $$V_{O,min} = V_{ov5} + V_{ov1} = 0.2 + 0.141 = 0.341\\,\\text{V}$$',
-            'Highest output (M3 saturated): $$V_{O,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.2 = 1.6\\,\\text{V}$$',
+            'Lowest output, by checks (how far the drain can fall): M1 (NMOS, drain = output, source = P) needs $V_{DS1} \\ge V_{ov1}$, the tail M5 (drain = P, source = ground) needs $V_{DS5} \\ge V_{ov5}$: $$V_{O,min} = V_{ov5} + V_{ov1} = 0.2 + 0.141 = 0.341\\,\\text{V}$$',
+            'Highest output, by a check: M3 is PMOS, source = $V_{DD}$ (top), drain = output, so $|V_{DS3}| \\ge |V_{ov3}|$: $$V_{O,max} = V_{DD} - |V_{ov3}| = 1.8 - 0.2 = 1.6\\,\\text{V}$$',
             'The middle: $$V_{O,CM} = \\frac{0.341 + 1.6}{2} = 0.971\\,\\text{V}$$'],
           calc: [{ what: 'The whole middle in one line', keys: '( 0.2 + [√] ( 2 × 50µ ÷ ( 100µ × 50 ) ) + 1.8 − 0.2 ) ÷ 2 [EXE]', shows: '0.9707', note: 'Close the √ bracket before adding 1.8.' }] },
         say: 'Output floor: tail + M1 overdrives, 0.341 V. Ceiling: $1.8 - |V_{ov3}| = 1.6$ V. Middle: 0.971 V.' },
@@ -714,14 +714,14 @@ scene(L10, '2024 mid-sem Q1 (Tutorial 5 Q3), part 2: with CMFB', 84, (S) => {
       { t: 6, title: '**The ±1% target.** The output CM may move from −1% to +1% of $V_{O,CM}$ (a 2% window) while the input CM sweeps its whole range, from $V_{ov5} + V_{GS1}$ up to $V_{O,CM} + V_{thn}$.',
         tex: 'V_{in,min} = V_{ov5} + V_{thn} + V_{ov1} = 0.2 + 0.4 + 0.141 = 0.741\\,\\text{V},\\; V_{in,max} = V_{O,CM} + V_{thn} = 0.971 + 0.4 = 1.371\\,\\text{V},\\; |A_{CM}|_{req} = \\frac{2(0.01)(0.971)}{1.371 - 0.741} = \\frac{0.0194}{0.629} = 0.0309',
         try: { parts: [
-          { q: 'First: the lowest input CM $V_{in,min}$ (tail M5 just saturated)?', answer: T5V.vinmin, unit: 'V', tol: 0.01, hint: '$V_{in,min} = V_{ov5} + V_{thn} + V_{ov1}$ (overdrives from part 1)', how: ['$$V_{in,min} = 0.2 + 0.4 + 0.141 = 0.741\\,\\text{V}$$'] },
-          { q: 'Next: the highest input CM $V_{in,max}$ (M1 just saturated)?', answer: T5V.vinmax, unit: 'V', tol: 0.01, hint: '$V_{in,max} = V_{O,CM} + V_{thn}$', how: ['$$V_{in,max} = 0.971 + 0.4 = 1.371\\,\\text{V}$$'] },
+          { q: 'First: the lowest input CM $V_{in,min}$ (tail M5 just saturated)?', answer: T5V.vinmin, unit: 'V', tol: 0.01, hint: '$V_{in,min} = V_{ov5} + V_{thn} + V_{ov1}$ (overdrives from part 1)', how: ['Check on the tail M5 (drain = P): P ≥ $V_{ov5}$; link through M1 (NMOS, source = P, gate = input): add $V_{GS1} = V_{thn} + V_{ov1}$: $$V_{in,min} = 0.2 + 0.4 + 0.141 = 0.741\\,\\text{V}$$'] },
+          { q: 'Next: the highest input CM $V_{in,max}$ (M1 just saturated)?', answer: T5V.vinmax, unit: 'V', tol: 0.01, hint: '$V_{in,max} = V_{O,CM} + V_{thn}$', how: ['Fence on M1 (gate = input, drain = output at $V_{O,CM}$): saturated while $V_{G1} \\le V_{D1} + V_{thn}$: $$V_{in,max} = 0.971 + 0.4 = 1.371\\,\\text{V}$$'] },
           { q: 'Next: the allowed output-CM change (±1% of $V_{O,CM}$)?', answer: T5V.dvo, unit: 'V', tol: 0.02, hint: 'A 2% window: $2(0.01)V_{O,CM}$', how: ['$$\\Delta V_{O,CM} = 2\\times 0.01\\times 0.971 = 0.0194\\,\\text{V}$$'] }],
           q: '$V_{O,CM}$ (part 1) may vary by ±1% while the input CM moves over its full range. What is the largest CM gain allowed?', answer: ans('bank-t5q3', 'target'), unit: 'V/V', tol: 0.03,
           hint: ['Same method as Quiz 2 Q2: (allowed output-CM change) ÷ (input-CM range). First the input-CM range: a check at the tail plus a link up to M1’s gate, and the fence on M1.',
             '$V_{in,min} = V_{ov5} + V_{GS1}$, $\\;V_{in,max} = V_{O,CM} + V_{thn}$, $\\;|A_{CM}|_{req} = \\dfrac{2(0.01)V_{O,CM}}{V_{in,max} - V_{in,min}}$'],
-          how: ['Lowest input CM: the tail’s overdrive plus M1’s $V_{GS}$ (overdrives from part 1): $$V_{in,min} = 0.2 + (0.4 + 0.141) = 0.741\\,\\text{V}$$',
-            'Highest input CM: M1’s gate at most $V_{thn}$ above its drain: $$V_{in,max} = 0.971 + 0.4 = 1.371\\,\\text{V}$$',
+          how: ['Lowest input CM: a check on the tail M5 (NMOS, drain = P) puts P at least $V_{ov5}$ up; the link through M1 (source = P, gate = input) adds $V_{GS1} = V_{thn} + V_{ov1}$ (overdrives from part 1): $$V_{in,min} = 0.2 + (0.4 + 0.141) = 0.741\\,\\text{V}$$',
+            'Highest input CM, a fence on M1 (gate = input, drain = output at $V_{O,CM}$): its gate may sit at most $V_{thn}$ above its drain: $$V_{in,max} = 0.971 + 0.4 = 1.371\\,\\text{V}$$',
             'Allowed output change (a 2% window): $$\\Delta V_{O,CM} = 2\\times 0.01\\times 0.971 = 0.0194\\,\\text{V}$$',
             'The ratio: $$|A_{CM}|_{req} = \\frac{0.0194}{1.371 - 0.741} = \\frac{0.0194}{0.629} = 0.0309$$'],
           why: '±1% means a 2% window over the **whole** input-CM range.' },
@@ -780,17 +780,22 @@ function t5q2Fig(S) {
   nmos(S, L, 510, { right: true, gl: 26 }); nmos(S, R, 510, { gl: 26 }); wire(S, [[L + 56, 510], [R - 56, 510]]);
   wire(S, [[L, 560], [L, 590]]); wire(S, [[R, 560], [R, 590]]);
   const m3 = nmos(S, L, 640, { name: 'M3', right: true, gl: 26, nameSide: 'l' }); const m4 = nmos(S, R, 640, { name: 'M4', gl: 26 });
-  wire(S, [[L + 56, 640], [R - 56, 640]]); txt(S, 580, 632, 'V_E', { size: 18, color: C.amb, weight: 700, anchor: 'middle' });
+  wire(S, [[L + 56, 640], [R - 56, 640]]); txt(S, 590, 624, 'V_E', { size: 18, color: C.amb, weight: 700, anchor: 'start' });
   gnd(S, L, 690); gnd(S, R, 690);
   // input pair at left
-  nmos(S, 180, 480, { name: 'M1', gate: 'V_in1' }); nmos(S, 320, 480, { name: 'M2', right: true, gate: 'V_in2' });
+  nmos(S, 180, 480, { name: 'M1' }); nmos(S, 320, 480, { name: 'M2', right: true });
+  // printed: one differential input V_in between two terminals (M1's gate, and M2's gate routed round underneath)
+  const term = (x, y) => S.el('circle', { cx: x, cy: y, r: 5, fill: 'none', stroke: C.wire, 'stroke-width': 2.2 });
+  wire(S, [[116, 480], [95, 480]]); term(90, 480);
+  wire(S, [[384, 480], [400, 480], [400, 668], [95, 668]]); term(90, 668);
+  txt(S, 84, 580, 'V_in', { size: 20, color: C.muted, anchor: 'end' });
   wire(S, [[180, 430], [180, 268], [L, 268]]); wire(S, [[320, 430], [320, 240], [R + 0, 240], [R, 268]]);
   wire(S, [[180, 530], [180, 550], [320, 550], [320, 530]]); isrc(S, 250, 590, { label: 'I_SS', len: 40 }); gnd(S, 250, 630);
   // error amp
   amp(S, 860, 600, { left: true, w: 110, h: 100 });
   wire(S, [[580, 410], [580, 440], [900, 440], [900, 575], [860, 575]]); txt(S, 908, 520, 'V_out,CM', { size: 18, color: C.amb, weight: 700 });
   wire(S, [[860, 625], [900, 625]]); txt(S, 908, 631, 'V_REF', { size: 18, color: C.muted });
-  wire(S, [[750, 600], [750, 640], [R + 0, 640]]);
+  wire(S, [[750, 600], [750, 722], [580, 722], [580, 640]]); dot(S, 580, 640); // V_E onto the shared gate line of M3, M4
   r();
   return g;
 }
@@ -873,7 +878,7 @@ scene(L10, 'Tutorial 5 Q2: which pair for the CMFB amplifier, and its loop gain'
         try: { q: 'The error amplifier is a differential pair with a current-mirror load, and its output $V_E$ drives the gates of M3 and M4. Should its input pair be PMOS or NMOS?', choices: ['PMOS input pair (with an NMOS mirror at the bottom)', 'NMOS input pair (with a PMOS mirror at the top)'], answer: 0,
           hint: ['What DC level must $V_E$ have to bias M3, M4 (NMOS with their sources on ground)?',
             'The mirror load sits on the rail opposite the input pair, and the output rests about one diode $V_{GS}$ from that rail.'],
-          how: ['M3 and M4 are NMOS with sources on ground, so their gates need $$V_E \\approx V_{GS3} = V_{thn} + V_{ov3}$$ which is low, near ground.',
+          how: ['A link: M3 and M4 are NMOS, gate = $V_E$, source = ground, so their gates sit one $V_{GS3}$ above ground: $$V_E \\approx V_{GS3} = V_{thn} + V_{ov3}$$ which is low, near ground.',
             'PMOS input pair: its mirror is NMOS, at the bottom, so the output rests about one $V_{GS,n}$ above ground: exactly the level M3, M4 need.',
             'NMOS input pair: its mirror is PMOS, at the top, so the output rests near $V_{DD} - |V_{GS,p}|$: far too high, it would turn M3, M4 hard on. So: **PMOS pair**.'],
           why: 'Pick the pair whose mirror sits on the same rail as the devices it drives.' },

@@ -1,9 +1,14 @@
 /* Lesson C: every question tied to Lecture 6, solved by the student first. */
 'use strict';
 const CQ = 'Lec 6 · Questions';
-const RAZ = { tail: 'I_SS', in: ['M1', 'M2'], top: ['M9', 'M10'], pc: ['M7', 'M8'], nc: ['M3', 'M4'], bot: ['M5', 'M6'] };
+/* Razavi's PMOS-input folded cascode, names as printed (Tutorial 2 Q3 = Razavi 9.3: M9, M10 gates V_b3, M7, M8 V_b2, M3, M4 V_b1,
+   M5, M6 V_b4, tail an ideal source I_SS). Problem Set 1 P6–P8 use the same names with the tail drawn as M11 (gate V_b). */
+const RAZB = { top: 'V_b3', pc: 'V_b2', nc: 'V_b1', bot: 'V_b4', tail: 'V_b' };
+const RAZ = { tail: 'M11', in: ['M1', 'M2'], top: ['M9', 'M10'], pc: ['M7', 'M8'], nc: ['M3', 'M4'], bot: ['M5', 'M6'], bias: RAZB };
+const RAZ_T23 = { ...RAZ, tail: 'I_SS', isrc: true };
 const FT = tfm(0.82, -60, 140);
 const foldFig = (S2) => { const g = foldP(S2, RAZ); g.setAttribute('transform', 'translate(-60 140) scale(0.82)'); };
+const foldFigT23 = (S2) => { const g = foldP(S2, RAZ_T23); g.setAttribute('transform', 'translate(-60 140) scale(0.82)'); };
 /* Razavi's parameter "Set A" (the guide's bank), written out so every number on screen is traceable */
 const SETA = 'Set A: $\\mu_nC_{ox} = 134.28\\,\\mu$A/V², $\\mu_pC_{ox} = 38.36\\,\\mu$A/V², $V_{thn} = 0.7$ V, $|V_{thp}| = 0.8$ V, $\\lambda_n = 0.1$ V⁻¹, $\\lambda_p = 0.2$ V⁻¹';
 const PFX = 'Prefixes on: [SETTINGS] ▸ Calc Settings ▸ Engineer Symbol ▸ On; type µ, m, k with [CATALOG] ▸ Engineer Symbol.';
@@ -65,21 +70,21 @@ scene(CQ, 'Problem Set 1 P8: folded-cascode CM ranges', 58, (S) => {
     tests: 'your page’s first circuit with numbers: the PMOS input’s fence and the tail’s check give the input CM range, then checks on the output column give the output range.',
     fig: foldFig,
     steps: [
-      { t: 7, title: '(a) **Floor of the input CM.** M1’s drain is the fold node X, held one $V_{ov5}$ above ground. A PMOS stays saturated while its gate is no more than $|V_{thp}|$ below its drain.', tex: 'V_{in,CM,min} = V_X - |V_{thp}| = 0.5 - 0.8 = -0.3\\,\\mathrm{V}', hl: [FT([200, 280, 440, 270, C.p])],
+      { t: 7, title: '(a) **Floor of the input CM.** M1’s drain is the fold node X, held one $V_{ov5}$ above ground. A PMOS stays saturated while its gate is no more than $|V_{thp}|$ below its drain.', tex: 'V_{in,CM,min} = V_X - |V_{thp}| = 0.5 - 0.8 = -0.3\\,\\mathrm{V}', hl: [FT([200, 280, 470, 270, C.p])],
         try: { q: '(a) Start with the low end. How low can the input common-mode level go before M1 leaves saturation?', answer: -0.3, unit: 'V', tol: 0.01, abs: 0.005,
           hint: ['M1’s drain is the fold node X. X sits on the bottom NMOS source M5, which only needs its overdrive. M1 is a PMOS: its gate may sit up to $|V_{thp}|$ below its drain.', '$V_{in,CM,min} = V_X - |V_{thp}|$, with $V_X = V_{ov5}$'],
-          how: ['M5 only needs its overdrive to stay saturated, so the fold node X can sit as low as $$V_X = V_{ov5} = 0.5\\,\\text{V}$$', 'M1 is a PMOS. It stays saturated while its drain is at most $|V_{thp}|$ above its gate: $$V_X \\le V_{in,CM} + |V_{thp}|$$', 'Solve for the lowest gate voltage: $$V_{in,CM,min} = V_X - |V_{thp}| = 0.5 - 0.8 = -0.3\\,\\text{V}$$'],
+          how: ['Check on M5 (NMOS: source = ground, drain = X): it stays saturated with one $V_{ov}$ across it, so the fold node X can sit as low as $$V_X = V_{ov5} = 0.5\\,\\text{V}$$', 'Fence on M1 (PMOS: source = P on top, gate = $V_{in}$, drain = X below). X is fixed and the gate moves, so write saturation as drain vs gate: the drain may sit at most $|V_{thp}|$ above the gate: $$V_X \\le V_{in,CM} + |V_{thp}|$$', 'Solve for the lowest gate voltage: $$V_{in,CM,min} = V_X - |V_{thp}| = 0.5 - 0.8 = -0.3\\,\\text{V}$$'],
           why: 'A PMOS-input folded cascode accepts inputs below ground: its floor is $V_{ov5} - |V_{thp}|$.' },
         say: 'Floor: $0.5 - 0.8 = -0.3$ V — below ground.' },
       { t: 15, title: '**Ceiling of the input CM.** Walk down from $V_{DD}$: the tail keeps its 0.4 V (a check), then M1’s gate sits one $|V_{GS1}|$ below its source (a link).', tex: 'V_{in,CM,max} = V_{DD} - V_{tail} - |V_{GS1}| = 3 - 0.4 - 1.1 = 1.5\\,\\mathrm{V}', hl: [FT([220, 150, 160, 130, C.p])],
         try: { q: 'Now the high end. How high can the input common-mode level go before the tail current source runs out of room?', answer: 1.5, unit: 'V', tol: 0.01,
           hint: ['Walk down from $V_{DD}$: first the tail source needs its 0.4 V (a check), then M1’s gate is one $|V_{GS1}|$ below M1’s source (a link).', '$V_{in,CM,max} = V_{DD} - V_{tail} - |V_{GS1}|$'],
-          how: ['The tail source sits between $V_{DD}$ and M1’s source P and needs 0.4 V, so P can rise only to $$V_P = V_{DD} - 0.4 = 3 - 0.4 = 2.6\\,\\text{V}$$', 'M1’s gate sits one $|V_{GS1}|$ below its source: $$V_{in,CM,max} = V_P - |V_{GS1}| = 2.6 - 1.1 = 1.5\\,\\text{V}$$', 'So the input CM range is −0.3 V to 1.5 V.'] },
+          how: ['Check on the tail M11 (between $V_{DD}$ and M1’s source P): it needs 0.4 V, so P can rise only to $$V_P = V_{DD} - 0.4 = 3 - 0.4 = 2.6\\,\\text{V}$$', 'Link through M1 (PMOS: source = P, gate = $V_{in}$): going from a source to its own gate costs $|V_{GS1}|$, so the gate sits that much lower: $$V_{in,CM,max} = V_P - |V_{GS1}| = 2.6 - 1.1 = 1.5\\,\\text{V}$$', 'So the input CM range is −0.3 V to 1.5 V.'] },
         say: 'Ceiling: $3 - 0.4 - 1.1 = 1.5$ V.' },
       { t: 23, title: '(b) **Output floor.** Under the output stand two NMOS, the cascode M3 and the source M5; each needs one overdrive (two checks).', tex: 'V_{out,min} = V_{ov5} + V_{ov3} = 0.5 + 0.5 = 1\\,\\mathrm{V}', hl: [FT([560, 150, 330, 520, C.volt])],
         try: { q: '(b) Output range. First: what is the lowest output voltage before a transistor under the output leaves saturation?', answer: 1, unit: 'V', tol: 0.01,
           hint: ['Count the transistors between the output and ground: the NMOS cascode M3 and the NMOS source M5. Each needs its overdrive (a check).', '$V_{out,min} = V_{ov5} + V_{ov3}$'],
-          how: ['Below the output: M3 (cascode) on top of M5 (current source). Each stays saturated with one $V_{ov}$ across it.', 'Add the two checks from ground: $$V_{out,min} = V_{ov5} + V_{ov3} = 0.5 + 0.5 = 1\\,\\text{V}$$', 'The input pair is not in this column (folding!), so it costs no headroom here.'] },
+          how: ['Below the output: M3 (NMOS cascode, drain = output) on top of M5 (NMOS source, on ground). Two checks, one $V_{ov}$ across each: we ask how far a drain (the output) can fall, and no gate lies on the path.', 'Add the two checks from ground: $$V_{out,min} = V_{ov5} + V_{ov3} = 0.5 + 0.5 = 1\\,\\text{V}$$', 'The input pair is not in this column (folding!), so it costs no headroom here.'] },
         say: 'Lowest output: $V_{ov5} + V_{ov3} = 1$ V.' },
       { t: 31, title: '**Output ceiling**: two PMOS overdrives (M7, M9) down from $V_{DD}$. Then pick a CM level inside both ranges.', tex: 'V_{out,max} = 3 - 0.5 - 0.5 = 2\\,\\mathrm{V}\\;\\Rightarrow\\;V_{CM} = 1.5\\,\\mathrm{V}\\in[-0.3, 1.5]\\cap[1, 2]', say: 'Highest: $3 - 0.5 - 0.5 = 2$ V. A CM of 1.5 V lies inside both the input range [−0.3, 1.5] and the output range [1, 2]: input CM = output CM is possible (the telescopic of Ex 9.6 could not do this).' },
       { t: 39, ans: true, title: '**Answers:** input CM from −0.3 V to 1.5 V · output from 1 V to 2 V · e.g. $V_{CM} = 1.5$ V works for both', say: 'This is why folded cascodes suit buffers and capacitive feedback: the same DC level can sit at the input and the output.' },
@@ -92,7 +97,7 @@ scene(CQ, 'Tutorial 2 Q3: design a folded cascode (2.4 V, 6 mW)', 66, (S) => {
     paper: 't2q3', tag: 'LEC 6 · QUESTION 2 OF 9', title: 'Power and swing decide everything', src: 'Tutorial 2 Q3 · Razavi 9.3',
     q: 'PMOS-input folded cascode, $V_{DD} = 3$ V, all $L = 0.5$ µm, power 6 mW, maximum differential output swing 2.4 V. Find the currents, the overdrives, the gain, and whether the input CM can reach 0 V.', giv: SETA + '. Assume half the supply current goes to the input pair and equal overdrives in the output column.', qh: 250,
     tests: 'the Ex 9.7-style design order on a folded cascode, the two looks for gain, and your page’s CM floor $V_{ov5} - |V_{thp}|$.',
-    fig: foldFig,
+    fig: foldFigT23,
     steps: [
       { t: 7, title: '**Power budget.** The power fixes the supply current; half feeds the input pair (the tail), half feeds the two cascode branches.', tex: 'I_{total} = \\frac{P}{V_{DD}} = \\frac{6\\,\\mathrm{mW}}{3\\,\\mathrm{V}} = 2\\,\\mathrm{mA},\\quad I_{SS} = 1\\,\\mathrm{mA},\\quad I = 0.5\\,\\mathrm{mA}',
         try: {
@@ -114,10 +119,10 @@ scene(CQ, 'Tutorial 2 Q3: design a folded cascode (2.4 V, 6 mW)', 66, (S) => {
           why: 'Folding takes the input pair and the tail out of the output column: four blocks, not five.' },
         say: 'Four blocks in each output column (tail is not in it — folding!): $V_{ov} = (3 - 1.2)/4 = 0.45$ V.' },
       { t: 23, title: '**Gain by two looks**: up into the PMOS cascode, down into the NMOS cascode whose source sees two $r_O$ at the fold node ($r_{O1}\\parallel r_{O5}$). Every device at 0.45 V overdrive (the input pair too, as in the key); 0.5 mA in branches and inputs, 1 mA in M5, M6.', tex: `\\begin{aligned} &g_m = \\tfrac{2(0.5\\,\\mathrm{m})}{0.45} = ${mS(NUM.t23.gm)}\\,\\mathrm{mS} \\\\ &R_{up} = g_{m7}r_{O7}r_{O9} = ${mS(NUM.t23.gm)}\\,\\mathrm{m}\\,(${kO(NUM.t23.roP)}\\,\\mathrm{k})^2 = ${kO(NUM.t23.rup)}\\,\\mathrm{k\\Omega} \\\\ &R_{down} = g_{m3}r_{O3}(r_{O1}\\parallel r_{O5}) = ${mS(NUM.t23.gm)}\\,\\mathrm{m}\\times${kO(NUM.t23.roN)}\\,\\mathrm{k}\\times${kO(par(NUM.t23.roP, NUM.t23.ro5))}\\,\\mathrm{k} = ${kO(NUM.t23.rdown)}\\,\\mathrm{k\\Omega} \\\\ &A_v = g_{m1}(R_{up}\\parallel R_{down}) \\approx ${fx(ans('bank-t2q3', 'av'), 3)} \\end{aligned}`, hl: [FT([560, 260, 330, 200, C.n])], say: 'Two looks: PMOS cascode up, NMOS cascode with two $r_O$ at the fold node down. About 247.' },
-      { t: 31, title: '**Input CM floor.** M1’s drain is the fold node, one $V_{ov5}$ above ground; the PMOS fence lets M1’s gate sit $|V_{thp}|$ lower.', tex: stepTex('bank-t2q3', 3), hl: [FT([200, 280, 440, 270, C.p])],
+      { t: 31, title: '**Input CM floor.** M1’s drain is the fold node, one $V_{ov5}$ above ground; the PMOS fence lets M1’s gate sit $|V_{thp}|$ lower.', tex: stepTex('bank-t2q3', 3), hl: [FT([200, 280, 470, 270, C.p])],
         try: { q: 'Can the input common-mode level go down to 0 V? Find the lowest input CM level (from the swing step, every column overdrive is $V_{ov} = 0.45$ V).', answer: -0.35, unit: 'V', tol: 0.02,
           hint: ['M1 (PMOS) has its drain on the fold node, which sits one overdrive of M5 above ground. The PMOS fence lets its gate go $|V_{thp}|$ below its drain.', '$V_{in,CM,min} = V_{ov5} - |V_{thp}|$'],
-          how: ['From the swing step, M5’s overdrive is 0.45 V, so the fold node can sit at $$V_X = V_{ov5} = 0.45\\,\\text{V}$$', 'PMOS fence on M1, gate as low as possible: $$V_{in,CM,min} = V_X - |V_{thp}| = 0.45 - 0.8 = -0.35\\,\\text{V}$$', 'That is below 0 V, so yes: the input CM can sit at ground.'] },
+          how: ['From the swing step, M5’s overdrive is 0.45 V, so the fold node can sit at $$V_X = V_{ov5} = 0.45\\,\\text{V}$$', 'Fence on M1 (PMOS: source = P on top, gate = $V_{in}$, drain = the fold node below): the drain may sit at most $|V_{thp}|$ above the gate, so the gate may go $|V_{thp}|$ below the fold node: $$V_{in,CM,min} = V_X - |V_{thp}| = 0.45 - 0.8 = -0.35\\,\\text{V}$$', 'That is below 0 V, so yes: the input CM can sit at ground.'] },
         say: '$0.45 - 0.8 = -0.35$ V < 0: yes, the input CM can go to 0 V (and below).' },
       { t: 39, ans: true, title: '**Answers:** $I_{SS} = 1$ mA, branches 0.5 mA · $V_{ov} = 0.45$ V · $A_v ≈ 247$ · CM floor −0.35 V, so 0 V is fine', say: 'Exactly your page’s point: the PMOS-input folded cascode accepts inputs at ground.' },
     ],
@@ -213,7 +218,7 @@ scene(CQ, 'Problem Set 1 P7: how much of M1’s current reaches the output?', 46
 }, { q: 'Problem Set 1 P7' });
 
 // names exactly as printed: M3, M4 gates = V_b2, M7, M8 gates = V_b1; M5, M6, M9, M10 and M11 are biased by the mirrors M_b2, M_b3, M_b1
-const QZ = { tail: 'M11', in: ['M1', 'M2'], top: ['M5', 'M6'], pc: ['M3', 'M4'], nc: ['M7', 'M8'], bot: ['M9', 'M10'], fold: ['X', 'Y'], bias: { top: 'from M_b2', pc: 'V_b2', nc: 'V_b1', bot: 'from M_b3', tail: 'M_b1' } };
+const QZ = { tail: 'M11', in: ['M1', 'M2'], top: ['M5', 'M6'], pc: ['M3', 'M4'], nc: ['M7', 'M8'], bot: ['M9', 'M10'], fold: ['X', 'Y'], bias: { top: 'from M_b2', pc: 'V_b2', nc: 'V_b1', bot: 'from M_b3', tail: 'from M_b1' } };
 scene(CQ, 'Quiz 1 2023 Q2: NMOS-input folded cascode, all parts', 92, (S) => {
   const T = tfm(0.82, -60, 140);
   pyqFrame(S, {
@@ -229,7 +234,7 @@ scene(CQ, 'Quiz 1 2023 Q2: NMOS-input folded cascode, all parts', 92, (S) => {
           ],
           q: 'Lowest input common-mode level?', answer: 0.6, unit: 'V', tol: 0.01,
           hint: ['Walk up from ground: the tail M11 needs its overdrive (a check), then M1’s gate is one $V_{GS1}$ above M1’s source (a link).', '$V_{in,CM,min} = V_{ov11} + V_{GS1}$, $V_{GS1} = V_{th} + V_{ov}$'],
-          how: ['M1’s gate–source voltage: $$V_{GS1} = V_{th} + V_{ov} = 0.3 + 0.15 = 0.45\\,\\text{V}$$', 'The tail M11 at its edge puts M1’s source at $$V_P = V_{ov11} = 0.15\\,\\text{V}$$', 'Add the link: $$V_{in,CM,min} = V_P + V_{GS1} = 0.15 + 0.45 = 0.6\\,\\text{V}$$'] },
+          how: ['M1’s gate–source voltage: $$V_{GS1} = V_{th} + V_{ov} = 0.3 + 0.15 = 0.45\\,\\text{V}$$', 'Check on the tail M11 (NMOS: source = ground, drain = M1’s source): one $V_{ov}$ across it puts M1’s source at $$V_P = V_{ov11} = 0.15\\,\\text{V}$$', 'Link through M1 (NMOS: source = $V_P$, gate = $V_{in}$): from a source up to its own gate is one $V_{GS1}$: $$V_{in,CM,min} = V_P + V_{GS1} = 0.15 + 0.45 = 0.6\\,\\text{V}$$'] },
         say: '$0.15 + 0.45 = 0.6$ V.' },
       { t: 15, title: '$V_{b2,max}$: **the top source M5 needs $|V_{ov}|$**, so the fold node can rise to 2.85 V; the fold node is M3’s source, one $|V_{GS3}|$ above its gate $V_{b2}$ (a link).', tex: 'V_{b2,max} = V_{DD} - |V_{ov5}| - |V_{GS3}| = 3 - 0.15 - 0.45 = 2.4\\,\\mathrm{V}', hl: [T([520, 150, 380, 250, C.p])],
         try: {
@@ -238,17 +243,18 @@ scene(CQ, 'Quiz 1 2023 Q2: NMOS-input folded cascode, all parts', 92, (S) => {
           ],
           q: 'How high can $V_{b2}$ go before the top PMOS source M5 leaves saturation?', answer: 2.4, unit: 'V', tol: 0.01,
           hint: ['M5 needs its overdrive below $V_{DD}$; that caps the fold node. The fold node is M3’s source, and M3’s gate ($V_{b2}$) sits one $|V_{GS3}|$ below it.', '$V_{b2,max} = V_{DD} - |V_{ov5}| - |V_{GS3}|$'],
-          how: ['M5 at its edge: the fold node can rise to $$V_X = V_{DD} - |V_{ov5}| = 3 - 0.15 = 2.85\\,\\text{V}$$', 'The fold node is M3’s source; M3’s gate sits one $|V_{GS3}| = 0.3 + 0.15 = 0.45$ V lower: $$V_{b2,max} = 2.85 - 0.45 = 2.4\\,\\text{V}$$', 'A higher $V_{b2}$ would push the fold node up and squeeze M5 into triode.'] },
+          how: ['Check on M5 (PMOS: source = $V_{DD}$, drain = X): one $|V_{ov}|$ across it, so the fold node can rise to $$V_X = V_{DD} - |V_{ov5}| = 3 - 0.15 = 2.85\\,\\text{V}$$', 'Link through M3 (PMOS: source = X on top, gate = $V_{b2}$, drain = $V_{out1}$ below): from a source to its own gate is $|V_{GS3}| = 0.3 + 0.15 = 0.45$ V, so the gate sits that much lower: $$V_{b2,max} = 2.85 - 0.45 = 2.4\\,\\text{V}$$', 'A higher $V_{b2}$ would push the fold node up and squeeze M5 into triode.'],
+          why: 'Why $|V_{ov}|$ for M5 but $|V_{GS}|$ for M3? Across M5 the question is how far its drain X can rise (a check: one overdrive). Through M3 we step from its source X to its gate $V_{b2}$ (a link: threshold + overdrive).' },
         say: 'Top source check: fold ≤ 2.85 V. The fold node is M3’s source, one link above its gate: $V_{b2} \\le 2.4$ V.' },
       { t: 24, title: '$V_{b1,min}$: **the bottom source M9 needs $V_{ov}$** under M7’s source; M7’s gate $V_{b1}$ is one $V_{GS7}$ higher (a check, then a link).', tex: 'V_{b1,min} = V_{ov9} + V_{GS7} = 0.15 + 0.45 = 0.6\\,\\mathrm{V}', hl: [T([520, 520, 380, 200, C.n])],
         try: { q: 'How low can $V_{b1}$ go before the bottom NMOS source M9 leaves saturation?', answer: 0.6, unit: 'V', tol: 0.01,
           hint: ['M9 needs its overdrive above ground at M7’s source (a check); M7’s gate, $V_{b1}$, is one $V_{GS7}$ higher (a link).', '$V_{b1,min} = V_{ov9} + V_{GS7}$'],
-          how: ['M9 at its edge: M7’s source sits at $$V_{S7} = V_{ov9} = 0.15\\,\\text{V}$$', 'M7’s gate is one link higher, $V_{GS7} = 0.3 + 0.15 = 0.45$ V: $$V_{b1,min} = 0.15 + 0.45 = 0.6\\,\\text{V}$$'] },
+          how: ['Check on M9 (NMOS: source = ground, drain = M7’s source): one $V_{ov}$ across it, so M7’s source sits at $$V_{S7} = V_{ov9} = 0.15\\,\\text{V}$$', 'Link through M7 (NMOS: source below, gate = $V_{b1}$): from a source up to its own gate is $V_{GS7} = 0.3 + 0.15 = 0.45$ V: $$V_{b1,min} = 0.15 + 0.45 = 0.6\\,\\text{V}$$'] },
         say: '$0.15 + 0.45 = 0.6$ V.' },
       { t: 32, title: '**Input ceiling.** M1’s drain is the fold node (2.85 V with $V_{b2}$ at its maximum); the NMOS fence lets M1’s gate rise $V_{th}$ above its drain.', tex: 'V_{in,CM,max} = V_X + V_{th} = 2.85 + 0.3 = 3.15\\,\\mathrm{V}\\;(\\text{capped at } V_{DD} = 3\\,\\mathrm{V})', hl: [T([180, 230, 470, 230, C.n])],
         try: { q: 'Highest input common-mode level (before you cap it at the supply)?', answer: 3.15, unit: 'V', tol: 0.01,
           hint: ['M1 is an NMOS whose drain is the fold node. Its fence lets the gate rise $V_{th}$ above the drain.', '$V_{in,CM,max} = V_X + V_{th}$, with $V_X = V_{DD} - |V_{ov5}|$'],
-          how: ['With $V_{b2}$ at its maximum, the fold node (M1’s drain) sits at $$V_X = 3 - 0.15 = 2.85\\,\\text{V}$$', 'NMOS fence on M1, its gate may be $V_{th}$ above its drain: $$V_{in,CM,max} = V_X + V_{th} = 2.85 + 0.3 = 3.15\\,\\text{V}$$', 'That is above $V_{DD}$: in practice the input can go all the way to the 3 V rail.'] },
+          how: ['With $V_{b2}$ at its maximum, the fold node (M1’s drain) sits at $$V_X = 3 - 0.15 = 2.85\\,\\text{V}$$', 'Fence on M1 (NMOS: drain = X, gate = $V_{in}$, source = P). X is fixed and the gate moves, so write saturation as drain vs gate: the gate may sit at most $V_{th}$ above the drain: $$V_{in,CM,max} = V_X + V_{th} = 2.85 + 0.3 = 3.15\\,\\text{V}$$', 'That is above $V_{DD}$: in practice the input can go all the way to the 3 V rail.'] },
         say: '$2.85 + 0.3 = 3.15$ V — above $V_{DD}$, exactly your page’s point (in practice capped at 3 V).' },
       { t: 41, title: '**Swing by two fences** per output: floor = M7’s fence $V_{b1} - V_{th}$, ceiling = M3’s fence $V_{b2} + |V_{th}|$. Two outputs: ×2.', tex: '2[(V_{b2} + |V_{th}|) - (V_{b1} - V_{th})] = 2[(2.4 + 0.3) - (0.6 - 0.3)] = 4.8\\,\\mathrm{V}', hl: [T([520, 290, 380, 230, C.volt])],
         try: {
@@ -258,7 +264,7 @@ scene(CQ, 'Quiz 1 2023 Q2: NMOS-input folded cascode, all parts', 92, (S) => {
           ],
           q: 'Maximum differential output swing, with the biases at the limits found above ($V_{b1,min} = 0.6$ V, $V_{b2,max} = 2.4$ V)?', answer: 4.8, unit: 'V', tol: 0.01,
           hint: ['Each output is held between two fences: the NMOS cascode M7 (gate $V_{b1}$) below and the PMOS cascode M3 (gate $V_{b2}$) above. The differential swing is twice one output’s range.', '$V_{b1} - V_{th} \\le V_{out} \\le V_{b2} + |V_{th}|$, swing $= 2(V_{out,max} - V_{out,min})$'],
-          how: ['Floor, M7’s fence (gate at $V_{b1,min}$): $$V_{out,min} = V_{b1} - V_{th} = 0.6 - 0.3 = 0.3\\,\\text{V}$$', 'Ceiling, M3’s fence (gate at $V_{b2,max}$): $$V_{out,max} = V_{b2} + |V_{th}| = 2.4 + 0.3 = 2.7\\,\\text{V}$$', 'The two outputs move in opposite directions: $$\\text{swing} = 2(2.7 - 0.3) = 4.8\\,\\text{V}$$'] },
+          how: ['Floor, fence on M7 (NMOS: gate = $V_{b1}$, drain = $V_{out1}$): the drain may sit at most $V_{th}$ below the gate: $$V_{out,min} = V_{b1} - V_{th} = 0.6 - 0.3 = 0.3\\,\\text{V}$$', 'Ceiling, fence on M3 (PMOS: gate = $V_{b2}$, drain = $V_{out1}$): the drain may sit at most $|V_{th}|$ above the gate: $$V_{out,max} = V_{b2} + |V_{th}| = 2.4 + 0.3 = 2.7\\,\\text{V}$$', 'The two outputs move in opposite directions: $$\\text{swing} = 2(2.7 - 0.3) = 4.8\\,\\text{V}$$'] },
         say: 'Each output runs 0.3–2.7 V; differential $2 \\times 2.4 = 4.8$ V.' },
       { t: 50, title: '**Gain by two looks.** Up: PMOS cascode M3 on the fold node, which carries two $r_O$ (M1 and M5). Down: plain NMOS cascode M7 on M9.', tex: 'A_v = g_m(R_{up}\\parallel R_{down}) = 1\\,\\mathrm{mS}\\,(1.25\\,\\mathrm{M\\Omega}\\parallel 2.5\\,\\mathrm{M\\Omega}) = 833',
         try: {
@@ -307,7 +313,7 @@ scene(CQ, 'Razavi Ex 9.5: the telescopic buffer window', 44, (S) => {
           ],
           q: 'Highest output voltage? Remember the output is also M2’s gate.', answer: 1.05, unit: 'V', tol: 0.01,
           hint: ['M2’s drain is node Q, one $V_{GS4}$ below $V_{b1}$ (a link). M2’s gate is the output, and the NMOS fence lets the gate be at most $V_{th}$ above the drain.', '$V_{out,max} = V_Q + V_{th2} = V_{b1} - V_{GS4} + V_{th2}$, $V_{GS4} = V_{th} + V_{ov4}$'],
-          how: ['$$V_{GS4} = V_{th} + V_{ov4} = 0.4 + 0.15 = 0.55\\,\\text{V}$$', 'Node Q (M2’s drain) is one link below M4’s gate: $$V_Q = V_{b1} - V_{GS4} = 1.2 - 0.55 = 0.65\\,\\text{V}$$', 'M2’s gate (the output) may be at most $V_{th}$ above its drain: $$V_{out,max} = V_Q + V_{th2} = 0.65 + 0.4 = 1.05\\,\\text{V}$$'] },
+          how: ['$$V_{GS4} = V_{th} + V_{ov4} = 0.4 + 0.15 = 0.55\\,\\text{V}$$', 'Link through M4 (NMOS: gate = $V_{b1}$, source = Q): Q sits one $V_{GS4}$ below the gate: $$V_Q = V_{b1} - V_{GS4} = 1.2 - 0.55 = 0.65\\,\\text{V}$$', 'Fence on M2 (NMOS: drain = Q, gate = $V_{out}$): the gate may sit at most $V_{th}$ above the drain: $$V_{out,max} = V_Q + V_{th2} = 0.65 + 0.4 = 1.05\\,\\text{V}$$'] },
         say: '$1.2 - 0.55 + 0.4 = 1.05$ V.' },
       { t: 20, title: '**Width** = ceiling − floor: one threshold minus one overdrive.', tex: '(V_{b1} - V_{GS4} + V_{th}) - (V_{b1} - V_{th}) = V_{th} - V_{ov4} = 0.4 - 0.15 = 0.25\\,\\mathrm{V}', say: 'Only 0.25 V for the output.' },
       { t: 25, ans: true, title: '**Answers:** output from 0.8 V to 1.05 V · width 0.25 V', say: 'Compare the folded buffer on your page: no ceiling from M2 at all.' },
@@ -331,7 +337,7 @@ scene(CQ, 'Problem Set 1 P5: diode-stack mirror and its buffer window', 58, (S) 
           ],
           q: '(a) Find $V_X$, the drain of M1 (which is also the source of the cascode M3).', answer: ans('bank-ps1p5', 'vx'), unit: 'V', tol: 0.01,
           hint: ['X is M3’s source and M3’s gate is at $V_{b1}$: one link down. Find $V_{GS3}$ from the square law, with each side carrying $I_{SS}/2$.', '$V_X = V_{b1} - V_{GS3}$, $V_{GS3} = V_{thn} + \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}}$'],
-          how: ['Each side carries $I_D = I_{SS}/2 = 0.5$ mA.', 'Overdrive from the square law: $$V_{ov3} = \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\frac{2(0.5\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.193\\,\\text{V}$$', '$$V_{GS3} = V_{thn} + V_{ov3} = 0.7 + 0.193 = 0.893\\,\\text{V}$$', 'One link below $V_{b1}$: $$V_X = V_{b1} - V_{GS3} = 1.6 - 0.893 = 0.707\\,\\text{V}$$'],
+          how: ['Each side carries $I_D = I_{SS}/2 = 0.5$ mA.', 'Overdrive from the square law: $$V_{ov3} = \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\frac{2(0.5\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.193\\,\\text{V}$$', '$$V_{GS3} = V_{thn} + V_{ov3} = 0.7 + 0.193 = 0.893\\,\\text{V}$$', 'Link through M3 (NMOS: gate = $V_{b1}$, source = X): X sits one $V_{GS3}$ below the gate: $$V_X = V_{b1} - V_{GS3} = 1.6 - 0.893 = 0.707\\,\\text{V}$$'],
           calc: [{ what: 'V_GS3 and V_X in one line', keys: '1.6 − ( 0.7 + [√] 2 × 0.5m ÷ ( 134.28µ × 200 ) ) [EXE]', shows: '0.707', note: 'Close the √ with ▶ before “)”. ' + PFX }] },
         say: '$1.6 - 0.893 = 0.707$ V.' },
       { t: 14, title: '(b) **Floor: M4’s fence.** The output is M4’s drain, its gate is at $V_{b1}$.', tex: 'V_{out,min} = V_{b1} - V_{thn} = 1.6 - 0.7 = 0.9\\,\\mathrm{V}', hl: [T([620, 400, 140, 100, C.n])], say: '$V_{out} \\ge 1.6 - 0.7 = 0.9$ V.' },
@@ -343,12 +349,12 @@ scene(CQ, 'Problem Set 1 P5: diode-stack mirror and its buffer window', 58, (S) 
           ],
           q: '(b, c) Highest output voltage with this diode-stack mirror load?', answer: ans('bank-ps1p5', 'max'), unit: 'V', tol: 0.01,
           hint: ['The PMOS mirror is M8 (top) and M6 (cascode) on the output side. M6’s gate is set by the two diodes on the other side: two PMOS $|V_{GS}|$ below $V_{DD}$. Then M6’s PMOS fence: its drain (the output) may be at most $|V_{thp}|$ above its gate.', '$V_{out,max} = V_{G6} + |V_{thp}|$, $V_{G6} = V_{DD} - 2|V_{GS,p}|$, $|V_{GS,p}| = |V_{thp}| + \\sqrt{\\frac{2I_D}{\\mu_pC_{ox}(W/L)}}$'],
-          how: ['PMOS overdrive at 0.5 mA, W/L = 200: $$|V_{ov}| = \\sqrt{\\frac{2(0.5\\,\\text{m})}{38.36\\,\\mu\\times200}} = 0.361\\,\\text{V},\\;\\; |V_{GS,p}| = 0.8 + 0.361 = 1.161\\,\\text{V}$$', 'Two diode drops below $V_{DD}$: $$V_{G6} = 3 - 2(1.161) = 0.678\\,\\text{V}$$', 'PMOS fence on M6: $$V_{out,max} = V_{G6} + |V_{thp}| = 0.678 + 0.8 = 1.478\\,\\text{V}$$', '(c) This equals $V_{DD} - |V_{thp}| - |V_{ov8}| - |V_{ov6}|$: a whole $|V_{thp}|$ below the ideal $V_{DD} - |V_{ov8}| - |V_{ov6}|$. That is the diode tax.'] },
+          how: ['PMOS overdrive at 0.5 mA, W/L = 200: $$|V_{ov}| = \\sqrt{\\frac{2(0.5\\,\\text{m})}{38.36\\,\\mu\\times200}} = 0.361\\,\\text{V},\\;\\; |V_{GS,p}| = 0.8 + 0.361 = 1.161\\,\\text{V}$$', 'Two diode drops below $V_{DD}$: $$V_{G6} = 3 - 2(1.161) = 0.678\\,\\text{V}$$', 'Fence on M6 (PMOS: gate = $V_{G6}$, drain = $V_{out}$): the drain may sit at most $|V_{thp}|$ above the gate: $$V_{out,max} = V_{G6} + |V_{thp}| = 0.678 + 0.8 = 1.478\\,\\text{V}$$', '(c) This equals $V_{DD} - |V_{thp}| - |V_{ov8}| - |V_{ov6}|$: a whole $|V_{thp}|$ below the ideal $V_{DD} - |V_{ov8}| - |V_{ov6}|$. That is the diode tax.'] },
         say: '(c) $3 - 0.8 - 0.361 - 0.361 = 1.478$ V: one $|V_{thp}|$ lower than ideal cascode loads would allow — the diode tax.' },
       { t: 30, title: '(d) **Buffer: M2’s fence.** M2’s gate is now the output and its drain sits at $V_{b1} - V_{GS4}$ (0.707 V, like X), so the output may rise only $V_{thn}$ above that.', tex: 'V_{out,max} = V_{b1} - V_{GS4} + V_{thn} = 1.6 - 0.893 + 0.7 = 1.407\\,\\mathrm{V}',
         try: { q: '(d) M2’s gate is now tied to $V_{out}$ (unity-gain buffer). Highest output voltage? (From (a): $V_{GS3} = V_{GS4} = 0.893$ V.)', answer: ans('bank-ps1p5', 'bufMax'), unit: 'V', tol: 0.01,
           hint: ['M2’s drain is one $V_{GS4}$ below $V_{b1}$, the same as X in part (a) by symmetry. M2’s gate is now the output, and an NMOS gate may be at most $V_{thn}$ above its drain.', '$V_{out,max} = V_{b1} - V_{GS4} + V_{thn}$'],
-          how: ['M2’s drain is M4’s source, one link below $V_{b1}$ (same as part (a)): $$V_{b1} - V_{GS4} = 1.6 - 0.893 = 0.707\\,\\text{V}$$', 'NMOS fence on M2 with the gate on the output: $$V_{out,max} = 0.707 + V_{thn} = 0.707 + 0.7 = 1.407\\,\\text{V}$$', 'The floor is still M4’s fence, 0.9 V, so the buffer only works from 0.9 V to 1.407 V.'] },
+          how: ['M2’s drain is M4’s source, one link below $V_{b1}$ (same as part (a)): $$V_{b1} - V_{GS4} = 1.6 - 0.893 = 0.707\\,\\text{V}$$', 'Fence on M2 (NMOS: drain = M4’s source at 0.707 V, gate = $V_{out}$): the gate may sit at most $V_{thn}$ above the drain: $$V_{out,max} = 0.707 + V_{thn} = 0.707 + 0.7 = 1.407\\,\\text{V}$$', 'The floor is still M4’s fence, 0.9 V, so the buffer only works from 0.9 V to 1.407 V.'] },
         say: '1.407 V; the window is 0.9–1.407 V.' },
       { t: 38, ans: true, title: '**Answers:** $V_X$ = 0.707 V · output 0.9 V to 1.478 V · (c) the diode tax costs $|V_{thp}|$ · buffer 0.9 V to 1.407 V. (Check: with these sizes M3 is just in triode — the trap of Tutorial 2 Q2.)', say: 'One honesty note: with W/L = 200 the diode stack puts M3’s drain below X, so M3 is actually in triode; the key assumes saturation.' },
     ],
@@ -388,7 +394,7 @@ scene(CQ, '2024 mid-sem Q3: PMOS-input telescopic, then as a buffer', 66, (S) =>
           ],
           q: 'Lowest output voltage $V_{out,min}$?', answer: 0.6, unit: 'V', tol: 0.01,
           hint: ['The output is M6’s drain. M6’s gate is set by the diode stack M7, M5 on the other side: two $V_{GS}$ above ground. Then M6’s NMOS fence.', '$V_{out,min} = V_{G6} - V_{thn}$, $V_{G6} = V_{GS7} + V_{GS5}$'],
-          how: ['Each NMOS diode: $$V_{GS} = V_{thn} + V_{ov} = 0.4 + 0.1 = 0.5\\,\\text{V}$$', 'Two diodes stacked from ground: $$V_{G6} = V_{GS7} + V_{GS5} = 0.5 + 0.5 = 1.0\\,\\text{V}$$', 'NMOS fence on M6 (drain = output): $$V_{out,min} = V_{G6} - V_{thn} = 1.0 - 0.4 = 0.6\\,\\text{V}$$', 'Ideal cascode biasing would allow $2V_{ov} = 0.2$ V: the diode stack costs a whole $V_{thn}$.'] },
+          how: ['Each NMOS diode: $$V_{GS} = V_{thn} + V_{ov} = 0.4 + 0.1 = 0.5\\,\\text{V}$$', 'Two diodes stacked from ground: $$V_{G6} = V_{GS7} + V_{GS5} = 0.5 + 0.5 = 1.0\\,\\text{V}$$', 'Fence on M6 (NMOS: gate = $V_{G6}$ from the diode stack, drain = $V_{out}$): the drain may sit at most $V_{thn}$ below the gate: $$V_{out,min} = V_{G6} - V_{thn} = 1.0 - 0.4 = 0.6\\,\\text{V}$$', 'Ideal cascode biasing would allow $2V_{ov} = 0.2$ V: the diode stack costs a whole $V_{thn}$.'] },
         say: '$1.0 - 0.4 = 0.6$ V — the diode tax again, this time at the bottom.' },
       { t: 38, title: '**Buffer: M2’s fence becomes a floor.** M2 is a PMOS with its gate on $V_{out}$; its drain is M4’s source, $V_b + |V_{GS4}| = 1.4$ V, and may be at most $|V_{thp}|$ above the gate.', tex: '1.4 \\le V_{out} + 0.5 \\;\\Rightarrow\\; V_{out,min} = 0.9\\,\\mathrm{V}', hl: [T([620, 240, 160, 120, C.bad])],
         try: {
@@ -398,7 +404,7 @@ scene(CQ, '2024 mid-sem Q3: PMOS-input telescopic, then as a buffer', 66, (S) =>
           ],
           q: 'Now $V_{out}$ is shorted to $V_{in2}$ (M2’s gate). Lowest output voltage?', answer: 0.9, unit: 'V', tol: 0.01,
           hint: ['M2 is a PMOS whose drain is M4’s source, one $|V_{GS4}|$ above $V_b$. Its gate is now the output, and a PMOS drain may be at most $|V_{thp}|$ above its gate.', '$V_b + |V_{GS4}| \\le V_{out} + |V_{thp}|$'],
-          how: ['$$|V_{GS4}| = |V_{thp}| + |V_{ov4}| = 0.5 + 0.2 = 0.7\\,\\text{V}$$', 'M2’s drain is M4’s source: $$V_{D2} = V_b + |V_{GS4}| = 0.7 + 0.7 = 1.4\\,\\text{V}$$', 'PMOS fence on M2 with its gate on the output: $$1.4 \\le V_{out} + 0.5\\;\\Rightarrow\\;V_{out,min} = 0.9\\,\\text{V}$$'],
+          how: ['$$|V_{GS4}| = |V_{thp}| + |V_{ov4}| = 0.5 + 0.2 = 0.7\\,\\text{V}$$', 'Link through M4 (PMOS: gate = $V_b$, source = M2’s drain above it): the source sits one $|V_{GS4}|$ above the gate: $$V_{D2} = V_b + |V_{GS4}| = 0.7 + 0.7 = 1.4\\,\\text{V}$$', 'Fence on M2 (PMOS: source = tail node on top, gate = $V_{out}$, drain = 1.4 V): the drain may sit at most $|V_{thp}|$ above the gate: $$1.4 \\le V_{out} + 0.5\\;\\Rightarrow\\;V_{out,min} = 0.9\\,\\text{V}$$'],
           why: 'Flip NMOS to PMOS and the buffer fence flips too: for a PMOS input, M2 limits the output from below.' },
         say: '$1.4 \\le V_{out} + 0.5 \\Rightarrow V_{out} \\ge 0.9$ V: for a PMOS input, M2’s fence becomes a <b>floor</b>.' },
       { t: 46, title: '**Buffer ceiling** is still M4’s fence (unchanged by the short).', tex: 'V_{out,max} = V_b + |V_{thp}| = 1.2\\,\\mathrm{V}', say: 'Still 1.2 V. Buffer window 0.9–1.2 V.' },
@@ -413,7 +419,7 @@ scene(CQ, 'Tutorial 3 Q1: your page’s last circuit with numbers', 74, (S) => {
     paper: 't3q1', tag: 'LEC 6 · QUESTION 9 OF 9', title: 'The low-voltage cascode load, every part', src: 'Tutorial 3 Q1 · Razavi 9.4',
     q: 'Telescopic with the low-voltage cascode load. $(W/L)_{1-8} = 200$, $I_{SS} = 1$ mA, $V_{b1} = 1.7$ V, $V_{DD} = 3$ V. (a) Maximum input CM. (b) $V_X$. (c) Output range if M2’s gate is tied to the output. (d) Allowed range of $V_{b2}$.', giv: SETA, qh: 230,
     tests: 'a fence for the CM ceiling, a link for X, the telescopic buffer window, and the two fences that bound $V_{b2}$ — your page’s last circuit.',
-    fig: (S2) => { const g = teleSE(S2, { load: 'lvc', xname: 'X', qname: '' }); g.setAttribute('transform', 'translate(-60 140) scale(0.82)'); },
+    fig: (S2) => { const g = teleSE(S2, { load: 'lvc', xname: 'X', qname: '', pname: '' }); g.setAttribute('transform', 'translate(-60 140) scale(0.82)'); },
     steps: [
       { t: 7, title: '(a) **M1’s drain is M3’s source**, one $V_{GS3}$ below $V_{b1}$ (a link); the NMOS fence lets M1’s gate rise $V_{thn}$ above it.', tex: 'V_{in,CM,max} = V_{b1} - V_{GS3} + V_{thn} = 1.7 - 0.893 + 0.7 = 1.507\\,\\mathrm{V}',
         try: {
@@ -423,7 +429,7 @@ scene(CQ, 'Tutorial 3 Q1: your page’s last circuit with numbers', 74, (S) => {
           ],
           q: '(a) Maximum input common-mode level?', answer: ans('bank-t3q1', 'cmMax'), unit: 'V', tol: 0.01,
           hint: ['M1’s drain is M3’s source, one $V_{GS3}$ below $V_{b1}$ (a link; each side carries $I_{SS}/2$). M1’s gate may rise $V_{thn}$ above its drain (NMOS fence).', '$V_{in,CM,max} = V_{b1} - V_{GS3} + V_{thn}$, $V_{GS3} = V_{thn} + \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}}$'],
-          how: ['Each side carries 0.5 mA: $$V_{ov3} = \\sqrt{\\frac{2(0.5\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.193\\,\\text{V},\\;\\; V_{GS3} = 0.7 + 0.193 = 0.893\\,\\text{V}$$', 'M1’s drain, one link below $V_{b1}$: $$V_{D1} = V_{b1} - V_{GS3} = 1.7 - 0.893 = 0.807\\,\\text{V}$$', 'NMOS fence on M1: $$V_{in,CM,max} = V_{D1} + V_{thn} = 0.807 + 0.7 = 1.507\\,\\text{V}$$'] },
+          how: ['Each side carries 0.5 mA: $$V_{ov3} = \\sqrt{\\frac{2(0.5\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.193\\,\\text{V},\\;\\; V_{GS3} = 0.7 + 0.193 = 0.893\\,\\text{V}$$', 'Link through M3 (NMOS: gate = $V_{b1}$, source = M1’s drain): one $V_{GS3}$ below the gate: $$V_{D1} = V_{b1} - V_{GS3} = 1.7 - 0.893 = 0.807\\,\\text{V}$$', 'Fence on M1 (NMOS: drain = $V_{D1}$, gate = $V_{in}$): the gate may sit at most $V_{thn}$ above the drain: $$V_{in,CM,max} = V_{D1} + V_{thn} = 0.807 + 0.7 = 1.507\\,\\text{V}$$'] },
         say: '$1.7 - 0.893 + 0.7 = 1.507$ V.' },
       { t: 15, title: '(b) **M7’s gate is X and its source is $V_{DD}$**: X is one PMOS $|V_{GS7}|$ below the supply (a link), at 0.5 mA.', tex: '|V_{GS7}| = 0.8 + \\sqrt{\\tfrac{2(0.5\\,\\mathrm{m})}{38.36\\,\\mu\\cdot200}} = 1.161\\,\\mathrm{V},\\quad V_X = 3 - 1.161 = 1.839\\,\\mathrm{V}', hl: [T([400, 150, 360, 270, C.amb])],
         try: {
@@ -433,23 +439,23 @@ scene(CQ, 'Tutorial 3 Q1: your page’s last circuit with numbers', 74, (S) => {
           ],
           q: '(b) Node X is the gate of the PMOS M7 (source on $V_{DD}$). Find $V_X$.', answer: ans('bank-t3q1', 'vx'), unit: 'V', tol: 0.01,
           hint: ['M7 carries 0.5 mA with its source on $V_{DD}$ and its gate on X, so X is one $|V_{GS7}|$ below the supply. Get $|V_{ov7}|$ from the square law.', '$V_X = V_{DD} - |V_{GS7}|$, $|V_{GS7}| = |V_{thp}| + \\sqrt{\\frac{2I_D}{\\mu_pC_{ox}(W/L)}}$'],
-          how: ['PMOS overdrive at 0.5 mA, W/L = 200: $$|V_{ov7}| = \\sqrt{\\frac{2(0.5\\,\\text{m})}{38.36\\,\\mu\\times200}} = 0.361\\,\\text{V}$$', '$$|V_{GS7}| = |V_{thp}| + |V_{ov7}| = 0.8 + 0.361 = 1.161\\,\\text{V}$$', 'One link below the supply: $$V_X = V_{DD} - |V_{GS7}| = 3 - 1.161 = 1.839\\,\\text{V}$$'],
+          how: ['PMOS overdrive at 0.5 mA, W/L = 200: $$|V_{ov7}| = \\sqrt{\\frac{2(0.5\\,\\text{m})}{38.36\\,\\mu\\times200}} = 0.361\\,\\text{V}$$', '$$|V_{GS7}| = |V_{thp}| + |V_{ov7}| = 0.8 + 0.361 = 1.161\\,\\text{V}$$', 'Link through M7 (PMOS: source = $V_{DD}$, gate = X): the gate sits one $|V_{GS7}|$ below the source: $$V_X = V_{DD} - |V_{GS7}| = 3 - 1.161 = 1.839\\,\\text{V}$$'],
           calc: [{ what: 'V_X in one line', keys: '3 − ( 0.8 + [√] 2 × 0.5m ÷ ( 38.36µ × 200 ) ) [EXE]', shows: '1.839', note: 'Close the √ with ▶ before “)”; store it ([VARIABLE] ▸ A ▸ Store) for part (d). ' + PFX }] },
         say: '$X = 3 - 1.161 = 1.839$ V.' },
       { t: 23, title: '(c) **Buffer window**: M4’s fence below ($V_{b1} - V_{thn}$), M2’s fence above (gate = output, drain $V_{b1} - V_{GS4}$).', tex: 'V_{b1} - V_{thn} = 1\\,\\mathrm{V} \\le V_{out} \\le V_{b1} - V_{GS4} + V_{thn} = 1.507\\,\\mathrm{V}',
         try: { q: '(c) M2’s gate is tied to the output. Lowest output voltage?', answer: 1, unit: 'V', tol: 0.01,
           hint: ['The output is M4’s drain; M4 is the NMOS cascode with its gate at $V_{b1}$. Its fence sets the floor.', '$V_{out,min} = V_{b1} - V_{thn}$'],
-          how: ['M4’s gate is at $V_{b1} = 1.7$ V and its drain is the output.', 'NMOS fence on M4: $$V_{out,min} = V_{b1} - V_{thn} = 1.7 - 0.7 = 1.0\\,\\text{V}$$', 'The top of the window is M2’s fence: $V_{b1} - V_{GS4} + V_{thn} = 1.507$ V, the same as part (a).'] },
+          how: ['M4’s gate is at $V_{b1} = 1.7$ V and its drain is the output.', 'Fence on M4 (NMOS: gate = $V_{b1}$, drain = $V_{out}$): the drain may sit at most $V_{thn}$ below the gate: $$V_{out,min} = V_{b1} - V_{thn} = 1.7 - 0.7 = 1.0\\,\\text{V}$$', 'The top of the window is M2’s fence: $V_{b1} - V_{GS4} + V_{thn} = 1.507$ V, the same as part (a).'] },
         say: 'Window 1.0–1.507 V (width $V_{th} - V_{ov4}$).' },
       { t: 31, title: '(d) **Lowest $V_{b2}$: M5’s fence.** M5 is the PMOS cascode with gate $V_{b2}$ and drain X; its drain may be at most $|V_{thp}|$ above its gate.', tex: 'V_X \\le V_{b2} + |V_{thp}| \\;\\Rightarrow\\; V_{b2} \\ge 1.839 - 0.8 = 1.039\\,\\mathrm{V}', hl: [T([400, 270, 120, 130, C.p])],
         try: { q: '(d) Range of $V_{b2}$, low end: what is the smallest $V_{b2}$ that keeps M5 saturated? (From (b): $V_X = 1.839$ V.)', answer: ans('bank-t3q1', 'vb2min'), unit: 'V', tol: 0.01,
           hint: ['M5 is the PMOS cascode: gate at $V_{b2}$, drain on node X. PMOS fence: the drain may be at most $|V_{thp}|$ above the gate.', '$V_X \\le V_{b2} + |V_{thp}|$, so $V_{b2,min} = V_X - |V_{thp}|$'],
-          how: ['From (b): $V_X = 1.839$ V, and X is M5’s drain.', 'PMOS fence on M5: $$V_X \\le V_{b2} + |V_{thp}|$$', '$$V_{b2,min} = V_X - |V_{thp}| = 1.839 - 0.8 = 1.039\\,\\text{V}$$'] },
+          how: ['From (b): $V_X = 1.839$ V, and X is M5’s drain.', 'Fence on M5 (PMOS: gate = $V_{b2}$, drain = X): the drain may sit at most $|V_{thp}|$ above the gate: $$V_X \\le V_{b2} + |V_{thp}|$$', '$$V_{b2,min} = V_X - |V_{thp}| = 1.839 - 0.8 = 1.039\\,\\text{V}$$'] },
         say: '$V_{b2} \\ge 1.039$ V — your page’s first line.' },
       { t: 40, title: '**Highest $V_{b2}$: M7’s fence.** M7’s drain is M5’s source, $V_{b2} + |V_{GS5}|$; M7’s gate is X, so that drain may be at most $V_X + |V_{thp}|$.', tex: 'V_{b2} + |V_{GS5}| \\le V_X + |V_{thp}| \\;\\Rightarrow\\; V_{b2} \\le 1.839 + 0.8 - 1.161 = 1.478\\,\\mathrm{V}', hl: [T([400, 150, 120, 140, C.p])],
         try: { q: 'Now the high end: the largest $V_{b2}$ that keeps M7 saturated? (From (b): $V_X = 1.839$ V and every PMOS here has $|V_{GS}| = 1.161$ V.)', answer: ans('bank-t3q1', 'vb2max'), unit: 'V', tol: 0.01,
           hint: ['M7’s drain is M5’s source, one $|V_{GS5}|$ above $V_{b2}$ (M5 carries the same 0.5 mA as M7). M7’s gate is X, so its PMOS fence caps that drain at $V_X + |V_{thp}|$.', '$V_{b2} + |V_{GS5}| \\le V_X + |V_{thp}|$'],
-          how: ['M5 has the same size and current as M7, so from (b): $|V_{GS5}| = 1.161$ V.', 'PMOS fence on M7 (gate X, drain = M5’s source): $$V_{b2} + |V_{GS5}| \\le V_X + |V_{thp}|$$', '$$V_{b2,max} = V_X + |V_{thp}| - |V_{GS5}| = 1.839 + 0.8 - 1.161 = 1.478\\,\\text{V}$$'] },
+          how: ['M5 has the same size and current as M7, so from (b): $|V_{GS5}| = 1.161$ V.', 'Fence on M7 (PMOS: source = $V_{DD}$, gate = X, drain = M5’s source, which sits one link $|V_{GS5}|$ above $V_{b2}$): the drain may sit at most $|V_{thp}|$ above the gate: $$V_{b2} + |V_{GS5}| \\le V_X + |V_{thp}|$$', '$$V_{b2,max} = V_X + |V_{thp}| - |V_{GS5}| = 1.839 + 0.8 - 1.161 = 1.478\\,\\text{V}$$'] },
         say: '$V_{b2} \\le 1.478$ V. (Same as your page’s $P \\le V_{DD} - |V_{ov7}|$, written with M7’s gate at X.)' },
       { t: 49, ans: true, title: '**Answers:** CM max 1.507 V · $V_X$ = 1.839 V · buffer from 1.0 V to 1.507 V · $V_{b2}$ from 1.039 V to 1.478 V', say: 'Your page’s last circuit in exam form: one link for X, two fences for the bias window.' },
     ],

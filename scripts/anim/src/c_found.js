@@ -5,20 +5,24 @@ const CF = 'Foundations for Lec 6';
 /* PMOS-input folded cascode, fully differential. n: names (lecture naming by default). */
 function foldP(S, n = {}) {
   const N = { tail: 'M11', in: ['M1', 'M2'], top: ['M7', 'M8'], pc: ['M5', 'M6'], nc: ['M3', 'M4'], bot: ['M9', 'M10'], ...n };
+  // gate-bias names: lecture naming by default; a past paper passes its own (n.bias) so the figure matches the printed question.
+  // n.isrc: draw the tail as an ideal current source labelled N.tail (as printed in Razavi 9.3 / Tutorial 2 Q3)
+  const Bn = { top: 'V_b4', pc: 'V_b3', nc: 'V_b2', bot: 'V_b1', tail: 'V_b5', ...(n.bias || {}) };
   const g = S.g(); const r = S.into(g);
   rail(S, 150, 960, 150);
   const L = 620, R = 840;
   const row = (y, a, b, p, gate) => { const A = fet(S, L, y, { p, name: a, right: true, gl: 26, nameSide: 'l' }); const B = fet(S, R, y, { p, name: b, gl: 26, nameSide: 'r' }); wire(S, [[A.gate[0], y], [B.gate[0], y]]); txt(S, 730, y - 9, gate, { size: 16, color: C.muted, anchor: 'middle' }); };
-  row(205, N.top[0], N.top[1], true, 'V_b4'); wire(S, [[L, 150], [L, 155]]); wire(S, [[R, 150], [R, 155]]);
-  row(305, N.pc[0], N.pc[1], true, 'V_b3');
+  row(205, N.top[0], N.top[1], true, Bn.top); wire(S, [[L, 150], [L, 155]]); wire(S, [[R, 150], [R, 155]]);
+  row(305, N.pc[0], N.pc[1], true, Bn.pc);
   wire(S, [[L, 355], [L, 405]]); wire(S, [[R, 355], [R, 405]]); dot(S, L, 380); dot(S, R, 380);
   txt(S, L - 12, 374, 'V_out1', { size: 17, color: C.volt, weight: 700, anchor: 'end' }); txt(S, R + 12, 374, 'V_out2', { size: 17, color: C.volt, weight: 700 });
-  row(455, N.nc[0], N.nc[1], false, 'V_b2');
+  row(455, N.nc[0], N.nc[1], false, Bn.nc);
   wire(S, [[L, 505], [L, 555]]); wire(S, [[R, 505], [R, 555]]); dot(S, L, 530); dot(S, R, 530);
   txt(S, L + 12, 548, 'X', { size: 19, color: C.bad, weight: 750 }); txt(S, R - 12, 548, 'Y', { size: 19, color: C.bad, weight: 750, anchor: 'end' });
-  row(605, N.bot[0], N.bot[1], false, 'V_b1'); gnd(S, L, 655); gnd(S, R, 655);
-  const tl = pmos(S, 300, 205, { name: N.tail, gate: 'V_b5', gl: 24 }); wire(S, [[300, 150], [300, 155]]);
-  wire(S, [[300, 255], [300, 270]]); dot(S, 300, 270); txt(S, 312, 264, 'P', { size: 18, color: C.bad, weight: 750 });
+  row(605, N.bot[0], N.bot[1], false, Bn.bot); gnd(S, L, 655); gnd(S, R, 655);
+  if (n.isrc) { isrc(S, 300, 210, { label: N.tail, len: 60 }); }
+  else { pmos(S, 300, 205, { name: N.tail, gate: Bn.tail, gl: 24 }); wire(S, [[300, 150], [300, 155]]); wire(S, [[300, 255], [300, 270]]); }
+  dot(S, 300, 270); txt(S, 312, 264, 'P', { size: 18, color: C.bad, weight: 750 });
   wire(S, [[220, 270], [380, 270]]); wire(S, [[220, 270], [220, 280]]); wire(S, [[380, 270], [380, 280]]);
   pmos(S, 220, 330, { name: N.in[0], gate: 'V_in1', gl: 24 }); pmos(S, 380, 330, { name: N.in[1], gate: 'V_in2', right: true, nameSide: 'l', gl: 24 });
   wire(S, [[220, 380], [220, 530], [L, 530]]);

@@ -420,7 +420,7 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
     q: '$I_1 = 100\\,\\mu$A (M3’s load, feeds P), $I_2 = 0.5$ mA (output), $(W/L)_{1,2,3} = 200$; $I_1, I_2$ are PMOS with $W/L = 100$. (a) DC voltages at X and P. (b) Maximum swing. (c) Gain.',
     giv: '$V_{DD} = 3$ V, $\\mu_nC_{ox} = 135\\,\\mu$, $\\mu_pC_{ox} = 40\\,\\mu$A/V², $V_{thn} = 0.7$, $|V_{thp}| = 0.8$ V, $\\lambda_n = 0.1$, $\\lambda_p = 0.2$ V⁻¹',
     qh: 290, tests: 'implementation 1 of Lec 8: **links up from ground** for the biases, the **booster’s swing penalty**, and the **load trap** in the gain.',
-    fig: (S2) => { const c = regCascode(S2, { iout: 'I_2 (PMOS)', iaux: 'I_1 (PMOS)' }); c.g.setAttribute('transform', 'translate(0 90)'); },
+    fig: (S2) => { const c = regCascode(S2, { iout: 'I_2 (PMOS)', iaux: 'I_1 (PMOS)', p: 'P' }); c.g.setAttribute('transform', 'translate(0 90)'); },
     steps: [
       { t: 7, title: '**(a) Walk up from ground.** M3’s source is on ground and it carries $I_1 = 100\\,\\mu$A, so its gate X sits exactly one $V_{GS3}$ up — a **link**, not a choice.',
         tex: 'V_X = V_{th} + \\sqrt{\\tfrac{2I_1}{\\mu_nC_{ox}(W/L)}} = 0.7 + \\sqrt{\\tfrac{2(100\\mu)}{135\\mu\\times 200}} = 0.7 + 0.0861 = 0.786\\,\\mathrm{V}', hl: [T([250, 470, 170, 140, C.volt])],
@@ -428,7 +428,7 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
           q: '**(a)** M3 carries $I_1 = 100\\,\\mu$A with its source on ground. Find the DC voltage at X.', answer: ans('pyq-m25-q1', 'vx'), unit: 'V', tol: 0.01,
           parts: [{ q: 'First M3’s overdrive $V_{ov3}$ at $I_1 = 100\\,\\mu$A.', answer: vov3, unit: 'V', tol: 0.02, hint: ['$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu_nC_{ox}(W/L)}}$'], how: ['$$V_{ov3} = \\sqrt{\\tfrac{2(100\\mu)}{135\\mu\\times 200}} = 0.0861\\,\\mathrm{V}$$'] }],
           hint: ['X is M3’s gate and M3’s source is on ground, so X sits exactly one $V_{GS3}$ above ground (a link).', '$V_X = V_{GS3} = V_{th} + \\sqrt{\\dfrac{2I_1}{\\mu_nC_{ox}(W/L)_3}}$'],
-          how: ['M3’s source is on ground and its gate is X, so X is one gate–source drop up: $$V_X = V_{GS3} = V_{th} + V_{ov3}$$', 'M3’s overdrive from its current $I_1 = 100\\,\\mu$A (square law): $$V_{ov3} = \\sqrt{\\tfrac{2I_1}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\tfrac{2(100\\mu)}{135\\mu\\times 200}} = 0.0861\\,\\mathrm{V}$$', 'Add the threshold: $$V_X = 0.7 + 0.0861 = 0.786\\,\\mathrm{V}$$'],
+          how: ['M3 is NMOS: source = ground, gate = X, drain = P. From source to gate is a **link**, $V_{GS3} = V_{th} + V_{ov3}$: $$V_X = V_{GS3} = V_{th} + V_{ov3}$$', 'M3’s overdrive from its current $I_1 = 100\\,\\mu$A (square law): $$V_{ov3} = \\sqrt{\\tfrac{2I_1}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\tfrac{2(100\\mu)}{135\\mu\\times 200}} = 0.0861\\,\\mathrm{V}$$', 'Add the threshold: $$V_X = 0.7 + 0.0861 = 0.786\\,\\mathrm{V}$$'],
           why: 'Gate on X, source on ground: $V_X = V_{GS3}$. Bias voltages here are links from ground.',
           calc: [{ what: 'V_X in one line (prefixes on)', keys: '0.7 + [√] ( 2 × 100µ ÷ ( 135µ × 200 ) ) [EXE]', shows: '0.786', note: 'Type µ with [CATALOG] ▸ Engineer Symbol ▸ micro. Then [VARIABLE] ▸ A ▸ Store to keep V_X for part (b).' }],
         },
@@ -439,7 +439,7 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
           q: '**(a)** P is M2’s gate. M2 carries $I_2 = 0.5$ mA. Using $V_X$ from above, find the DC voltage at P.', answer: ans('pyq-m25-q1', 'vp'), unit: 'V', tol: 0.01,
           parts: [{ q: 'First M2’s overdrive $V_{ov2}$ (M2 carries $I_2 = 0.5$ mA).', answer: vov2, unit: 'V', tol: 0.02, hint: ['M2 is in series with M1: it carries the output current. $V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}(W/L))}$'], how: ['$$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{135\\mu\\times 200}} = 0.192\\,\\mathrm{V}$$'] }],
           hint: ['P is M2’s gate and X is M2’s source: a second link stacked on the first.', '$V_P = V_X + V_{GS2} = V_X + V_{th} + \\sqrt{\\dfrac{2I_2}{\\mu_nC_{ox}(W/L)_2}}$'],
-          how: ['M2’s source is X and its gate is P, so P is one $V_{GS2}$ above X: $$V_P = V_X + V_{GS2}$$', 'M2 is in series with M1, so it carries the output current $I_2 = 0.5$ mA: $$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{135\\mu\\times 200}} = 0.192\\,\\mathrm{V}$$', 'Stack the two links (X from the step above): $$V_P = 0.786 + 0.7 + 0.192 = 1.679\\,\\mathrm{V}$$'],
+          how: ['M2 is NMOS: source = X, gate = P, drain = $V_{out}$. From source to gate is a **link**, so P is one $V_{GS2}$ above X: $$V_P = V_X + V_{GS2}$$', 'M2 is in series with M1, so it carries the output current $I_2 = 0.5$ mA: $$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{135\\mu\\times 200}} = 0.192\\,\\mathrm{V}$$', 'Stack the two links (X from the step above): $$V_P = 0.786 + 0.7 + 0.192 = 1.679\\,\\mathrm{V}$$'],
           why: 'Two links from ground: $V_P = V_{GS3} + V_{GS2}$.',
         },
         say: 'P sits one more link up: $V_P = V_X + V_{GS2} = 1.679$ V. Two links stacked.' },
@@ -449,7 +449,7 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
           q: '**(b)** The output current source $I_2$ is a PMOS ($W/L = 100$) carrying 0.5 mA. How high can $V_{out}$ go before it leaves saturation?', answer: 2.5, unit: 'V', tol: 0.01,
           parts: [{ q: 'First the PMOS source’s overdrive $|V_{ov}|$ at 0.5 mA.', answer: vovp, unit: 'V', tol: 0.02, hint: ['$|V_{ov}| = \\sqrt{\\dfrac{2I_D}{\\mu_pC_{ox}(W/L)_p}}$ with $\\mu_pC_{ox} = 40\\,\\mu$A/V², $W/L = 100$.'], how: ['$$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{40\\mu\\times 100}} = 0.5\\,\\mathrm{V}$$'] }],
           hint: ['A PMOS current source needs its drain at least $|V_{ov}|$ below its source, which is $V_{DD}$.', '$V_{out,max} = V_{DD} - |V_{ov}|,\\quad |V_{ov}| = \\sqrt{\\dfrac{2I_2}{\\mu_pC_{ox}(W/L)_p}}$'],
-          how: ['The PMOS source’s source is $V_{DD}$ and its drain is the output. To stay saturated it needs $|V_{SD}| \\ge |V_{ov}|$, so $$V_{out,max} = V_{DD} - |V_{ov}|$$', 'Its overdrive at 0.5 mA with $\\mu_pC_{ox} = 40\\,\\mu$A/V²: $$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{40\\mu\\times 100}} = 0.5\\,\\mathrm{V}$$', 'Subtract from the supply: $$V_{out,max} = 3 - 0.5 = 2.5\\,\\mathrm{V}$$'],
+          how: ['The $I_2$ PMOS: source = $V_{DD}$ (top), drain = $V_{out}$. How high $V_{out}$ may go is a **fence** question (not a link): it needs $|V_{SD}| \\ge |V_{ov}|$, so $$V_{out,max} = V_{DD} - |V_{ov}|$$', 'Its overdrive at 0.5 mA with $\\mu_pC_{ox} = 40\\,\\mu$A/V²: $$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{40\\mu\\times 100}} = 0.5\\,\\mathrm{V}$$', 'Subtract from the supply: $$V_{out,max} = 3 - 0.5 = 2.5\\,\\mathrm{V}$$'],
           why: 'Ceiling = $V_{DD}$ minus the top device’s $|V_{ov}|$ (not its $|V_{GS}|$).',
         },
         say: 'Ceiling: the PMOS current source on top needs its overdrive, 0.5 V: $V_{out,max} = 2.5$ V.' },
@@ -459,7 +459,7 @@ scene(L8, '2025 mid-sem Q1: CS-boosted cascode, full solve', 92, (S) => {
           q: '**(b)** Using $V_X$ from part (a) and the ceiling just found, what is the maximum output swing?', answer: ans('pyq-m25-q1', 'swing'), unit: 'V', tol: 0.01,
           parts: [{ q: 'First the floor $V_{out,min}$, set by M2.', answer: vmin, unit: 'V', tol: 0.01, hint: ['M2 needs its drain at least $V_{ov2}$ above its source X: $V_{out,min} = V_X + V_{ov2}$.'], how: ['$V_X$ and $V_{ov2}$ from part (a): $$V_{out,min} = 0.786 + 0.192 = 0.979\\,\\mathrm{V}$$'] }],
           hint: ['The floor is set by M2: its drain (the output) must stay at least $V_{ov2}$ above its source X.', '$V_{out,min} = V_X + V_{ov2}$, then swing $= V_{out,max} - V_{out,min}$.'],
-          how: ['M2 stays saturated while its drain is at least $V_{ov2}$ above its source X, and X is pinned at $V_{GS3}$ by the booster: $$V_{out,min} = V_X + V_{ov2}$$', 'Use $V_X$ from (a) and M2’s overdrive at 0.5 mA (also from (a)): $$V_{out,min} = 0.786 + 0.192 = 0.979\\,\\mathrm{V}$$', 'Swing is the room between ceiling and floor: $$\\text{swing} = 2.5 - 0.979 = 1.521\\,\\mathrm{V}$$'],
+          how: ['M2 is NMOS: gate = P, source = X, drain = $V_{out}$. How low $V_{out}$ may go is a **fence**: $V_{DS2} \\ge V_{ov2}$. X is pinned at $V_{GS3}$ by the booster (a link): $$V_{out,min} = V_X + V_{ov2}$$', 'Use $V_X$ from (a) and M2’s overdrive at 0.5 mA (also from (a)): $$V_{out,min} = 0.786 + 0.192 = 0.979\\,\\mathrm{V}$$', 'Swing is the room between ceiling and floor: $$\\text{swing} = 2.5 - 0.979 = 1.521\\,\\mathrm{V}$$'],
           why: 'With a CS booster the floor is $V_{GS3} + V_{ov2}$, not $2V_{ov}$: one $V_{th}$ of swing lost.',
         },
         say: 'Floor: X is at $V_{GS3}$ (the implementation-1 penalty) plus $V_{ov2}$: 0.979 V. Swing = 2.5 − 0.979 = 1.52 V.' },
@@ -511,7 +511,7 @@ function pmosBoostFig(S) {
   pmos(S, xo, 230, { name: 'M5', gate: 'V_bp', right: true, nameSide: 'l' }); wire(S, [[xo, 170], [xo, 180]]);
   dot(S, xo, 310); wire(S, [[xo, 280], [xo, 330]]); wire(S, [[xo, 310], [720, 310]]); txt(S, 728, 317, 'V_out', { size: 22, color: C.volt, weight: 700 });
   const m2 = nmos(S, xo, 380, { name: 'M2', gl: 120 });
-  dot(S, xo, 460); wire(S, [[xo, 430], [xo, 490]]); txt(S, xo + 14, 474, 'P', { size: 22, color: C.bad, weight: 750 });
+  dot(S, xo, 460); wire(S, [[xo, 430], [xo, 490]]); txt(S, xo + 14, 474, 'V_P', { size: 22, color: C.bad, weight: 750 });
   nmos(S, xo, 540, { name: 'M1', gate: 'V_in' }); gnd(S, xo, 590);
   const xa = 330;
   txt(S, xa, 200, 'V_S', { size: 21, color: C.amb, weight: 700, anchor: 'middle' }); dot(S, xa, 214); wire(S, [[xa, 214], [xa, 250]]);
@@ -531,7 +531,7 @@ scene(L8, 'Tutorial 4 Q2: the PMOS booster with numbers', 80, (S) => {
   const gmn = Math.sqrt(2 * 150e-6 * 150 * 0.1e-3), gmro = Math.sqrt(2550), ron = gmro / gmn;
   const off = pyqFrame(S, {
     paper: 't4q2', tag: 'LEC 8 · PAST PAPER 2 OF 3', title: 'Is the PMOS booster’s M3 saturated?', src: 'Tutorial 4 Q2',
-    q: 'M5 (PMOS load, gate $V_{bp}$), M2 and M1 carry $I_{D1} = 0.1$ mA. (a) $V_{bp}$. (b) With $V_P = V_{ov1}$, is M3 saturated? (c) With $V_{ov4} = 0.1$ V, the required $V_S$. (d) Booster removed, M5 ideal: λ for a gain ≈ 2550. (e) Gain with $\\lambda_p = 1.3\\lambda_n$.',
+    q: 'M5 (PMOS load, gate $V_{bp}$), M2 and M1 carry $I_{D1} = 0.1$ mA. (a) $V_{bp}$. (b) Aiming for $V_P = V_{ov1}$ and $V_{out}|_{min} = 2V_{ov1}$, check M3’s region. (c) With $V_{ov4} = 0.1$ V, the required $V_S$. (d) Booster removed, M5 ideal: λ for a gain ≈ 2550. (e) Gain with $\\lambda_p = 1.3\\lambda_n$.',
     giv: '$V_{DD} = 1.8$ V, $\\mu_nC_{ox} = 150\\,\\mu$, $\\mu_pC_{ox} = 100\\,\\mu$A/V², $(W/L)_n = 150$, $(W/L)_p = 100$, $V_{thn} = 0.7$, $|V_{thp}| = 0.85$ V',
     qh: 290, tests: 'implementation 2 of Lec 8: the **PMOS fence on M3** that forces $V_{GS2} \\le |V_{th3}|$, plus links for the biases and the load trap.',
     fig: (S2) => { const g = pmosBoostFig(S2); g.setAttribute('transform', 'translate(0 110)'); },
@@ -542,7 +542,7 @@ scene(L8, 'Tutorial 4 Q2: the PMOS booster with numbers', 80, (S) => {
           q: '**(a)** M5 is a PMOS load carrying 0.1 mA. Find its gate bias $V_{bp}$.', answer: ans('bank-t4q2', 'vbp'), unit: 'V', tol: 0.01,
           parts: [{ q: 'First M5’s overdrive $|V_{ov5}|$ at 0.1 mA.', answer: vov5, unit: 'V', tol: 0.02, hint: ['$|V_{ov}| = \\sqrt{\\dfrac{2I_D}{\\mu_pC_{ox}(W/L)_p}}$'], how: ['$$|V_{ov5}| = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{100\\mu\\times 100}} = 0.141\\,\\mathrm{V}$$'] }],
           hint: ['M5’s source is on $V_{DD}$, so its gate is one $|V_{GS5}|$ below $V_{DD}$ (a link).', '$V_{bp} = V_{DD} - |V_{GS5}|,\\; |V_{GS5}| = |V_{thp}| + \\sqrt{\\dfrac{2I_D}{\\mu_pC_{ox}(W/L)_p}}$'],
-          how: ['M5’s source sits on $V_{DD}$ and its gate is $V_{bp}$: $$V_{bp} = V_{DD} - |V_{GS5}|$$', 'Its overdrive at 0.1 mA: $$|V_{ov5}| = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{100\\mu\\times 100}} = 0.141\\,\\mathrm{V}$$', 'Add the threshold, then subtract from the supply: $$V_{bp} = 1.8 - (0.85 + 0.141) = 0.809\\,\\mathrm{V}$$'],
+          how: ['M5 is PMOS: source = $V_{DD}$ (top), gate = $V_{bp}$, drain = $V_{out}$. From source to gate is a **link**: $$V_{bp} = V_{DD} - |V_{GS5}|$$', 'Its overdrive at 0.1 mA: $$|V_{ov5}| = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{100\\mu\\times 100}} = 0.141\\,\\mathrm{V}$$', 'Add the threshold, then subtract from the supply: $$V_{bp} = 1.8 - (0.85 + 0.141) = 0.809\\,\\mathrm{V}$$'],
           why: 'Common slip: subtracting only $|V_{ov}|$ gives 1.66 V. A gate bias needs the full $|V_{GS}|$.',
         },
         say: '(a) A link from the top: $V_{bp} = V_{DD} - |V_{GS5}| = 0.809$ V.' },
@@ -557,7 +557,7 @@ scene(L8, 'Tutorial 4 Q2: the PMOS booster with numbers', 80, (S) => {
           ],
           choices: ['Yes, just: its drain sits below its gate + $|V_{thp}|$', 'No: its drain is too high, so it is in triode', 'Cannot tell without λ'], answer: 0,
           hint: ['M3’s gate is P and its drain is M2’s gate. Find both voltages, then use the PMOS fence.', 'PMOS saturated while $V_{D3} \\le V_{G3} + |V_{thp}|$, with $V_{D3} = V_P + V_{GS2}$ and $V_{G3} = V_P$.'],
-          how: ['M1 and M2 carry 0.1 mA with $(W/L)_n = 150$: $$V_{ov1} = V_{ov2} = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{150\\mu\\times 150}} = 0.094\\,\\mathrm{V}$$', 'M3’s drain is M2’s gate, one $V_{GS2} = 0.7 + 0.094$ above P: $$V_{D3} = 0.094 + 0.794 = 0.889\\,\\mathrm{V}$$', 'The fence for M3, whose gate is P: $$V_{G3} + |V_{thp}| = 0.094 + 0.85 = 0.944\\,\\mathrm{V}$$', '0.889 ≤ 0.944, so M3 is saturated — by only about 56 mV, because $V_{GS2} = 0.794$ V is barely below $|V_{thp}| = 0.85$ V.'],
+          how: ['M1 and M2 carry 0.1 mA with $(W/L)_n = 150$: $$V_{ov1} = V_{ov2} = \\sqrt{\\tfrac{2(0.1\\mathrm{m})}{150\\mu\\times 150}} = 0.094\\,\\mathrm{V}$$', 'M3’s drain is M2’s gate; M2 is NMOS with source = $V_P$, so its gate is one **link** $V_{GS2} = 0.7 + 0.094$ above $V_P$: $$V_{D3} = 0.094 + 0.794 = 0.889\\,\\mathrm{V}$$', 'M3 is PMOS: source = $V_S$ (top), gate = $V_P$, drain = M2’s gate. “Is it saturated?” is a **fence** check, not a link: a PMOS drain may sit at most $|V_{thp}|$ above its gate: $$V_{G3} + |V_{thp}| = 0.094 + 0.85 = 0.944\\,\\mathrm{V}$$', '0.889 ≤ 0.944, so M3 is saturated — by only about 56 mV, because $V_{GS2} = 0.794$ V is barely below $|V_{thp}| = 0.85$ V.'],
           why: 'The fence reduces to $V_{GS2} \\le |V_{th3}|$. It is a DC check: λ is not needed.',
         },
         say: '(b) The implementation-2 fence: 0.889 ≤ 0.944, so M3 is just saturated — only because $V_{GS2}$ is barely above threshold.' },
@@ -566,7 +566,7 @@ scene(L8, 'Tutorial 4 Q2: the PMOS booster with numbers', 80, (S) => {
         try: {
           q: '**(c)** M4 (NMOS) runs at $V_{ov4} = 0.1$ V. Before finding $V_S$: what current does M4 set in the booster branch?', answer: 112.5e-6, unit: 'A', tol: 0.02,
           hint: ['M4 is a saturated NMOS: its current follows from its overdrive (square law).', '$I_{D4} = \\tfrac12\\mu_nC_{ox}(W/L)_nV_{ov4}^2$'],
-          how: ['M4 is saturated, so the square law gives its current from its overdrive: $$I_{D4} = \\tfrac12\\mu_nC_{ox}(W/L)_nV_{ov4}^2$$', 'Substitute: $$I_{D4} = \\tfrac12(150\\mu)(150)(0.1)^2 = 112.5\\,\\mu\\mathrm{A}$$', 'M3 sits on top of M4 in the same column (P only touches M3’s gate), so M3 carries the same 112.5 µA. That sets $|V_{GS3}|$, and $V_S = V_P + |V_{GS3}|$ follows.'],
+          how: ['M4 is saturated, so the square law gives its current from its overdrive: $$I_{D4} = \\tfrac12\\mu_nC_{ox}(W/L)_nV_{ov4}^2$$', 'Substitute: $$I_{D4} = \\tfrac12(150\\mu)(150)(0.1)^2 = 112.5\\,\\mu\\mathrm{A}$$', 'M3 sits on top of M4 in the same column (P only touches M3’s gate), so M3 carries the same 112.5 µA. That sets $|V_{GS3}|$. M3 is PMOS with gate = $V_P$ and source = $V_S$ above it, so the **link** gives $V_S = V_P + |V_{thp}| + |V_{ov3}|$.'],
           why: 'In a series column the bottom sink decides the current for every device above it.',
         },
         say: '(c) M4 at 0.1 V sets 113 µA; M3’s source $V_S$ sits one $|V_{GS3}|$ above its gate P: 1.094 V.' },
@@ -599,8 +599,8 @@ scene(L8, 'Tutorial 4 Q1 (a), (c): biases and swing', 70, (S) => {
   const T = tfm(1, 0, 90);
   pyqFrame(S, {
     paper: 't4q1', tag: 'LEC 8 · PAST PAPER 3 OF 3', title: 'Biases and swing of implementation 1', src: 'Tutorial 4 Q1 (a), (c)',
-    q: 'Same circuit: $I_1 = 100\\,\\mu$A (M3), $I_2 = 0.5$ mA (output), $(W/L)_{1-3} = 200$. (a) Gates of M3 and M2. (c) Output swing with a PMOS source for $I_2$ ($W/L = 100$).',
-    giv: '$V_{DD} = 3$ V, $\\mu_nC_{ox} = 172.35\\,\\mu$A/V², $\\mu_pC_{ox} = 51.7\\,\\mu$A/V², $V_{thn} = 0.7$ V',
+    q: 'Same circuit: $I_1 = 100\\,\\mu$A (M3), $I_2 = 0.5$ mA (output), $(W/L)_{1-3} = 200$. (a) Gate biases of M2 and M3. (c) With $I_1$ and $I_2$ implemented as PMOS devices, $(W/L)_p = 100$: the output swing.',
+    giv: '$V_{DD} = 3$ V, $\\mu_nC_{ox} = 172.35\\,\\mu$A/V², $\\mu_pC_{ox} = 51.7\\,\\mu$A/V², $V_{thn} = 0.7$ V, $|V_{thp}| = 0.8$ V, $\\lambda_n = 0.1$, $\\lambda_p = 0.2$ V⁻¹',
     qh: 250, tests: 'the same **two stacked links** (X, then M2’s gate) and the **floor/ceiling** of implementation 1 — part (b) was solved in Lec 7.',
     fig: (S2) => { const c = regCascode(S2, { iout: 'I_2', iaux: 'I_1' }); c.g.setAttribute('transform', 'translate(0 90)'); },
     steps: [
@@ -610,7 +610,7 @@ scene(L8, 'Tutorial 4 Q1 (a), (c): biases and swing', 70, (S) => {
           q: '**(a)** Find the gate bias of M3 (the voltage at X).', answer: ans('bank-t4q1', 'vx'), unit: 'V', tol: 0.01,
           parts: [{ q: 'First M3’s overdrive $V_{ov3}$ at $I_1 = 100\\,\\mu$A.', answer: Math.sqrt(2 * 100e-6 / (172.35e-6 * 200)), unit: 'V', tol: 0.02, hint: ['$V_{ov} = \\sqrt{\\dfrac{2I_D}{\\mu_nC_{ox}(W/L)}}$'], how: ['$$V_{ov3} = \\sqrt{\\tfrac{2(100\\mu)}{172.35\\mu\\times 200}} = 0.0762\\,\\mathrm{V}$$'] }],
           hint: ['M3’s gate is X and its source is on ground: one link up.', '$V_X = V_{th} + \\sqrt{\\dfrac{2I_1}{\\mu_nC_{ox}(W/L)}}$'],
-          how: ['X is M3’s gate and M3’s source is ground: $$V_X = V_{GS3} = V_{th} + V_{ov3}$$', 'M3 carries $I_1 = 100\\,\\mu$A: $$V_{ov3} = \\sqrt{\\tfrac{2(100\\mu)}{172.35\\mu\\times 200}} = 0.0762\\,\\mathrm{V}$$', 'Add the threshold: $$V_X = 0.7 + 0.0762 = 0.776\\,\\mathrm{V}$$'],
+          how: ['M3 is NMOS: source = ground, gate = X, drain = M2’s gate. From source to gate is a **link**: $$V_X = V_{GS3} = V_{th} + V_{ov3}$$', 'M3 carries $I_1 = 100\\,\\mu$A: $$V_{ov3} = \\sqrt{\\tfrac{2(100\\mu)}{172.35\\mu\\times 200}} = 0.0762\\,\\mathrm{V}$$', 'Add the threshold: $$V_X = 0.7 + 0.0762 = 0.776\\,\\mathrm{V}$$'],
           why: 'Same move as the 2025 mid-sem: a gate whose device sits on ground is one $V_{GS}$ up.',
         },
         say: 'Gate of M3 = X = $V_{GS3}$ = 0.776 V.' },
@@ -620,7 +620,7 @@ scene(L8, 'Tutorial 4 Q1 (a), (c): biases and swing', 70, (S) => {
           q: '**(a)** Using $V_X$ from the step above, find the gate bias of M2.', answer: ans('bank-t4q1', 'vg2'), unit: 'V', tol: 0.01,
           parts: [{ q: 'First M2’s overdrive $V_{ov2}$ at $I_2 = 0.5$ mA.', answer: Math.sqrt(2 * 0.5e-3 / (172.35e-6 * 200)), unit: 'V', tol: 0.02, hint: ['M2 is in series with M1, so it carries $I_2$. $V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}(W/L))}$'], how: ['$$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{172.35\\mu\\times 200}} = 0.170\\,\\mathrm{V}$$'] }],
           hint: ['M2’s gate is one $V_{GS2}$ above its source X, and M2 carries the output current $I_2$.', '$V_{G2} = V_X + V_{th} + \\sqrt{\\dfrac{2I_2}{\\mu_nC_{ox}(W/L)}}$'],
-          how: ['M2’s source is X, so its gate is one link higher: $$V_{G2} = V_X + V_{GS2}$$', 'M2 is in series with M1, so it carries $I_2 = 0.5$ mA: $$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{172.35\\mu\\times 200}} = 0.170\\,\\mathrm{V}$$', 'Stack them: $$V_{G2} = 0.776 + 0.7 + 0.170 = 1.646\\,\\mathrm{V}$$'],
+          how: ['M2 is NMOS: source = X, gate = $V_{G2}$, drain = $V_{out}$. From source to gate is one more **link**: $$V_{G2} = V_X + V_{GS2}$$', 'M2 is in series with M1, so it carries $I_2 = 0.5$ mA: $$V_{ov2} = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{172.35\\mu\\times 200}} = 0.170\\,\\mathrm{V}$$', 'Stack them: $$V_{G2} = 0.776 + 0.7 + 0.170 = 1.646\\,\\mathrm{V}$$'],
           why: '$V_{G2} = V_{GS3} + V_{GS2}$: two links stacked from ground.',
           calc: [{ what: 'V_G2, reusing the stored V_X', keys: '[SHIFT] [4] + 0.7 + [√] ( 2 × 0.5m ÷ ( 172.35µ × 200 ) ) [EXE]', shows: '1.646', note: 'First store V_X from part (a): [VARIABLE] ▸ A ▸ Store; [SHIFT] [4] types A.' }],
         },
@@ -630,7 +630,7 @@ scene(L8, 'Tutorial 4 Q1 (a), (c): biases and swing', 70, (S) => {
         try: {
           q: '**(c)** Using $V_{G2}$ from part (a), what is the lowest output voltage that keeps M2 saturated?', answer: ans('bank-t4q1', 'vmin'), unit: 'V', tol: 0.01,
           hint: ['The floor is M2’s saturation fence: its drain is the output.', 'NMOS saturated while $V_D \\ge V_G - V_{th}$, so $V_{out,min} = V_{G2} - V_{th}$.'],
-          how: ['M2’s drain is the output and its gate is at $V_{G2}$. NMOS fence: $$V_{out} \\ge V_{G2} - V_{th}$$', 'With $V_{G2}$ from (a): $$V_{out,min} = 1.646 - 0.7 = 0.946\\,\\mathrm{V}$$', 'Check: it equals $V_X + V_{ov2} = 0.776 + 0.170$, X plus M2’s own overdrive.'],
+          how: ['M2 is NMOS: gate = $V_{G2}$, source = X, drain = $V_{out}$. How low $V_{out}$ may go is a **fence** (saturation), not a link: $$V_{out} \\ge V_{G2} - V_{th}$$', 'With $V_{G2}$ from (a): $$V_{out,min} = 1.646 - 0.7 = 0.946\\,\\mathrm{V}$$', 'Check: it equals $V_X + V_{ov2} = 0.776 + 0.170$, X plus M2’s own overdrive.'],
           why: 'Two ways to the same floor: $V_{G2} - V_{th}$ or $V_X + V_{ov2}$.',
         },
         say: 'Floor from M2’s fence: $V_{out} \\ge V_{G2} - V_{th} = 0.946$ V — the same as $V_{GS3} + V_{ov2}$.' },
@@ -640,7 +640,7 @@ scene(L8, 'Tutorial 4 Q1 (a), (c): biases and swing', 70, (S) => {
           q: '**(c)** The output current source is a PMOS ($W/L = 100$) carrying 0.5 mA from $V_{DD} = 3$ V. What is the highest output voltage?', answer: ans('bank-t4q1', 'vmax'), unit: 'V', tol: 0.01,
           parts: [{ q: 'First the PMOS source’s overdrive $|V_{ov}|$ at 0.5 mA.', answer: Math.sqrt(2 * 0.5e-3 / (51.7e-6 * 100)), unit: 'V', tol: 0.02, hint: ['$|V_{ov}| = \\sqrt{\\dfrac{2I_D}{\\mu_pC_{ox}(W/L)_p}}$'], how: ['$$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{51.7\\mu\\times 100}} = 0.440\\,\\mathrm{V}$$'] }],
           hint: ['The PMOS source stays saturated while its drain is at least $|V_{ov}|$ below $V_{DD}$.', '$V_{out,max} = V_{DD} - \\sqrt{\\dfrac{2I_2}{\\mu_pC_{ox}(W/L)_p}}$'],
-          how: ['The top PMOS needs $|V_{SD}| \\ge |V_{ov}|$: $$V_{out,max} = V_{DD} - |V_{ov}|$$', 'Its overdrive at 0.5 mA with $\\mu_pC_{ox} = 51.7\\,\\mu$A/V²: $$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{51.7\\mu\\times 100}} = 0.440\\,\\mathrm{V}$$', 'Subtract from the supply: $$V_{out,max} = 3 - 0.440 = 2.56\\,\\mathrm{V}$$'],
+          how: ['The $I_2$ PMOS: source = $V_{DD}$, drain = $V_{out}$. How high $V_{out}$ may go is a **fence**: $|V_{SD}| \\ge |V_{ov}|$: $$V_{out,max} = V_{DD} - |V_{ov}|$$', 'Its overdrive at 0.5 mA with $\\mu_pC_{ox} = 51.7\\,\\mu$A/V²: $$|V_{ov}| = \\sqrt{\\tfrac{2(0.5\\mathrm{m})}{51.7\\mu\\times 100}} = 0.440\\,\\mathrm{V}$$', 'Subtract from the supply: $$V_{out,max} = 3 - 0.440 = 2.56\\,\\mathrm{V}$$'],
           why: 'Swing = 2.56 − 0.946 ≈ 1.61 V. The ceiling uses only $|V_{ov}|$; no threshold appears.',
         },
         say: 'Ceiling: $3 - |V_{ov}| = 2.56$ V. Swing ≈ 1.61 V.' },

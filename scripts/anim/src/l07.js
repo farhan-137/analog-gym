@@ -2,7 +2,8 @@
 'use strict';
 const L7 = 'Lec 7 · Two stages & boosting';
 
-/* the simple two-stage op amp of your Lec 7 page (circuit 1). Returns node coordinates. */
+/* the simple two-stage op amp of your Lec 7 page (circuit 1). Returns node coordinates.
+   o.iss: ideal tail source I_SS instead of M9; o.vbSink: gate name of M7, M8 (Tutorial 3 Q2 prints V_b2). */
 function twoStage1(S, o = {}) {
   const g = S.g();
   const r = S.into(g);
@@ -17,8 +18,8 @@ function twoStage1(S, o = {}) {
   const m2 = nmos(S, 940, 420, { name: 'M2', gate: 'V_in2', right: true });
   wire(S, [[660, 280], [660, 370]]); wire(S, [[940, 280], [940, 370]]);
   wire(S, [[660, 470], [660, 500], [940, 500], [940, 470]]);
-  const m9 = nmos(S, 800, 560, { name: 'M9', gate: 'V_b2' });
-  wire(S, [[800, 500], [800, 510]]); gnd(S, 800, 610);
+  if (o.iss) { isrc(S, 800, 550, { label: 'I_SS', len: 50 }); gnd(S, 800, 600); } // tail as printed in Tutorial 3 Q2
+  else { nmos(S, 800, 560, { name: 'M9', gate: 'V_b2' }); wire(S, [[800, 500], [800, 510]]); gnd(S, 800, 610); }
   dot(S, 660, 330); dot(S, 940, 330); dot(S, 800, 500);
   txt(S, 676, 324, 'X', { size: 22, color: C.bad, weight: 750 }); txt(S, 924, 324, 'Y', { size: 22, color: C.bad, weight: 750, anchor: 'end' });
   // stage 2: PMOS CS M5, M6 with NMOS sources M7, M8
@@ -27,8 +28,8 @@ function twoStage1(S, o = {}) {
   wire(S, [[400, 170], [400, 180]]); wire(S, [[1200, 170], [1200, 180]]);
   wire(S, [[m5.gate[0], 230], [520, 230], [520, 330], [660, 330]]);
   wire(S, [[m6.gate[0], 230], [1080, 230], [1080, 330], [940, 330]]);
-  const m7 = nmos(S, 400, 480, { name: 'M7', gate: 'V_b' });
-  const m8 = nmos(S, 1200, 480, { name: 'M8', gate: 'V_b', right: true });
+  const m7 = nmos(S, 400, 480, { name: 'M7', gate: o.vbSink || 'V_b' });
+  const m8 = nmos(S, 1200, 480, { name: 'M8', gate: o.vbSink || 'V_b', right: true });
   wire(S, [[400, 280], [400, 430]]); wire(S, [[1200, 280], [1200, 430]]);
   gnd(S, 400, 530); gnd(S, 1200, 530);
   dot(S, 400, 360); dot(S, 1200, 360);
@@ -676,7 +677,7 @@ scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
     q: 'Your circuit 1 with $(W/L)_{1-8} = 200$, $I_{SS} = 1$ mA, $I_{D5} = I_{D6} = 1$ mA. (a) CM level at X, Y and the input-CM ceiling. (b) Gain and maximum output swing.',
     giv: L7_SET_A + '. M7, M8 are NMOS sinks of 1 mA, also $W/L = 200$.',
     qh: 270, tests: 'the **link** that pins the level between two stages, the **fence** for the input-CM ceiling, and **gain = product of stage gains**.',
-    fig: (S2) => { const c = twoStage1(S2); c.g.setAttribute('transform', 'translate(-130 188) scale(0.76)'); },
+    fig: (S2) => { const c = twoStage1(S2, { iss: true, vbSink: 'V_b2' }); c.g.setAttribute('transform', 'translate(-130 188) scale(0.76)'); },
     steps: [
       { t: 7, title: '**(a) Start at stage 2: the link.** X is **M5’s gate** and M5’s source is on $V_{DD}$. M5 must carry 1 mA, so its $|V_{GS5}|$ is fixed and X sits exactly that far below $V_{DD}$ (Y the same).',
         tex: '|V_{ov5}| = \\sqrt{\\frac{2I_{D5}}{\\mu_pC_{ox}(W/L)}} = \\sqrt{\\frac{2(1\\,\\text{m})}{38.36\\,\\mu\\times200}} = 0.511\\,\\text{V},\\quad V_X = V_{DD} - |V_{thp}| - |V_{ov5}| = 3 - 0.8 - 0.511 = 1.689\\,\\text{V}', hl: [T([330, 170, 150, 130, C.volt])],
@@ -688,7 +689,7 @@ scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
           ],
           hint: ['X is M5’s **gate**, and M5’s source is on $V_{DD}$. Get M5’s $|V_{GS}|$ from its current, then step down from $V_{DD}$.', '$|V_{GS5}| = |V_{thp}| + \\sqrt{\\dfrac{2I_{D5}}{\\mu_pC_{ox}(W/L)}}$, then $V_X = V_{DD} - |V_{GS5}|$.'],
           how: [
-            'M5 is a PMOS with its source on $V_{DD}$ and its gate on X. Only one $|V_{GS5}|$ gives 1 mA, so that fixes X (the **link**).',
+            'M5 is PMOS: source = $V_{DD}$ (top), gate = X, drain = $V_{out1}$. We go from its source to its gate, so use the **link** $|V_{GS5}| = |V_{thp}| + |V_{ov5}|$: only one $|V_{GS5}|$ gives 1 mA, and that fixes X.',
             'Overdrive from the square law: $$|V_{ov5}| = \\sqrt{\\frac{2I_{D5}}{\\mu_pC_{ox}(W/L)}} = \\sqrt{\\frac{2(1\\,\\text{mA})}{38.36\\,\\mu\\text{A/V}^2\\times200}} = 0.511\\,\\text{V}$$',
             'Add the threshold: $$|V_{GS5}| = |V_{thp}| + |V_{ov5}| = 0.8 + 0.511 = 1.311\\,\\text{V}$$',
             'Step down from the rail (Y is the same by symmetry): $$V_X = V_{DD} - |V_{GS5}| = 3 - 1.311 = 1.689\\,\\text{V}$$',
@@ -705,7 +706,7 @@ scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
           hint: ['M1’s drain is X. An NMOS stays saturated while its gate is at most one $V_{th}$ above its drain (the fence).', '$V_{in,CM,max} = V_X + V_{thn}$'],
           how: [
             'M1’s drain sits at X, which stage 2 has pinned at 1.689 V (part (a)).',
-            'NMOS saturation fence: $V_D \\ge V_G - V_{th}$, so the gate may rise only to $V_G \\le V_D + V_{th}$.',
+            'M1 is NMOS: gate = $V_{in}$, drain = X, source = the tail node. The question is how far the gate may rise above the drain, so use the **fence** (not a link): $V_D \\ge V_G - V_{th}$, so $V_G \\le V_D + V_{th}$.',
             'Put in the numbers: $$V_{in,CM,max} = V_X + V_{thn} = 1.689 + 0.7 = 2.389\\,\\text{V}$$',
           ],
           why: 'An input-CM ceiling always comes from the input device’s drain: drain + $V_{th}$.',
@@ -754,8 +755,8 @@ scene(L7, 'Tutorial 3 Q2: two-stage, level at X, gain, swing', 78, (S) => {
           ],
           hint: ['Each output is a CS stage: it rises until M5 reaches its edge and falls until M7 reaches its edge. The two outputs move in opposite directions.', 'One output: from $V_{ov7}$ up to $V_{DD} - |V_{ov5}|$. Differential p-p $= 2[(V_{DD} - |V_{ov5}|) - V_{ov7}]$.'],
           how: [
-            'M7 is an NMOS sink at 1 mA, $W/L = 200$: $$V_{ov7} = \\sqrt{\\frac{2I_{D7}}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\frac{2(1\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.273\\,\\text{V}$$',
-            'Top of one output: M5 keeps its $|V_{ov5}| = 0.511$ V from part (a): $$V_{out,max} = V_{DD} - |V_{ov5}| = 3 - 0.511 = 2.489\\,\\text{V}$$',
+            'Each end of the swing is a **fence** (a device reaching the edge of saturation), not a link. M7 is NMOS: source = ground, gate = $V_{b2}$, drain = $V_{out1}$, so $V_{out1} \\ge V_{ov7}$. At 1 mA, $W/L = 200$: $$V_{ov7} = \\sqrt{\\frac{2I_{D7}}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\frac{2(1\\,\\text{m})}{134.28\\,\\mu\\times200}} = 0.273\\,\\text{V}$$',
+            'Top: M5 is PMOS with source = $V_{DD}$, drain = $V_{out1}$; its fence is $|V_{SD5}| \\ge |V_{ov5}| = 0.511$ V (part (a)): $$V_{out,max} = V_{DD} - |V_{ov5}| = 3 - 0.511 = 2.489\\,\\text{V}$$',
             'Bottom: $V_{out,min} = V_{ov7} = 0.273$ V, so one output swings $$2.489 - 0.273 = 2.216\\,\\text{V p-p}$$',
             'The two outputs swing in opposite directions, so the differential swing doubles: $$V_{pp,diff} = 2\\times2.216 = 4.43\\,\\text{V}$$',
           ],
@@ -788,7 +789,7 @@ scene(L7, 'Tutorial 3 Q3: telescopic + CS, sizes from a 200 mV swing', 74, (S) =
           ],
           hint: ['The same link as Q2: X is M9’s gate, and M9’s source is $V_{DD}$.', '$V_X = V_{DD} - |V_{thp}| - \\sqrt{\\dfrac{2I_{D9}}{\\mu_pC_{ox}(W/L)_9}}$'],
           how: [
-            'X drives M9’s gate and M9 must carry 0.5 mA, so $|V_{GS9}|$ is fixed and X sits that far below $V_{DD}$.',
+            'M9 is PMOS: source = $V_{DD}$ (top), gate = X. Going from its source to its gate is a **link**, $|V_{GS9}| = |V_{thp}| + |V_{ov9}|$; M9 must carry 0.5 mA, so X sits that far below $V_{DD}$.',
             'Overdrive of M9: $$|V_{ov9}| = \\sqrt{\\frac{2(0.5\\,\\text{m})}{38.36\\,\\mu\\times200}} = 0.361\\,\\text{V}$$',
             'Step down from the rail: $$V_X = V_{DD} - |V_{thp}| - |V_{ov9}| = 3 - 0.8 - 0.361 = 1.839\\,\\text{V}$$',
           ],
@@ -806,7 +807,7 @@ scene(L7, 'Tutorial 3 Q3: telescopic + CS, sizes from a 200 mV swing', 74, (S) =
           hint: ['200 mV p-p means X moves ±0.1 V. Look at the **lowest** X: under it sit the tail, M1 and M3 in series.', '$V_{ov,N} = \\dfrac{(V_X - 0.1) - V_{ISS}}{2}$'],
           how: [
             'A 200 mV peak-to-peak swing takes X 0.1 V below its CM level: $$V_{X,min} = 1.839 - 0.1 = 1.739\\,\\text{V}$$',
-            'From ground up to that point we must fit the tail (0.4 V), then M1, then M3, each needing at least its $V_{ov}$.',
+            'From ground up to that point sit the tail (0.4 V), then M1 (NMOS, source = tail node, drain = M3’s source), then M3 (NMOS, gate = $V_{b1}$, drain = X). How far X may fall is a **fence** question: each needs $V_{DS} \\ge V_{ov}$.',
             'Share what is left equally: $$V_{ov,N} = \\frac{V_{X,min} - V_{ISS}}{2} = \\frac{1.739 - 0.4}{2} = 0.669\\,\\text{V}$$',
           ],
           why: 'Headroom budget: list every device between the node and the rail, give each its $V_{ov}$; the sum must fit.',
@@ -837,7 +838,7 @@ scene(L7, 'Tutorial 3 Q3: telescopic + CS, sizes from a 200 mV swing', 74, (S) =
   });
 }, { q: 'Tutorial 3 Q3' });
 
-/* regulated cascode with a CS booster (implementation 1); labels as Tutorial 4 Q1 */
+/* regulated cascode with a CS booster (implementation 1); labels as Tutorial 4 Q1. o.iout, o.iaux: source labels; o.p: name of M2's gate node (none by default) */
 function regCascode(S, o = {}) {
   const g = S.g(); const r = S.into(g);
   rail(S, 160, 760, 170);
@@ -853,6 +854,7 @@ function regCascode(S, o = {}) {
   isrc(S, xa, 260, { label: o.iaux || 'I_1', left: true }); wire(S, [[xa, 170], [xa, 218]]);
   wire(S, [[xa, 302], [xa, 490]]); dot(S, xa, 380);
   wire(S, [[xa, 380], [m2.gate[0], 380]]);
+  if (o.p) txt(S, xa - 14, 387, o.p, { size: 22, color: C.bad, weight: 750, anchor: 'end' }); // node name as printed (2025 mid-sem: P)
   const m3 = nmos(S, xa, 540, { name: 'M3', right: true, gl: 40, nameSide: 'l' });
   wire(S, [[m3.gate[0], 540], [470, 540], [470, 460], [xo, 460]]);
   gnd(S, xa, 590);
@@ -918,10 +920,12 @@ scene(L7, 'Tutorial 4 Q1(b): the boosted R_out with numbers', 66, (S) => {
   const A1 = Math.sqrt(2 * 172.35e-6 * 200 * 100e-6) / (0.1 * 100e-6); // g_m3 r_O3 at I_1 = 100 µA
   const gm3 = Math.sqrt(2 * 172.35e-6 * 200 * 100e-6), rO3 = 1 / (0.1 * 100e-6), rO = 1 / (0.1 * 0.5e-3);
   const Rout = ans('bank-t4q1', 'av') / gm, rOP = 1 / (0.2 * 0.5e-3);
+  // (c): BOTH sources are PMOS (as printed), so I_1's r_O (50 kΩ) also loads the booster
+  const rOI1 = 1 / (0.2 * 100e-6), A1p = gm3 * rO3 * rOI1 / (rO3 + rOI1), RdP = 2 * rO + (1 + A1p) * gm * rO * rO;
   pyqFrame(S, {
     paper: 't4q1', tag: 'LEC 7 · PAST PAPER 3 OF 3', title: 'Regulated cascode: how big does R_out get?', src: 'Tutorial 4 Q1 (b), (c)',
-    q: 'M3 (gate on X, loaded by $I_1 = 100\\,\\mu$A) drives M2’s gate; $I_2 = 0.5$ mA. $(W/L)_{1-3} = 200$. (b) Gain with ideal sources. (c) With a PMOS source for $I_2$ ($r_O = 10$ kΩ), the gain.',
-    giv: '$\\mu_nC_{ox} = 172.35\\,\\mu$A/V², $V_{thn} = 0.7$ V, $\\lambda_n = 0.1$ V⁻¹, $V_{DD} = 3$ V. PMOS source: $\\lambda_p = 0.2$ V⁻¹ at 0.5 mA ⇒ $r_O = 10$ kΩ.', qh: 250,
+    q: 'M3 (gate on X, loaded by $I_1 = 100\\,\\mu$A) drives M2’s gate; $I_2 = 0.5$ mA. $(W/L)_{1-3} = 200$. (b) Gain with ideal sources. (c) With $I_1$ and $I_2$ both PMOS current sources, the gain.',
+    giv: '$\\mu_nC_{ox} = 172.35\\,\\mu$A/V², $V_{thn} = 0.7$ V, $\\lambda_n = 0.1$ V⁻¹, $V_{DD} = 3$ V. PMOS sources: $(W/L)_p = 100$, $\\mu_pC_{ox} = 51.7\\,\\mu$A/V², $|V_{thp}| = 0.8$ V, $\\lambda_p = 0.2$ V⁻¹ ⇒ $r_O = 50$ kΩ ($I_1$), 10 kΩ ($I_2$).', qh: 250,
     tests: 'the Lec 7 boosted-$R_{out}$ formula with real numbers, and the **load trap**.',
     fig: (S2) => { const c = regCascode(S2); c.g.setAttribute('transform', 'translate(0 90)'); },
     steps: [
@@ -965,26 +969,28 @@ scene(L7, 'Tutorial 4 Q1(b): the boosted R_out with numbers', 66, (S) => {
         say: '$R_{out} = r_{O1} + r_{O2} + (1 + A_1)g_{m2}r_{O2}r_{O1}$ ≈ 619 MΩ.' },
       { t: 23, title: '**(b) Gain with an ideal $I_2$**: M1’s current $g_{m1}v_{in}$ meets only $R_{out}$ ($g_{m1} = g_{m2}$, same size and current).',
         tex: 'g_{m1} = g_{m2} = 5.87\\,\\text{mS},\\quad |A_v| = g_{m1}R_{out} = 5.87\\,\\text{m}\\times619\\,\\text{M} = 3.63\\times10^{6}', say: 'Ideal load: the gain is $g_{m1}R_{out}$ — about 3.6 million.' },
-      { t: 30, title: '**(c) The load trap:** a real PMOS source ($r_O = 10$ kΩ) sits **in parallel** with the 619 MΩ, and the small one wins.',
-        tex: '|A_v| = g_{m1}(R_{out}\\parallel r_{O,P}) = 5.87\\,\\text{m}\\times(619\\,\\text{M}\\parallel10\\,\\text{k}) = 5.87\\,\\text{m}\\times10\\,\\text{k} = 58.7', hl: [T([470, 180, 190, 110, C.bad])],
+      { t: 30, title: '**(c) Both sources become PMOS.** $I_1$’s $r_O$ (50 kΩ) loads the booster, so $A_1$ drops; and $I_2$’s 10 kΩ sits **in parallel** with the boosted $R_{down}$ — the small one wins.',
+        tex: `A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1}) = 2.63\\,\\text{m}\\times(100\\,\\text{k}\\parallel50\\,\\text{k}) = ${fx(A1p, 3)},\\quad R_{down} = 40\\,\\text{k} + ${fx(1 + A1p, 3)}\\times5.87\\,\\text{m}\\times(20\\,\\text{k})^2 = ${fx(RdP / 1e6, 3)}\\,\\text{M}\\Omega,\\quad |A_v| = g_{m1}(R_{down}\\parallel r_{O,I2}) = 5.87\\,\\text{m}\\times10\\,\\text{k} = 58.7`, hl: [T([470, 180, 190, 110, C.bad]), T([250, 180, 170, 110, C.bad])],
         try: {
-          q: '**(c)** Now $I_2$ is a real PMOS current source with $r_O = 10$ kΩ. What is the gain magnitude $|A_v|$?',
+          q: '**(c)** Now $I_1$ and $I_2$ are real PMOS current sources ($\\lambda_p = 0.2$ V⁻¹: $r_O = 50$ kΩ at 100 µA, 10 kΩ at 0.5 mA). What is the gain magnitude $|A_v|$?',
           answer: ans('bank-t4q1', 'avP'), unit: 'V/V', tol: 0.03,
           parts: [
-            { q: 'First: $g_{m1}$ of the input device M1 (0.5 mA, $W/L = 200$)?', answer: gm, unit: 'S', tol: 0.02, hint: 'M1 has the same size and current as M2.', how: ['$$g_{m1} = g_{m2} = 5.87\\,\\text{mS}$$ (same $W/L$, same $I_2$).'] },
-            { q: 'The resistance at the output: $R_{out}\\parallel r_{O,P}$ (619 MΩ ∥ 10 kΩ)?', answer: Rout * rOP / (Rout + rOP), unit: 'Ω', tol: 0.02, hint: 'Parallel: $\\frac{ab}{a+b}$; when one is 60 000× bigger, the result is the small one.', how: ['$$619\\,\\text{M}\\parallel10\\,\\text{k} = \\frac{619\\,\\text{M}\\times10\\,\\text{k}}{619\\,\\text{M}+10\\,\\text{k}} \\approx 10.0\\,\\text{k}\\Omega$$'] },
+            { q: 'First the booster: M3’s drain now also sees $I_1$’s $r_O = 50$ kΩ. New $A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1})$?', answer: A1p, unit: 'V/V', tol: 0.02, hint: '$g_{m3} = 2.63$ mS and $r_{O3} = 100$ kΩ from (b); $r_{O,I1} = 1/(0.2\\times100\\,\\mu)$.', how: [`$$A_1 = 2.63\\,\\text{m}\\times(100\\,\\text{k}\\parallel50\\,\\text{k}) = 2.63\\,\\text{m}\\times33.3\\,\\text{k} = ${fx(A1p, 3)}$$`] },
+            { q: 'The boosted $R_{down}$ looking into M2’s drain with that $A_1$?', answer: RdP, unit: 'Ω', tol: 0.03, hint: '$R_{down} = r_{O1} + r_{O2} + (1 + A_1)g_{m2}r_{O2}r_{O1}$', how: [`$$R_{down} = 40\\,\\text{k} + ${fx(1 + A1p, 3)}\\times5.87\\,\\text{m}\\times20\\,\\text{k}\\times20\\,\\text{k} = ${fx(RdP / 1e6, 3)}\\,\\text{M}\\Omega$$`] },
+            { q: 'The resistance at the output: $R_{down}\\parallel r_{O,I2}$ (with $r_{O,I2} = 10$ kΩ)?', answer: RdP * rOP / (RdP + rOP), unit: 'Ω', tol: 0.02, hint: 'Parallel: $\\frac{ab}{a+b}$; when one is 20 000× bigger, the result is the small one.', how: [`$$${fx(RdP / 1e6, 3)}\\,\\text{M}\\parallel10\\,\\text{k} \\approx 10.0\\,\\text{k}\\Omega$$`] },
           ],
-          hint: ['The PMOS source’s $r_O$ hangs on the output node, in parallel with the boosted $R_{out}$. In a parallel pair the small one wins.', '$|A_v| = g_{m1}(R_{out}\\parallel r_{O,P})$'],
+          hint: ['Two changes: $I_1$’s $r_O$ sits in parallel with $r_{O3}$ at the booster’s output, and $I_2$’s $r_O$ sits in parallel with the boosted $R_{down}$ at $V_{out}$. In a parallel pair the small one wins.', '$A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1})$, then $|A_v| = g_{m1}(R_{down}\\parallel r_{O,I2})$'],
           how: [
-            'The output node sees two resistances: looking down, the boosted 619 MΩ; looking up, the PMOS source’s 10 kΩ. They are in parallel.',
-            'In a parallel pair the small one wins: $$R_{out}\\parallel r_{O,P} = 619\\,\\text{M}\\parallel10\\,\\text{k} \\approx 10\\,\\text{k}\\Omega$$',
-            'M1 converts $v_{in}$ to current with $g_{m1} = 5.87$ mS (from the last part): $$|A_v| = g_{m1}(R_{out}\\parallel r_{O,P}) = 5.87\\,\\text{m}\\times10\\,\\text{k} = 58.7$$',
+            `The booster M3 (CS: gate = X, source = ground, drain = M2’s gate) now has $I_1$’s 50 kΩ in parallel with its own 100 kΩ: $$A_1 = g_{m3}(r_{O3}\\parallel r_{O,I1}) = 2.63\\,\\text{m}\\times33.3\\,\\text{k} = ${fx(A1p, 3)}$$`,
+            `Boosted resistance looking down into M2’s drain: $$R_{down} = r_{O1} + r_{O2} + (1 + A_1)g_{m2}r_{O2}r_{O1} = ${fx(RdP / 1e6, 3)}\\,\\text{M}\\Omega$$`,
+            'Looking up from $V_{out}$, $I_2$’s PMOS shows only its $r_O = 1/(0.2\\times0.5\\,\\text{m}) = 10$ kΩ. In parallel, the small one wins: $\\approx 10$ kΩ.',
+            '$$|A_v| = g_{m1}(R_{down}\\parallel r_{O,I2}) = 5.87\\,\\text{m}\\times10\\,\\text{k} = 58.7$$',
           ],
-          why: 'A boosted cascode is only as good as its load: boost (or cascode) the load too, or the gain collapses.',
-          calc: [{ what: 'Parallel and gain in one line', keys: '[√] ( 2 × 172.35µ × 200 × 0.5m ) × ( 619M [SHIFT][^] + 10k [SHIFT][^] ) [SHIFT][^]', shows: '58.71', note: '[SHIFT][^] is x⁻¹. Type M (Mega) and k with [CATALOG] ▸ Engineer Symbol.' }],
+          why: 'A boosted cascode is only as good as its load: boost (or cascode) the load too, or the gain collapses. The smaller $A_1$ does not even matter here.',
+          calc: [{ what: 'Parallel and gain in one line', keys: '[√] ( 2 × 172.35µ × 200 × 0.5m ) × ( 208M [SHIFT][^] + 10k [SHIFT][^] ) [SHIFT][^]', shows: '58.71', note: '[SHIFT][^] is x⁻¹. Type M (Mega) and k with [CATALOG] ▸ Engineer Symbol.' }],
         },
-        say: 'With a real PMOS current source, its 10 kΩ sits in parallel with 619 MΩ — the small one wins. Gain collapses to about 59.' },
-      { t: 38, ans: true, title: `**Answers:** $A_1 ≈ ${fx(A1, 3)}$, $R_{out} ≈ ${fx(ans('bank-t4q1', 'av') / gm / 1e6, 3)}$ MΩ, $|A_v| ≈ ${fx(ans('bank-t4q1', 'av') / 1e6, 3)}\\times10^6$ (ideal) and $≈ ${fx(ans('bank-t4q1', 'avP'), 3)}$ with the PMOS load`, say: 'Exam tip: whenever you boost one side, look at the other side’s resistance before you multiply.' },
+        say: 'With PMOS sources, $I_1$’s 50 kΩ cuts the booster to about 88 and $R_{down}$ to about 208 MΩ; $I_2$’s 10 kΩ sits in parallel with it, and the small one wins. Gain collapses to about 59.' },
+      { t: 38, ans: true, title: `**Answers:** $A_1 ≈ ${fx(A1, 3)}$, $R_{out} ≈ ${fx(ans('bank-t4q1', 'av') / gm / 1e6, 3)}$ MΩ, $|A_v| ≈ ${fx(ans('bank-t4q1', 'av') / 1e6, 3)}\\times10^6$ (ideal) and $≈ ${fx(ans('bank-t4q1', 'avP'), 3)}$ with PMOS sources`, say: 'Exam tip: whenever you boost one side, look at the other side’s resistance before you multiply.' },
     ],
   });
 }, { q: 'Tutorial 4 Q1' });

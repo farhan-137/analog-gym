@@ -73,6 +73,12 @@ Tags such as **[U4]** or **[L2]** give the curriculum unit each item belongs to 
 
 11. **Problem Set 1 P5 (from our chat) has a hidden triode device.** With (W/L)5–8 = 100/0.5 in Set A, each PMOS diode costs |VGS| = 1.161 V, so the diode stack puts M3's drain at 3 − 2(1.161) = 0.678 V, *below* M3's source VX = 0.707 V: M3 is in triode, not saturation. The chat's key (VX 0.707 V, Vout 0.900–1.478 V) assumes every device is saturated. The formulas and numbers are right *given* that assumption, but the circuit as sized can't hold it: the PMOS need W/L ≥ 417 (|Vov| ≤ 0.25 V). This is exactly the trap Tutorial 2 Q2(a) asks about. The app keeps the key's numbers, shows M3 red in the figure, and explains why.
 
+12. **2024-25 mid-sem Q2 does not print (W/L)8.** The animated lesson (Lec 17) assumes M8 carries I7 (so the output stage is biased by the I7 mirror) and says so on the question card. If your teacher intended a different (W/L)8, the second-stage current and gm7 change.
+
+13. **Compre 2023-24 Q8: "unity-gain bandwidth 1 MHz" is printed but the key ignores it** and computes the gain-bandwidth product from the circuit (16.05 MHz). The lesson follows the key and points this out. Also its DC gain: exact arithmetic gives 1584, the key 1581 (it rounds intermediates).
+
+14. **Quiz 1 2023-24 Q2 bias names.** The printed circuit calls M3/M4's gate bias Vb2 and M7/M8's Vb1 (the top and bottom sources are biased by mirrors Mb2, Mb3). An earlier version of the animated lesson labelled them generically (Vb3, Vb2), which contradicted the question text; the figure now uses the printed names.
+
 ---
 
 ## 2. Curriculum map with sources

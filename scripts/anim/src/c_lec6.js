@@ -26,26 +26,29 @@ function foldN(S, n = {}) {
   r(); return g;
 }
 
-/* single-ended telescopic. o.load: 'diode' (diode-stack cascode mirror) | 'lvc' (M7, M8 gates on X); o.buffer: M2's gate on V_out */
+/* single-ended telescopic. o.load: 'diode' (diode-stack cascode mirror) | 'lvc' (M7, M8 gates on X); o.buffer: M2's gate on V_out.
+   Name overrides for past papers (defaults = lecture naming): o.vb (M3, M4 gate bias, 'V_b1'), o.vb2 (M5, M6 bias in the lvc load, 'V_b2'),
+   o.pname (M7/M5 node, 'P'), o.vin1 (M1's gate, 'V_in1'), o.rname (label on the right lower node, M2's drain = M4's source; none by default) */
 function teleSE(S, o = {}) {
-  const xn = o.xname ?? 'X', qn = o.qname ?? 'Q';
+  const xn = o.xname ?? 'X', qn = o.qname ?? 'Q', pn = o.pname ?? 'P';
   const g = S.g(); const r = S.into(g);
   rail(S, 300, 860, 150);
   const L = 470, R = 690;
   const m7 = pmos(S, L, 205, { name: 'M7', right: true, gl: 26, nameSide: 'l' }); const m8 = pmos(S, R, 205, { name: 'M8', gl: 26 });
   wire(S, [[L, 150], [L, 155]]); wire(S, [[R, 150], [R, 155]]); wire(S, [[m7.gate[0], 205], [m8.gate[0], 205]]); dot(S, 580, 205);
-  wire(S, [[L, 255], [L, 265]]); wire(S, [[R, 255], [R, 265]]); dot(S, L, 260); txt(S, L - 12, 266, 'P', { size: 17, color: C.bad, weight: 750, anchor: 'end' });
+  wire(S, [[L, 255], [L, 265]]); wire(S, [[R, 255], [R, 265]]); dot(S, L, 260); if (pn) txt(S, L - 12, 266, pn, { size: 17, color: C.bad, weight: 750, anchor: 'end' });
   const m5 = pmos(S, L, 315, { name: 'M5', right: true, gl: 26, nameSide: 'l' }); const m6 = pmos(S, R, 315, { name: 'M6', gl: 26 });
   wire(S, [[m5.gate[0], 315], [m6.gate[0], 315]]);
   wire(S, [[L, 365], [L, 400]]); wire(S, [[R, 365], [R, 400]]); dot(S, L, 382); dot(S, R, 382);
   if (xn) txt(S, L - 12, 388, xn, { size: 18, color: C.bad, weight: 750, anchor: 'end' });
   wire(S, [[R, 382], [800, 382]]); txt(S, 808, 389, 'V_out', { size: 20, color: C.volt, weight: 700 });
-  if (o.load === 'lvc') { wire(S, [[580, 205], [580, 382], [L, 382]], { color: C.amb }); txt(S, 530, 306, 'V_b2', { size: 17, color: C.muted, anchor: 'middle' }); }
+  if (o.load === 'lvc') { wire(S, [[580, 205], [580, 382], [L, 382]], { color: C.amb }); txt(S, 530, 306, o.vb2 ?? 'V_b2', { size: 17, color: C.muted, anchor: 'middle' }); }
   else { wire(S, [[L, 260], [530, 260], [530, 205]], { color: C.amb }); dot(S, 530, 205); wire(S, [[L, 382], [520, 382], [520, 315]], { color: C.amb }); dot(S, 520, 315); }
   const m3 = nmos(S, L, 450, { name: 'M3', right: true, gl: 26, nameSide: 'l' }); const m4 = nmos(S, R, 450, { name: 'M4', gl: 26 });
-  wire(S, [[m3.gate[0], 450], [m4.gate[0], 450]]); txt(S, 580, 441, 'V_b1', { size: 17, color: C.muted, anchor: 'middle' });
-  wire(S, [[L, 500], [L, 510]]); wire(S, [[R, 500], [R, 510]]); dot(S, L, 505); txt(S, L - 12, 511, qn, { size: 17, color: qn === 'Q' ? C.muted : C.bad, weight: 700, anchor: 'end' });
-  nmos(S, L, 560, { name: 'M1', gate: 'V_in1' });
+  wire(S, [[m3.gate[0], 450], [m4.gate[0], 450]]); txt(S, 580, 441, o.vb ?? 'V_b1', { size: 17, color: C.muted, anchor: 'middle' });
+  wire(S, [[L, 500], [L, 510]]); wire(S, [[R, 500], [R, 510]]); dot(S, L, 505); if (o.rname) { dot(S, R, 505); txt(S, R + 12, 511, o.rname, { size: 17, color: C.bad, weight: 700 }); }
+  if (qn) txt(S, L - 12, 511, qn, { size: 17, color: qn === 'Q' ? C.muted : C.bad, weight: 700, anchor: 'end' });
+  nmos(S, L, 560, { name: 'M1', gate: o.vin1 ?? 'V_in1' });
   if (o.buffer) { const m2 = nmos(S, R, 560, { name: 'M2', right: true, nameSide: 'l', gl: 30 }); wire(S, [[m2.gate[0], 560], [780, 560], [780, 382]], { color: C.volt }); dot(S, 780, 382); }
   else nmos(S, R, 560, { name: 'M2', gate: 'V_in2', right: true, nameSide: 'l' });
   wire(S, [[L, 610], [L, 630], [R, 630], [R, 610]]); isrc(S, 580, 672, { label: 'I_SS', len: 42 }); gnd(S, 580, 714);

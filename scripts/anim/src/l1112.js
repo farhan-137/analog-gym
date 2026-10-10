@@ -438,11 +438,11 @@ scene(L11, 'Tutorial 5 Q1 = 2025 mid-sem Q4: size the triode CMFB', 80, (S) => {
             '$V_{out,min} = V_P + V_{ov3} + V_{ov5}$, $V_{out,max} = V_{DD} - |V_{ov9}| - |V_{ov11}|$; differential swing $= 2(V_{out,max} - V_{out,min})$.'],
           how: [
             `NMOS overdrive (from part b): $V_{ov,n} = ${fx(vovn, 3)}$ V. PMOS overdrive, same W/L and 0.5 mA: $$|V_{ov,p}| = \\sqrt{\\frac{2(0.5\\,\\mathrm m)}{40\\,\\mu\\times ${fx(wl, 4)}}} = ${fx(vovp, 3)}\\,\\mathrm V$$`,
-            `Lowest output: start at P and add the two NMOS overdrives below the output: $$V_{out,min} = 0.1 + 2(${fx(vovn, 3)}) = ${fx(vmin, 3)}\\,\\mathrm V$$`,
-            `Highest output: $V_{DD}$ minus the two PMOS overdrives above it: $$V_{out,max} = 3 - 2(${fx(vovp, 3)}) = ${fx(vmax, 4)}\\,\\mathrm V$$`,
+            `Lowest output, by checks (how far a drain can fall): M5 (NMOS, source = P) and the cascode M3 (drain = $V_{out1}$) each need $V_{DS} \\ge V_{ov,n}$: $$V_{out,min} = 0.1 + 2(${fx(vovn, 3)}) = ${fx(vmin, 3)}\\,\\mathrm V$$`,
+            `Highest output, by checks: the PMOS cascode M9 (drain = $V_{out1}$) and M11 (source = $V_{DD}$, top) each need $|V_{DS}| \\ge |V_{ov,p}|$: $$V_{out,max} = 3 - 2(${fx(vovp, 3)}) = ${fx(vmax, 4)}\\,\\mathrm V$$`,
             `The differential output $V_{out1} - V_{out2}$ swings twice as far as one side: $$V_{pp,diff} = 2(${fx(vmax, 4)} - ${fx(vmin, 3)}) = ${fx(sw, 3)}\\,\\mathrm V$$`,
           ],
-          why: 'Differential swing = 2 × the single-ended range. The key rounds to 1.412 V.',
+          why: 'Differential swing = 2 × the single-ended range. The key rounds $|V_{ov,p}|$ to 0.71 V and gets 1.412 V.',
           calc: [{ what: 'PMOS overdrive', keys: '[√] ( 2 × 0.5m ÷ ( 40µ × 49.38 ) )', shows: fx(vovp, 4) }, { what: 'swing', keys: '2 × ( 3 − 2 × [Ans] − 0.8746 )', shows: fx(sw, 4), note: 'Ans is the last result: press [Ans].' }],
           parts: [
             { q: 'The PMOS overdrive $|V_{ov,p}|$ (0.5 mA, same W/L, $\\mu_pC_{ox} = 40\\,\\mu$A/V²).', hint: ['$|V_{ov,p}| = \\sqrt{2I_D/(\\mu_pC_{ox}\\,W/L)}$'], how: [`$$|V_{ov,p}| = \\sqrt{\\frac{2(0.5\\,\\mathrm m)}{40\\,\\mu\\times ${fx(wl, 4)}}}$$`], answer: vovp, unit: 'V', tol: 0.01 },
@@ -466,7 +466,7 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
     q: 'Telescopic with a triode-pair tail M11, M12 (gates on the outputs). PMOS $M_{3,4}$: W/L = 50 at 50 µA. NMOS: W/L = 50 at 40 µA each, $V_{b1} = 0.6$ V on the input pair, output CM = $0.5V_{DD}$. Find $V_P$, $(W/L)_{11,12}$, $V_{out,min}$.',
     giv: '$V_{DD} = 1.8$ V, $\\mu_nC_{ox} = 200\\,\\mu$A/V², $\\mu_pC_{ox} = 100\\,\\mu$A/V², $V_{thn} = 0.4$ V, $|V_{thp}| = 0.5$ V',
     qh: 250, tests: 'a **link** down from $V_{b1}$ to P, then the **triode-pair equation** solved for W/L, then **checks** for the lowest output.',
-    fig: (S2) => { const g = triodeTele(S2, { top: ['M3', 'M4'], pc: ['M7', 'M8'], nc: ['M5', 'M6'], inp: ['M9', 'M10'], tri: ['M11', 'M12'] }); g.setAttribute('transform', 'translate(-300 30)'); },
+    fig: (S2) => { const g = triodeTele(S2, { top: ['M3', 'M4'], pc: ['M5', 'M6'], nc: ['M7', 'M8'], inp: ['M9', 'M10'], tri: ['M11', 'M12'] }) /* key: V_out,min = V_P + V_ov9 + V_ov7, R_down = g_m7 r_O7 r_O9 ⇒ M7, M8 are the NMOS cascodes */; g.setAttribute('transform', 'translate(-300 30)'); },
     steps: [
       { t: 6, title: '**Find $V_P$ by a link.** P is the source of the input device M10 (gate at $V_{b1}$, 40 µA, W/L = 50), so P sits one $V_{GS10}$ below $V_{b1}$.',
         tex: `V_{ov} = \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\frac{2(40\\,\\mu)}{200\\,\\mu\\times 50}} = ${fx(ova, 3)}\\,\\mathrm V,\\; V_P = V_{b1} - V_{th} - V_{ov} = 0.6 - 0.4 - ${fx(ova, 3)} = ${fx(A('vp'), 4)}\\,\\mathrm V`,
@@ -476,7 +476,7 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
           hint: ['P is the source of the input device M10, whose gate is at $V_{b1}$. Walk **down** one $V_{GS}$ (a link).', '$V_P = V_{b1} - V_{th} - V_{ov}$ with $V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}\\,W/L)}$.'],
           how: [
             `The device standing on P is the NMOS input device M10: 40 µA, W/L = 50. Its overdrive: $$V_{ov} = \\sqrt{\\frac{2I_D}{\\mu_nC_{ox}(W/L)}} = \\sqrt{\\frac{2(40\\,\\mu)}{200\\,\\mu\\times 50}} = ${fx(ova, 3)}\\,\\mathrm V$$`,
-            `Its gate–source voltage: $$V_{GS} = V_{th} + V_{ov} = 0.4 + ${fx(ova, 3)} = ${fx(0.4 + ova, 3)}\\,\\mathrm V$$`,
+            `A link (gate known, source wanted): M10 is NMOS, gate = $V_{b1}$, source = P, so $$V_{GS} = V_{th} + V_{ov} = 0.4 + ${fx(ova, 3)} = ${fx(0.4 + ova, 3)}\\,\\mathrm V$$`,
             `P is its source, one $V_{GS}$ below the gate: $$V_P = V_{b1} - V_{GS} = 0.6 - ${fx(0.4 + ova, 3)} = ${fx(A('vp'), 3)}\\,\\mathrm V$$`,
           ],
           why: 'Known gate, unknown source: subtract one $V_{GS}$.',
@@ -496,7 +496,7 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
             'Both outputs sit at the CM, $0.5V_{DD} = 0.9$ V: $$V_{out1}+V_{out2}-2V_{th} = 1.8 - 0.8 = 1.0\\,\\mathrm V$$',
             `Ohm’s law at P with the triode resistance, solved for W/L: $$\\tfrac WL = \\frac{2I_D}{\\mu_nC_{ox}V_P(1.0)} = \\frac{80\\,\\mu}{200\\,\\mu\\times ${fx(A('vp'), 4)}\\times 1.0} = ${fx(A('wl'), 3)}$$`,
           ],
-          why: 'The key rounds $V_P$ to 0.11 V and gets ≈ 3.64; both are marked right.',
+          why: 'The key rounds $V_P$ to 0.11 V and gets 3.63; both are marked right.',
           parts: [
             { q: 'The tail current $2I_D$ through the triode pair.', hint: ['Both branches (40 µA each) meet at P.'], how: ['$$2I_D = 2(40\\,\\mu)$$'], answer: 80e-6, unit: 'A', tol: 0.01 },
             { q: '$V_{out1}+V_{out2}-2V_{th}$ with the outputs at the CM $0.5V_{DD}$.', hint: ['Each output sits at $0.5 \\times 1.8 = 0.9$ V.'], how: ['$$0.9 + 0.9 - 2(0.4) = 1.8 - 0.8$$'], answer: 1.0, unit: 'V', tol: 0.01 },
@@ -509,10 +509,10 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
         hl: [T([480, 380, 440, 260, C.volt])],
         try: {
           q: '**Part A:** how low can each output go before an NMOS below it leaves saturation? Find $V_{out,min}$.',
-          hint: ['Two NMOS stand between P and the output (the input device and the cascode). Each needs its overdrive across it.', '$V_{out,min} = V_P + V_{ov,in} + V_{ov,casc}$.'],
+          hint: ['Two NMOS stand between P and the output (the input device M9 and the cascode M7). Each needs its overdrive across it.', '$V_{out,min} = V_P + V_{ov9} + V_{ov7}$.'],
           how: [
             `Start at P (from the first part): $V_P = ${fx(A('vp'), 4)}$ V.`,
-            `The input device needs $V_{DS} \\ge V_{ov}$ and the cascode on top needs another $V_{ov}$. Same size and current, so both are $${fx(ova, 3)}$ V (from the first part).`,
+            `Checks (the question is how far the output, a drain, can fall): the input device M9 (NMOS, source = P, drain = M7’s source) needs $V_{DS9} \\ge V_{ov9}$, and the cascode M7 (drain = output) needs $V_{DS7} \\ge V_{ov7}$. Same size and current, so both are $${fx(ova, 3)}$ V (from the first part).`,
             `Add them: $$V_{out,min} = V_P + 2V_{ov} = ${fx(A('vp'), 4)} + 2(${fx(ova, 3)}) = ${fx(A('vmin'), 3)}\\,\\mathrm V$$`,
           ],
           answer: A('vmin'), unit: 'V', tol: 0.02,
@@ -530,6 +530,7 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
             'Outputs at $0.6V_{DD} = 1.08$ V each; tail current $2I_D = 100\\,\\mu$A: $$V_{out1}+V_{out2}-2V_{th} = 2.16 - 0.8 = 1.36\\,\\mathrm V$$',
             `Triode equation for W/L: $$\\tfrac WL = \\frac{2I_D}{\\mu_nC_{ox}V_P(1.36)} = \\frac{100\\,\\mu}{150\\,\\mu\\times ${fx(B('vp'), 3)}\\times 1.36} = ${fx(B('wl'), 3)}$$`,
           ],
+          why: 'The key rounds $V_P$ to 0.07 V and gets 7.00; same method.',
           calc: [
             { what: '$V_P$, then store it', keys: '0.6 − 0.4 − [√] ( 2 × 50µ ÷ ( 150µ × 40 ) ) [EXE], then [VARIABLE] ▸ A ▸ Store', shows: fx(B('vp'), 4) },
             { what: 'W/L using A', keys: '100µ ÷ ( 150µ × [SHIFT] [4] × ( 2.16 − 0.8 ) )', shows: fx(B('wl'), 4), note: '[SHIFT] [4] types the variable A.' },
@@ -553,7 +554,7 @@ scene(L11, 'Quiz 2 Parts A, B, C: triode sensing on a telescopic', 72, (S) => {
             'Outputs at $0.4V_{DD} = 0.72$ V each; tail current $2I_D = 120\\,\\mu$A: $$V_{out1}+V_{out2}-2V_{th} = 1.44 - 0.6 = 0.84\\,\\mathrm V$$',
             `Triode equation for W/L: $$\\tfrac WL = \\frac{120\\,\\mu}{120\\,\\mu\\times ${fx(Cc('vp'), 3)}\\times 0.84} = ${fx(Cc('wl'), 3)}$$`,
           ],
-          why: 'Three versions, one recipe: link to P, triode equation for W/L.',
+          why: 'Three versions, one recipe: link to P, triode equation for W/L. (The key rounds $V_P$ to 0.12 V and gets 9.92.)',
           parts: [
             { q: 'The overdrive of the input device (60 µA, W/L = 60).', hint: ['$V_{ov} = \\sqrt{2I_D/(\\mu_nC_{ox}\\,W/L)}$'], how: ['$$V_{ov} = \\sqrt{\\frac{2(60\\,\\mu)}{120\\,\\mu\\times 60}}$$'], answer: ovc, unit: 'V', tol: 0.02 },
             { q: '$V_P$, by a link down from $V_{b1}$.', hint: ['$V_P = V_{b1} - V_{th} - V_{ov}$'], how: [`$$V_P = 0.55 - 0.3 - ${fx(ovc, 3)}$$`], answer: Cc('vp'), unit: 'V', tol: 0.02 },
